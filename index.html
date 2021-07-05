@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jinping-dev.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta property="og:type" content="website">
+<meta property="og:title" content="靳平の博客">
+<meta property="og:url" content="https://jinping-dev.github.io/index.html">
+<meta property="og:site_name" content="靳平の博客">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="Jinping">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jinping-dev.github.io/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>靳平の博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?8963e74cb35315df308c698224929229";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">靳平の博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">51</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content index posts-expand">
+            
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2021/07/05/%E5%B0%86%E5%8D%9A%E5%AE%A2%E6%90%AC%E8%87%B3CSDN/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/07/05/%E5%B0%86%E5%8D%9A%E5%AE%A2%E6%90%AC%E8%87%B3CSDN/" class="post-title-link" itemprop="url">将博客搬至CSDN</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2021-07-05 15:55:58 / 修改时间：15:58:21" itemprop="dateCreated datePublished" datetime="2021-07-05T15:55:58+08:00">2021-07-05</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <meta name="referrer" content="no-referrer">
+自2021-07-05起，本人的博客将如数全部搬至CSDN。个人CSDN博客地址：https://blog.csdn.net/qq_26707371
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2021/04/04/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/04/04/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/" class="post-title-link" itemprop="url">Java内存模型与线程</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-04-04 18:00:46" itemprop="dateCreated datePublished" datetime="2021-04-04T18:00:46+08:00">2021-04-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:22" itemprop="dateModified" datetime="2021-07-05T15:47:22+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <meta name="referrer" content="no-referrer">
+
+<h3 id="一、物理机中的效率与一致性"><a href="#一、物理机中的效率与一致性" class="headerlink" title="一、物理机中的效率与一致性"></a>一、物理机中的效率与一致性</h3><h4 id="1-高速缓存（Cache）的引入"><a href="#1-高速缓存（Cache）的引入" class="headerlink" title="1. 高速缓存（Cache）的引入"></a>1. 高速缓存（Cache）的引入</h4><p>“让计算机并发执行若干个运算任务”与“更充分地利用计算机处理器的性能”之间的因果关系，看起来利索当然，实际上他们之间的关系并没有想象中那么简单，其中一个重要的复杂性的来源是绝大多数的运算任务都不可能只靠处理器“计算”就能完成。</p>
+<p>处理器只要要与内存交互，如读取运算数据、存储计算结果等，这个IO操作就是很难消除的（无法仅靠寄存器来完成所有运算任务）。</p>
+<p>由于计算机的存储设备与处理器的运算速度有着几个数量级的差距，所以现代计算机系统都不得不加入一层或多层读写速度尽可能接近处理器运算速度的<code>高速缓存（Cache）</code>来作为内存与处理器之间的缓冲：</p>
+<blockquote>
+<p>将运算需要使用的数据复制到内存中，让运算能快速进行，当运算结束后再从缓存同步到内存之中，这样就无需等待缓慢的内存读写了。</p>
+</blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/04/04/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2021/02/15/Docker-%E5%85%AD-DockerCompose/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/02/15/Docker-%E5%85%AD-DockerCompose/" class="post-title-link" itemprop="url">Docker(六)DockerCompose</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-02-15 19:05:39" itemprop="dateCreated datePublished" datetime="2021-02-15T19:05:39+08:00">2021-02-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:22" itemprop="dateModified" datetime="2021-07-05T15:47:22+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <meta name="referrer" content="no-referrer">
+
+<h3 id="前言：构建一个wordpress"><a href="#前言：构建一个wordpress" class="headerlink" title="前言：构建一个wordpress"></a>前言：构建一个wordpress</h3><h4 id="1-创建MySQL的container"><a href="#1-创建MySQL的container" class="headerlink" title="1.创建MySQL的container"></a>1.创建MySQL的container</h4><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="builtin-name">run</span> -d --name mysql -v mysql-data:/var/lib/mysql -e <span class="attribute">MYSQL_ROOT_PASSWORD</span>=root -e <span class="attribute">MYSQL_DATABASE</span>=wordpress mysql</span><br></pre></td></tr></table></figure>
+<p>声明了我的root用户密码为root，同时创建了一个wordpress的数据库，因为我的mysql是在内部使用的不用对提供服务他们使用的是同一个网络，所以不用做端口映射</p>
+<h4 id="2-创建wordpress"><a href="#2-创建wordpress" class="headerlink" title="2.创建wordpress"></a>2.创建wordpress</h4><figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="builtin-name">run</span> -d -e <span class="attribute">WORDPRESS_DB_HOST</span>=mysql:3306 --link mysql -p 8080:80 wordpress</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>-e 需要去指定我们的数据库的host，指定我刚刚启动的mysql的容器，</li>
+<li>–link 就是link到我们的mysql里面</li>
+<li>-p就是将容器中的80端口映射到我们本地的8080端口</li>
+</ul>
+<p>这个过程就比较复杂，像有些应用有好多个模块我们可能就需要构建好多个container，对它的创建、管理、启动、停止等操作比较繁琐。我们希望可以将多个容器定义成一个组，对这个组进行统一的管理，于是DockerCompose就出现了，DockerCompose就是为了解决这一问题而诞生的。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/02/15/Docker-%E5%85%AD-DockerCompose/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/" class="post-title-link" itemprop="url">Docker(五)-Docker的文件存储和数据共享</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-02-12 03:59:13" itemprop="dateCreated datePublished" datetime="2021-02-12T03:59:13+08:00">2021-02-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:22" itemprop="dateModified" datetime="2021-07-05T15:47:22+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <meta name="referrer" content="no-referrer">
+
+
+<p><strong>问题</strong></p>
+<p>当我创建了一个容器，在这个容器中我有个mysql服务，在这个mysql里面我有各种各样的数据。但是有一天我一不小心删除了这个容器，那么这个容器中的相关服务以及数据也都没有了。这个时候就出问题了。</p>
+<p>我们需要一种数据持久化机制来实现我们容器中数据的存储。</p>
+<p><img src="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/1.png" alt="1"></p>
+<p>默认情况下docker数据是写在了container里面的，当我们将容器删除掉之后是找不到这个容器里面的文件及恢复的，那么我们可以用一种机制类似于mock的方式去将容器中的数据保存在我们的磁盘上，这样就跟容器隔离开了，进而实现数据持久化。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2021/01/17/Docker-%E5%9B%9B-Docker%E7%9A%84%E7%BD%91%E7%BB%9C%E7%A9%BA%E9%97%B4/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/01/17/Docker-%E5%9B%9B-Docker%E7%9A%84%E7%BD%91%E7%BB%9C%E7%A9%BA%E9%97%B4/" class="post-title-link" itemprop="url">Docker(四)Docker的网络空间</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-01-17 01:43:20" itemprop="dateCreated datePublished" datetime="2021-01-17T01:43:20+08:00">2021-01-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:22" itemprop="dateModified" datetime="2021-07-05T15:47:22+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <meta name="referrer" content="no-referrer">
+
+<p>在一台linux机器上，不管创建多少个docker容器，他们都有属于自己的ip地址，并且可以相互ping通访问。</p>
+<p>为什么会ping通？其中的原理是什么？</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/01/17/Docker-%E5%9B%9B-Docker%E7%9A%84%E7%BD%91%E7%BB%9C%E7%A9%BA%E9%97%B4/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2020/12/24/Java%E4%B8%AD%E7%9A%84hashcode%E5%92%8Cequals/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/12/24/Java%E4%B8%AD%E7%9A%84hashcode%E5%92%8Cequals/" class="post-title-link" itemprop="url">Java中的hashcode和equals</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-12-24 00:18:34" itemprop="dateCreated datePublished" datetime="2020-12-24T00:18:34+08:00">2020-12-24</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:22" itemprop="dateModified" datetime="2021-07-05T15:47:22+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <meta name="referrer" content="no-referrer">
+
+<h2 id="关于hashcode"><a href="#关于hashcode" class="headerlink" title="关于hashcode"></a>关于hashcode</h2><p>1、hashcode的存在主要是用于查找的快捷性，如Hashtable、HashMap等，hashcode是用来在散列存储结构中确定对象的存储地址的。</p>
+<p>2、如果两个对象相同，就是适用于<code>equals(java.lang.Object)</code>方法，那么这两个对象的hashcode方法一定要相同。</p>
+<p>3、如果对象的equals方法被重写，那么对象的hashcode方法也尽量重写，并且产生hashcode使用的对象，一定要和equals方法中使用的一致，否则就会违反上面提到的第2点。</p>
+<p>4、两个对象的hashcode相同，并不一定表示两个对象就相同，也就是不一定适用于<code>equals(java.lang.Object)</code>方法，只能够说明这两个对象在散列存储结构中，如Hashtable，他们“存放在一个篮子中”。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/12/24/Java%E4%B8%AD%E7%9A%84hashcode%E5%92%8Cequals/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2020/12/18/mongo%E5%88%86%E7%89%87%E9%9B%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/12/18/mongo%E5%88%86%E7%89%87%E9%9B%86/" class="post-title-link" itemprop="url">mongo分片集</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-12-18 16:21:51" itemprop="dateCreated datePublished" datetime="2020-12-18T16:21:51+08:00">2020-12-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:23" itemprop="dateModified" datetime="2021-07-05T15:47:23+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MongoDB/" itemprop="url" rel="index"><span itemprop="name">MongoDB</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <meta name="referrer" content="no-referrer">
+
+
+<h2 id="分片集的架构说明"><a href="#分片集的架构说明" class="headerlink" title="分片集的架构说明"></a>分片集的架构说明</h2><p><img src="/2020/12/18/mongo%E5%88%86%E7%89%87%E9%9B%86/sharding.png" alt="分片集"></p>
+<table>
+<thead>
+<tr>
+<th align="center">名称</th>
+<th align="center">解释</th>
+<th align="left">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Shard</td>
+<td align="center">分片集存储实例</td>
+<td align="left">用于存储实际的数据块，实际生产环境中一个<code>shard server</code>角色可由几台机器组个一个<code>replica set</code>承担，防止单机节点故障</td>
+</tr>
+<tr>
+<td align="center">config server</td>
+<td align="center">分片集配置器</td>
+<td align="left">存储了整个ClusterMetadata，其中包括 chunk信息</td>
+</tr>
+<tr>
+<td align="center">mongos</td>
+<td align="center">分片集路由器</td>
+<td align="left">客户端由此接入，且让整个集群看上去像单一数据库，前端应用可以透明使用</td>
+</tr>
+</tbody></table>
+<h2 id="为什么要使用分片集？"><a href="#为什么要使用分片集？" class="headerlink" title="为什么要使用分片集？"></a>为什么要使用分片集？</h2><p>一般有如下几个原因：</p>
+<ul>
+<li>数据容量日益增大，副本集维护吃力</li>
+<li>增加集群的吞吐量</li>
+<li>单库数据超过10TB</li>
+<li>地理容灾</li>
+</ul>
+<h2 id="使用分片集的优劣势"><a href="#使用分片集的优劣势" class="headerlink" title="使用分片集的优劣势"></a>使用分片集的优劣势</h2><table>
+<thead>
+<tr>
+<th align="left">优势</th>
+<th align="left">劣势</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1.海量数据存储有方案 <br>2.增加数据库的访问并发和集群的iops <br>3.跨机房灾备<br> 4.单库数据量有限<br></td>
+<td align="left">1.成本高昂，一个高可用的分片集至少需要3台configServer，2个shardServer，每个shardServer都是为副本集，至少2个mongos组成。<br>2.分片集本身结构复杂，运维复杂。</td>
+</tr>
+</tbody></table>
+<h2 id="1-如何进行分片？"><a href="#1-如何进行分片？" class="headerlink" title="1.如何进行分片？"></a>1.如何进行分片？</h2><h3 id="1-1-分片的基本标准"><a href="#1-1-分片的基本标准" class="headerlink" title="1.1 分片的基本标准"></a>1.1 分片的基本标准</h3><ul>
+<li>1.数据角度:数据量不超过3TB，尽可能保持在2TB一个分片</li>
+<li>2.索引角度:常用的索引必须能容纳进系统内存之中</li>
+</ul>
+<h3 id="1-2-分片的预估标准"><a href="#1-2-分片的预估标准" class="headerlink" title="1.2 分片的预估标准"></a>1.2 分片的预估标准</h3><p>A=(所需存储量/单服务可挂载容量)<br>B=(工作集大小/服务器内存<em>MongoDB可用内存率)<br>C=(并发量总数/单服务器</em>损耗系数)<br><strong>分片的数量=max(A,B,C)</strong><br>举个例子：<br>A=30TB/2TB=15<br>B=1TB/(64G<em>0.6)=27<br>C=200000/(8000</em>0.7)=36<br>分片数量=36</p>
+<h3 id="1-3-分片的基本概念"><a href="#1-3-分片的基本概念" class="headerlink" title="1.3 分片的基本概念"></a>1.3 分片的基本概念</h3><table>
+<thead>
+<tr>
+<th align="left">名称</th>
+<th align="left">解释</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">分片键 shardkey</td>
+<td align="left">文档中的一个字段</td>
+</tr>
+<tr>
+<td align="left">文档doc</td>
+<td align="left">包含分片键的一行数据</td>
+</tr>
+<tr>
+<td align="left">块chunk</td>
+<td align="left">包含N个文档</td>
+</tr>
+<tr>
+<td align="left">分片shard</td>
+<td align="left">包含N个chunk</td>
+</tr>
+<tr>
+<td align="left">分片集群Cluster</td>
+<td align="left">包含N个分片shard</td>
+</tr>
+</tbody></table>
+<h3 id="1-4-选择合适的分片键"><a href="#1-4-选择合适的分片键" class="headerlink" title="1.4 选择合适的分片键"></a>1.4 选择合适的分片键</h3><h4 id="基于范围的分片"><a href="#基于范围的分片" class="headerlink" title="基于范围的分片"></a>基于范围的分片</h4><p>MongoDB按照片键的值的范围将数据拆分为不同的块（chunk），每个块包含了一段范围内的数据。</p>
+<ul>
+<li>优点： mongos可以快速定位请求需要的数据，并将请求转发到相应的Shard节点中。</li>
+<li>缺点： 可能导致数据在Shard节点上分布不均衡，容易造成读写热点，且不具备写分散性。</li>
+</ul>
+<p>适用场景：</p>
+<ul>
+<li>片键的值不是单调递增或单调递减、片键的值基数大且重复的频率低、需要范围查询等业务场景。</li>
+</ul>
+<h4 id="基于hash值的分片"><a href="#基于hash值的分片" class="headerlink" title="基于hash值的分片"></a>基于hash值的分片</h4><p>MongoDB计算单个字段的哈希值作为索引值，并以哈希值的范围将数据拆分为不同的块。</p>
+<ul>
+<li>优点：可以将数据更加均衡地分布在各Shard节点中，具备写分散性。</li>
+<li>缺点：不适合进行范围查询，进行范围查询时，需要将读请求分发到所有的Shard节点。</li>
+</ul>
+<p>适用场景：</p>
+<ul>
+<li>片键的值存在单调递增或递减、片键的值基数大且重复的频率低、需要写入的数据随机分发、数据读取随机性较大等业务场景。</li>
+</ul>
+<h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><ul>
+<li>在4.0之前片键一经设置，不可修改，不可删除。在4.2之后可以对分片完的Collection进行修改分片键</li>
+<li>执行了数据分片操作后，均衡器会对满足条件的数据进行拆分，这将占用实例的资源，请在业务低峰期操作。</li>
+</ul>
+<h3 id="1-5-分片操作"><a href="#1-5-分片操作" class="headerlink" title="1.5 分片操作"></a>1.5 分片操作</h3><p>1&gt;确认使用的实例为分片集群（执行<code>sh.status()</code>）<br>2&gt;切换数据库（执行 <code>use 数据库名</code>&gt;<br>3&gt;允许此库进行分片(执行 sh.enableSharding(“数据库名”))<br>4&gt;创建或使用已有的collection<br>5&gt;对collection中已创建索引的字段进行分片</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">sh</span>.shardCollection(<span class="string">&quot;数据库名.表名&quot;</span>,&#123;<span class="string">&quot;_id&quot;</span>:<span class="number">1</span>&#125;)</span><br></pre></td></tr></table></figure>
+<p>6.经过一段时间查看一下数据在每个节点的分布</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-tag">db</span><span class="selector-class">.stats</span>()</span><br></pre></td></tr></table></figure>
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2020/12/18/mongo%E6%9C%8D%E5%8A%A1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/12/18/mongo%E6%9C%8D%E5%8A%A1/" class="post-title-link" itemprop="url">mongo服务</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-12-18 15:51:14" itemprop="dateCreated datePublished" datetime="2020-12-18T15:51:14+08:00">2020-12-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:23" itemprop="dateModified" datetime="2021-07-05T15:47:23+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MongoDB/" itemprop="url" rel="index"><span itemprop="name">MongoDB</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <meta name="referrer" content="no-referrer">
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>本文以MongoDB 4.0版本为准，介绍服务器端、客户端的关键技术，以及使用中的注意事项。</p>
+<h2 id="服务器（Server）"><a href="#服务器（Server）" class="headerlink" title="服务器（Server）"></a>服务器（Server）</h2><h3 id="部署方式"><a href="#部署方式" class="headerlink" title="部署方式"></a>部署方式</h3><h4 id="1-单机部署方式"><a href="#1-单机部署方式" class="headerlink" title="1.单机部署方式"></a>1.单机部署方式</h4><p>适用场景:开发、测试</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/12/18/mongo%E6%9C%8D%E5%8A%A1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/" class="post-title-link" itemprop="url">Mysql(二)Mysql的数据目录</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-12-07 23:33:43" itemprop="dateCreated datePublished" datetime="2020-12-07T23:33:43+08:00">2020-12-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:22" itemprop="dateModified" datetime="2021-07-05T15:47:22+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Mysql/" itemprop="url" rel="index"><span itemprop="name">Mysql</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <meta name="referrer" content="no-referrer">
+
+<h3 id="数据库和文件系统的关系"><a href="#数据库和文件系统的关系" class="headerlink" title="数据库和文件系统的关系"></a>数据库和文件系统的关系</h3><p>像InnoDB、MyISAM这样的存储引擎都是把数据存储在文件系统中上。当我们想读取数据的时候，这些存储引擎会从文件系统中把数据读出来返回给我们；当我们想写入数据的时候，这些存储引擎会把这些数据又写回操作系统。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/" class="post-title-link" itemprop="url">Docker(三)Image概述</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-12-07 15:11:14" itemprop="dateCreated datePublished" datetime="2020-12-07T15:11:14+08:00">2020-12-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:22" itemprop="dateModified" datetime="2021-07-05T15:47:22+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <meta name="referrer" content="no-referrer">
+
+<h3 id="什么是Image"><a href="#什么是Image" class="headerlink" title="什么是Image"></a>什么是Image</h3><ul>
+<li>文件和meta data的集合（root filesystem）</li>
+<li>分层的，并且每一层都可以添加改变删除文件，成为一个新的image</li>
+<li>不同的image可以共享相同的layer</li>
+<li>Image本身是read-only的</li>
+</ul>
+<p><img src="/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/image.png" alt="image"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jinping"
+      src="/images/image.png">
+  <p class="site-author-name" itemprop="name">Jinping</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jinping-dev" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jinping-dev" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:jinping0982@163.com" title="E-Mail → mailto:jinping0982@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/9e1f045b3f8d" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;9e1f045b3f8d" rel="noopener" target="_blank"><i class="fa fa-heartbeat fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">©2018 by Jinping</span>
+</div>
+  <div class="powered-by">Erstellt mit  <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+  <div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+</body>
+</html>

@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jinping-dev.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一.OSI七层协议  1.物理层  机器A往机器B发送比特流，机器B要保证能收到比特流，这就是物理层要做的事情。物理层主要定义了网络设备的标准，如：网线的类型、光纤的接口类型。网卡就是工作在这一层里面的，这一层主要负责数模、模数的转换（比特流转化为电流，电流再转化为比特流） 2.数据链路层  在传输比特流的过程中，会产生错传、数据传输不完整的可能，因此数据链路层定义了如何格式化数据以进行传输，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机网络">
+<meta property="og:url" content="https://jinping-dev.github.io/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/index.html">
+<meta property="og:site_name" content="靳平の博客">
+<meta property="og:description" content="一.OSI七层协议  1.物理层  机器A往机器B发送比特流，机器B要保证能收到比特流，这就是物理层要做的事情。物理层主要定义了网络设备的标准，如：网线的类型、光纤的接口类型。网卡就是工作在这一层里面的，这一层主要负责数模、模数的转换（比特流转化为电流，电流再转化为比特流） 2.数据链路层  在传输比特流的过程中，会产生错传、数据传输不完整的可能，因此数据链路层定义了如何格式化数据以进行传输，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E7%BD%91%E7%BB%9C%E4%B8%83%E5%B1%82.jpg">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/tcp%E6%8A%A5%E6%96%87%E5%A4%B4.jpg">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/tcp%E6%8A%A5%E6%96%87%E5%A4%B41.jpg">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/tcp%E6%8A%A5%E6%96%87%E5%A4%B42.jpg">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B.jpg">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/tcp%E5%92%8Cudp.jpeg">
+<meta property="article:published_time" content="2020-11-14T14:30:17.000Z">
+<meta property="article:modified_time" content="2021-07-05T07:47:23.138Z">
+<meta property="article:author" content="Jinping">
+<meta property="article:tag" content="基础知识">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jinping-dev.github.io/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E7%BD%91%E7%BB%9C%E4%B8%83%E5%B1%82.jpg">
+
+<link rel="canonical" href="https://jinping-dev.github.io/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机网络 | 靳平の博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?8963e74cb35315df308c698224929229";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">靳平の博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">51</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机网络
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-14 22:30:17" itemprop="dateCreated datePublished" datetime="2020-11-14T22:30:17+08:00">2020-11-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:23" itemprop="dateModified" datetime="2021-07-05T15:47:23+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" itemprop="url" rel="index"><span itemprop="name">基础知识</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <meta name="referrer" content="no-referrer">
+
+<h1 id="一-OSI七层协议"><a href="#一-OSI七层协议" class="headerlink" title="一.OSI七层协议"></a>一.OSI七层协议</h1><p><img src="/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E7%BD%91%E7%BB%9C%E4%B8%83%E5%B1%82.jpg" alt="计算机网络"></p>
+<ul>
+<li>1.物理层<br>  机器A往机器B发送比特流，机器B要保证能收到比特流，这就是物理层要做的事情。物理层主要定义了网络设备的标准，如：网线的类型、光纤的接口类型。网卡就是工作在这一层里面的，这一层主要负责数模、模数的转换（比特流转化为电流，电流再转化为比特流）</li>
+<li>2.数据链路层<br>  在传输比特流的过程中，会产生错传、数据传输不完整的可能，因此数据链路层定义了如何格式化数据以进行传输，这一层通常还提供错误检测和纠正，以确保数据传输的可靠性，本层将比特数据组成了“帧”，其中交换机工作在这一层中，对帧解码，并根据帧中包含的信息将数据发送给正确的接收方</li>
+<li>3.网络层<br>  随着网络节点的不断增加，点对点通信的时候是需要经过多个节点的，如何找到目标节点、如何找到最佳路径便成为了首要需求，此时便有了网络层。其主要功能是将网络地址翻译成对应的物理地址，并决定如何将数据从发送方路由到接收方。网络层通过综合考虑发送优先权、网络拥塞程度、服务质量以及可选路由的花费来决定从一个节点A到另一个节点B的最佳路径。路由器属于网络层，此时的数据我们称之为“数据包”。本层需要关注的协议主要是TCP/IP协议中的IP协议</li>
+<li>4.传输层<br>  随着网络通信需求的进一步扩大，通信过程中需要发送大量的数据（如海量文件的传输，可能需要很长的时间），而网络在通信的过程中会中断好多次，此时为了保证传输大量文件时的准确性，需要对发出去的数据进行切分，切分为一个个的小段落(segment),其中一个段落丢失了怎么办？要不要重传？每个段落要按照顺序到达吗？这些便是传输层需要考虑的问题了。传输层解决了数据之间的传输，解决了传输质量的问题，该层为OSI模型中最终要的一层。以太网无法接收超过1500字节的数据包。本层需要关注的协议主要是TCP/IP协议中的TCP协议和UDP协议。</li>
+<li>5.会话层<br>  建立和管理应用程序之间的通信</li>
+<li>6.表示层<br>  windows上无法运行linux中的脚本文件，机器之间存在数据通信的语法差异。表示层就是为了解决不同和操作系统之间的通信语法问题。在表示层，数据将按照网络能理解的方案进行格式化，这种格式化也因所使用网络的类型不同而不同。</li>
+<li>7.应用层<br>  规定发送方和接收方必须使用固定格式的消息头，消息头必须使用某种固定的组成，而且消息头里必须记录消息体的长度等一系列信息，以方便接受方能够正确地解析发送方发送的数据，应用层旨在让我们更方便地应用从网络中接收到的数据。本层需要关注的协议主要是TCP/IP协议中的HTTP协议。<a id="more"></a>
+
+</li>
+</ul>
+<h1 id="二-TCP-IP概念层模型"><a href="#二-TCP-IP概念层模型" class="headerlink" title="二.TCP/IP概念层模型"></a>二.TCP/IP概念层模型</h1><ul>
+<li>1.应用层（应用层、表示层、会话层）</li>
+<li>2.传输层</li>
+<li>3.网络层</li>
+<li>4.链路层（数据链路层，物理层）</li>
+</ul>
+<h2 id="2-1-IP协议"><a href="#2-1-IP协议" class="headerlink" title="2.1 IP协议"></a>2.1 IP协议</h2><ul>
+<li>IP协议是无连接的通信协议，它不会占用两个正在通信的计算机之间的通信线路，这样IP就降低对网络线路的需求，每条线都可以满足许多计算机之间的通信需要，通过IP，消息或者其他会被分割为较小的独立的包，并通过在因特网在计算机之间传送。IP负责将每个包，路由至其目的地。但IP协议没有做任何事情来确认数据包是否按顺序发送，或者包被破坏。所以IP数据包是不可靠的，需要由它的上层协议作出控制。</li>
+</ul>
+<h2 id="2-2-TCP协议"><a href="#2-2-TCP协议" class="headerlink" title="2.2 TCP协议"></a>2.2 TCP协议</h2><ul>
+<li>传输控制协议TCP 是传输层的协议</li>
+<li>面向连接的，可靠的，基于字节流的传输层通信协议</li>
+<li>将应用层的数据流分割成报文段并发送给目标节点的TCP层<br>  报文段的长度通常受该计算机连接网络的数据链路层最大传输单元及MPU的限制，之后TCP把结果包传给IP层</li>
+<li>数据包都有序号，对方收到则发送ACK确认，未收到则重传<br>  数据包有序号的原因就是为了保证包不丢失，序列号(Sequence Number),也保证了传送到目标节点包的按序处理。然后接收端实体对已成功收到的包发回一个相应的确认，即ACK确认。如果发送端实体在合理的往返时延(RTT)内未收到确认，那么对应的数据包会被认为已丢失，并且将会对其进行重传。</li>
+<li>使用校验和未校验数据在传输过程中是否有误<br>  TCP用奇偶校验和函数来检验数据是否有错误，在发送和接收时都要计算校验和</li>
+</ul>
+<h2 id="2-3-TCP报文头"><a href="#2-3-TCP报文头" class="headerlink" title="2.3 TCP报文头"></a>2.3 TCP报文头</h2><p><img src="/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/tcp%E6%8A%A5%E6%96%87%E5%A4%B4.jpg" alt="tcp报文头"><br><img src="/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/tcp%E6%8A%A5%E6%96%87%E5%A4%B41.jpg" alt="tcp报文头"><br><img src="/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/tcp%E6%8A%A5%E6%96%87%E5%A4%B42.jpg" alt="tcp报文头"><br>TCP报文是TCP层传输的数据单元，也叫报文段。</p>
+<ul>
+<li><p><strong>1.端口号</strong>：用来标识同一台计算机的不同的应用进程。<br>  1）源端口：源端口和IP地址的作用是标识报文的返回地址。<br>  2）目的端口：端口指明接收方计算机上的应用程序接口。<br>  TCP报头中的源端口号和目的端口号同IP数据报中的源IP与目的IP唯一确定一条TCP连接。</p>
+</li>
+<li><p><strong>2.序号和确认号</strong>：是TCP可靠传输的关键部分。序号是本报文段发送的数据组的第一个字节的序号。在TCP传送的流中，每一个字节一个序号。<br>  一个报文段的序号为300，此报文段数据部分共有100字节，则下一个报文段的序号为400。所以序号确保了TCP传输的有序性。确认号，即ACK，指明下一个期待收到的字节序号，表明该序号之前的所有数据已经正确无误的收到。确认号只有当ACK标志为1时才有效。比如建立连接时，SYN报文的ACK标志位为0。</p>
+</li>
+<li><p><strong>3.数据偏移／首部长度：</strong><br>  4bits。由于首部可能含有可选项内容，因此TCP报头的长度是不确定的，报头不包含任何任选字段则长度为20字节，4位首部长度字段所能表示的最大值为1111，转化为10进制为15，15*32/8 = 60，故报头最大长度为60字节。首部长度也叫数据偏移，是因为首部长度实际上指示了数据区在报文段中的起始偏移值。</p>
+</li>
+<li><p><strong>4.控制位</strong><br>  由8个标志位来组成，每个标志位表示一个控制的功能，其中常见的包括：</p>
+  <figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">URG: 紧急指针标志。<span class="number">1</span>-紧急指针有效，<span class="number">0</span>-忽略紧急指针</span><br><span class="line">ACK: 确认序号标志。<span class="number">1</span>-确认序号有效，<span class="number">0</span>-报文中不含确认信息，忽略确认字段</span><br><span class="line">PSH: push标志。<span class="number">1</span>-表有push的标志，指示接收方在接收到报文段以后，应尽快将报文段交给应用程序，而不是在缓冲区排队  </span><br><span class="line">RST: 重置连接标志。用于重置，主机崩溃或者其他原因而出现错误的连接，或者用于拒绝非法的报文端和拒绝连接请求</span><br><span class="line">SYN: 同步序号，用于建立连接过程，在连接请求中SYN=<span class="number">1</span>,ACK=<span class="number">0</span>表示该数据段没有使用捎带的确认域，而连接应答捎带一个确认，即SYN=<span class="number">1</span>,ACK=<span class="number">1</span></span><br><span class="line">FIN: finsh标志。用于释放连接，唯一标识发送方没有数据发送，即关闭本方数据流，</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>5.窗口</strong><br>  滑动窗口大小，用来告知发送端接受端的缓存大小，以此控制发送端发送数据的速率，从而达到流量控制。窗口大小是一个16bit字段，因而窗口大小最大为65535。</p>
+</li>
+<li><p><strong>7.校验和</strong><br>  奇偶校验，此校验和是对整个的 TCP 报文段，包括 TCP 头部和 TCP 数据，以 16 位字进行计算所得。由发送端计算和存储，并由接收端进行验证。</p>
+</li>
+<li><p><strong>8.紧急指针</strong><br>  只有当 URG 标志置 1 时紧急指针才有效。紧急指针是一个正的偏移量，和顺序号字段中的值相加表示紧急数据最后一个字节的序号。 TCP 的紧急方式是发送端向另一端发送紧急数据的一种方式。</p>
+</li>
+<li><p><strong>9.选项和填充</strong><br>  最常见的可选字段是最长报文大小，又称为MSS（Maximum Segment Size），每个连接方通常都在通信的第一个报文段（为建立连接而设置SYN标志为1的那个段）中指明这个选项，它表示本端所能接受的最大报文段的长度。选项长度不一定是32位的整数倍，所以要加填充位，即在这个字段中加入额外的零，以保证TCP头是32的整数倍。</p>
+</li>
+<li><p><strong>10.数据部分</strong><br>   TCP 报文段中的数据部分是可选的。在一个连接建立和一个连接终止时，双方交换的报文段仅有 TCP 首部。如果一方没有数据要发送，也使用没有任何数据的首部来确认收到的数据。在处理超时的许多情况中，也会发送不带任何数据的报文段。</p>
+</li>
+</ul>
+<h1 id="三-TCP三次握手"><a href="#三-TCP三次握手" class="headerlink" title="三.TCP三次握手"></a>三.TCP三次握手</h1><p>当应用程序希望通过TCP与另一个应用通信时，它会发送一个通信请求，这个请求必须被送到一个确切的地址，在双方握手之后，TCP将在两个应用之间建立一个全双通的通信，这个全双通（A可以给B发送信息的同时，B也能够给A发信息）的通信将占用两个计算机之间的通信线路，直到被一方，或者双方关闭为止。</p>
+<p><img src="/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B.jpg" alt="tcp三次握手"></p>
+<h3 id="第一次握手"><a href="#第一次握手" class="headerlink" title="第一次握手"></a>第一次握手</h3><ul>
+<li>一开始客户端和服务器端都处于<code>Close</code>状态。</li>
+<li>刚开始的时候TCP服务器进程先创建传输控制块(<code>PCD</code>)，时刻准备接受其他客户进程发送过来的连接请求。</li>
+<li>此时服务端进入了Listen，即监听的状态。此时客户端进程也先创建一个传输控制块(<code>PCD</code>)然后向服务器发出连接请求报文，<code>SYN</code>就是<code>TCP Flags</code>的同步序号，SYN =1,选择一个初始序号seq =x ,x可以是任意的正整数值。</li>
+<li>此时TCP客户端进程就进入了一个<code>SYN-SENT</code>同步已发送的状态，发送给服务端的数据包，即报文端会被称为SYN报文段，不能携带数据，但是要消耗一个序号。</li>
+</ul>
+<h3 id="第二次握手"><a href="#第二次握手" class="headerlink" title="第二次握手"></a>第二次握手</h3><ul>
+<li>当服务器接收到一个报文请求之后，同意连接，则发出确认报文，确认报文中包含TCP Flags中的<code>SYN,ACK</code>两位的字段。</li>
+<li>SYN=1,ACK=1,seq=y,ack=x+1。</li>
+<li>ack = x+1的原因是第一次握手SYN报文中指定了seq=x,服务端要回应相关的信息，并且第一次握手中报文消耗了一个序号，因此ack=x+1,同时为自己的缓存初始化一个序列号，即seq=y。此时服务器就进入到了<code>SYN-RCVD</code>,即同步收到的状态。</li>
+<li>这个报文也是不能携带数据的，同时也需要消耗一个序号。</li>
+</ul>
+<h3 id="第三次握手"><a href="#第三次握手" class="headerlink" title="第三次握手"></a>第三次握手</h3><ul>
+<li><p>当TCP客户进程收到确认报文之后，还要给服务器一个确认。<code>ACK=1,seq=x+1,ack=y+1</code></p>
+</li>
+<li><p>ack=y+1,原因是服务器给客户端发送一个seq=y，客户端作为回应。所以就加了1。同时第二次握手的报文会消耗一个序号。</p>
+</li>
+<li><p>同时第一次握手的时候，客户端告知(ack)服务器序号被+1了，即seq =x ,第二次握手时ack=x +1 。所以第三次握手时候seq = x+ 1。</p>
+</li>
+<li><p>此时TCP连接建立，客户端就进入了<code>ESTAB-LISHED</code>,即已建立连接的状态，此时TCP规定这个时候的报文段可以携带数据。第一次，第二次握手的报文段都是不可以携带的。也可以不携带数据，这样就不会消耗序号了。</p>
+</li>
+<li><p>当服务器也收到了客户端的确认后也会进入<code>ESTAB-LISHED</code>状态。</p>
+</li>
+</ul>
+<p>完成三次握手之后，双方就可以开始通信了。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li>在TCP/IP协议中，TCP协议提供可靠的链接服务，采用三次握手建立一个连接</li>
+<li>第一次握手：建立连接时，客户端发送SYN包(SYN=j)到服务器，进入SYN_SEND状态，等待服务器确认；</li>
+<li>第二次握手：服务器收到SYN包，必须确认客户的SYN(ack=j+1),同时自己也发送一个SYN包(syn=k),即SYN+ACK包，此时服务器进入SYN_RECV状态；</li>
+<li>第三次握手：客户端收到服务器的SYN+ACK包，向服务器发送确认包ACK(ack=k+1),此时包发送完毕，客户端和服务区进入ESTABLISHED状态，完成三次握手。</li>
+</ul>
+<h1 id="四-TCP四次挥手"><a href="#四-TCP四次挥手" class="headerlink" title="四.TCP四次挥手"></a>四.TCP四次挥手</h1><ul>
+<li>断开一个TCP连接时，需要客户端和服务器端总共发出4个包，以确认连接的断开。</li>
+<li>在Socket编程中，这过程由客户端或服务端任一方，执行Close来触发。</li>
+</ul>
+<p>“挥手”是为了终止连接，TCP四次挥手的流程图如下</p>
+<p><img src="/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B.png" alt="tcp四次挥手"><br>上图由客户端主动触发close。数据传送完毕之后，双方都可以释放连接，最开始的时候客户端和服务端都处于ESTABLISHED状态。然后客户端主动关闭，服务器被动关闭。</p>
+<h2 id="第一次挥手"><a href="#第一次挥手" class="headerlink" title="第一次挥手"></a>第一次挥手</h2><p>首先客户端进程发出连接释放报文（FIN），并且停止发送数据。在该数据报的报头中，TCP Flags 中的 FIN = 1，假设客户端定义的序列号为seq=u，该值等于前面ESTABLISHED状态数据最后一次发送的时候，已经传送过来的数据的最后一个字节的序号加上1。此时客户端就进入了FINWAIT1,这个终止等待1的状态。TCP规定即使FIN不携带数据，也要消耗掉一个序号。即回值的时候u要加上1。</p>
+<h2 id="第二次挥手"><a href="#第二次挥手" class="headerlink" title="第二次挥手"></a>第二次挥手</h2><p>当服务器收到连接释放报文之后，也要发出确认报文，即ACK=1。作为回应akc=u+1,并且也带上了自己的序列号seq=v。此时服务端就进入了CLOSEWAIT,关闭等待的状态。TCP服务器通知高层的进程，客服端要释放与服务器之间的连接，这时候会处于半关闭的状态，即客户端没有数据要发送了，但是服务器要发送数据，客户端还是能够接受的。CLOSEWAIT状态还要持续一段时间。</p>
+<h2 id="第三次挥手"><a href="#第三次挥手" class="headerlink" title="第三次挥手"></a>第三次挥手</h2><p>客户端收到服务器的确认请求之后，客户端就进入了FIN_WAIT_2,即终止等待2状态。等待服务器发送释放连接报文，也就是第三次挥手的请求。因此在这个时间内还需要接收服务器发送最后的数据，服务器将最后的数据发送完毕后就会向客户端发送连接释放报文，FIN=1,ack=u+1。有可能在半关闭的状态，服务器很可能又发送了一些数据，假定此时的序号变为了w。此时服务器就进入到了LAST_ACK的状态。等待客户端的最终确认。</p>
+<h2 id="第四次挥手"><a href="#第四次挥手" class="headerlink" title="第四次挥手"></a>第四次挥手</h2><p>客户端在收到服务器的连接释放报文之后，必须发出确认，即ACK=1，然后再将服务器发送过来的w变成w+1,回发给服务器。</p>
+<p>此时的seq为u+1。此时客户端就进入了TIME_WAIT,即时间等待的状态，这时客户端的TCP连接还没有释放，必须经过2MSL时间后，连接才会真正的释放，才会进入到CLOSED状态。MSL最长报文段生命。在Linux MSL 为30s,而服务器只要收到客户端发出的确认，立即就进入CLOSED状态。</p>
+<p>由图可知，<strong>服务器结束TCP的连接时间要比客户端稍早一些</strong>。</p>
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>第一次挥手：Client发送一个FIN，用来关闭Client到Server的数据，Client进入<code>FIN_WAIT_1</code>状态；</li>
+<li>第二次挥手：Server收到FIN后，发送一个ACK给Client，确认序号为收到序号+1（与SYN相同，一个FIN占用一个序号），Server进入<code>CLOSE_WAIT</code>状态,Client进入<code>FIN_WAIT_2</code>状态</li>
+<li>第三次挥手：Server发送一个FIN，用来关闭Server到Client的数据传送，Server进入<code>LAST_ACK</code>状态；</li>
+<li>第四次挥手：Client收到FIN后，Client进入<code>TIME_WAIT</code>状态，接着发送一个ACK给Server,确认序号为收到序号+1，Server进入CLOSED状态，完成四次挥手。</li>
+</ul>
+<h2 id="4-1-为什么会有TIME-WAIT状态？"><a href="#4-1-为什么会有TIME-WAIT状态？" class="headerlink" title="4.1 为什么会有TIME_WAIT状态？"></a>4.1 为什么会有TIME_WAIT状态？</h2><ul>
+<li>确保由足够的时间让对方收到ACK<br>  TIME_WAIT状态用来保证有足够的时间让对端接收完ACK，如果被动关闭的那方没有收到ACK就会触发被动端重发FIN包，一来一去正好是2MSL。</li>
+<li>避免新旧连接混淆<br>  有足够的时间让这个连接，不会跟后面的连接混在一起，因为有些路由器会缓存IP数据包。如果连接被重用了，那么这些延迟被收到的包就有可能跟新连接混在一起</li>
+</ul>
+<h2 id="4-2-为什么需要四次挥手才能断开连接？"><a href="#4-2-为什么需要四次挥手才能断开连接？" class="headerlink" title="4.2 为什么需要四次挥手才能断开连接？"></a>4.2 为什么需要四次挥手才能断开连接？</h2><ul>
+<li>全双通的意思是允许数据在两个方向上同时传输，即在同一时间，服务器可以发送数据给客户端，客户端也可以发送数据给服务器。</li>
+<li>因为全双工，发送方和接收方都需要FIN报文和ACK报文</li>
+<li>发送方和接收方各只需两两次挥手即可，只不过有一方是被动的，所以看上去就成了四次挥手</li>
+</ul>
+<h2 id="4-3-服务器出现CLOSE-WAIT状态的原因"><a href="#4-3-服务器出现CLOSE-WAIT状态的原因" class="headerlink" title="4.3 服务器出现CLOSE_WAIT状态的原因"></a>4.3 服务器出现CLOSE_WAIT状态的原因</h2><ul>
+<li>问题其中一个表现是客户端一直在请求，但是返回给客户端的信息是异常的。服务端压根也没收到请求。</li>
+<li>服务器保持大量的CLOSE_WAIT只有一种情况，那就是在对方发送一个FIN报文之后，程序这边没有进一步发送ACK，或者FIN报文以确认。</li>
+</ul>
+<h2 id="4-4-对方关闭Socket连接，我方忙于读或写，没有及时关闭连接"><a href="#4-4-对方关闭Socket连接，我方忙于读或写，没有及时关闭连接" class="headerlink" title="4.4 对方关闭Socket连接，我方忙于读或写，没有及时关闭连接"></a>4.4 对方关闭Socket连接，我方忙于读或写，没有及时关闭连接</h2><p>对方关闭连接后，程序里没有检测到，或者程序本身就已经忘了这个时候需要关闭连接，于是这个资源就被程序占用着。<br>遇到这种情况多数是程序里面有BUG，通常是有些连接没有释放<br><strong>检查代码，特别是释放资源代码</strong><br><strong>检查配置，特别是处理请求的线程配置</strong></p>
+<h1 id="五-TCP和UDP的区别"><a href="#五-TCP和UDP的区别" class="headerlink" title="五.TCP和UDP的区别"></a>五.TCP和UDP的区别</h1><p>相比TCP报文，UDP的域少了很多。简单了很多。简单的报文结构意味着UDP不像TCP那样，支持错误重传，滑动窗口。</p>
+<p><img src="/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/tcp%E5%92%8Cudp.jpeg" alt="TCP和UDP的区别"></p>
+<h2 id="5-1UDP的特点"><a href="#5-1UDP的特点" class="headerlink" title="5.1UDP的特点"></a>5.1UDP的特点</h2><ul>
+<li>面向非连接<br>  传输数据之前，源端和终端不建立连接，当它想传送时，就简单地去抓取来自应用程序的数据，并尽可能快地把它扔到网络上。<br>  在发送端UDP传送数据的速度仅仅是受应用程序生成数据地速度，计算机的能力和传输带宽的限制。<br>  在接收端UDP把每个消息段放在队列中，应用程序每次从队列中读取一个消息段。</li>
+<li>不维护连接状态，支持同时向多个客户端传输相同的消息<br>  由于传输数据不建立连接，所以不需要维护连接状态。</li>
+<li>数据包报头只有8个字节，额外开销较小<br>  相对TCP的20个字节包小很多</li>
+<li>吞吐量只受限于数据生成速率，传输速率以及机器性能<br>  吞吐量不受拥挤控制算法的调节，只受应用软件生成数据的效率，传输带宽，源端和终端主机性能的限制。</li>
+<li>尽最大努力交付，不保证可靠交付，不需要维持复杂的链接状态表</li>
+<li>面向报文，不对应用程序提交的报文信息进行拆分或者合并<br>  发送方的UDP对应用程序，交下来的报文，在添加守护后就向下交付给IP层，既不拆分，也不合并。而是保留报文的边界。因此应用程序应该选择合适的报文大小，UDP将多数的控制交给上层去解决。</li>
+</ul>
+<h2 id="5-2-总结"><a href="#5-2-总结" class="headerlink" title="5.2 总结"></a>5.2 总结</h2><p>TCP和UDP是OSI模型中，运输层的协议。TCP提供可靠的传输，而UDP常被用于让广播和细节控制交给应用层的通信传输。</p>
+<ul>
+<li>面向链接与面向无连接<br>  TCP有三次握手的过程，UDP合适消息的多播发布，从单个点向多个点发布信息</li>
+<li>可靠性<br>  TCP利用握手，确认，重传机制提供了可靠性保证。UDP可能会被丢失，不知道有没有被接收</li>
+<li>有序性<br>  TCP利用序列号保证了消息报的顺序交付，达到可能无序，但是TCP最终还是会排序的。<br>  UDP不具备有序性</li>
+<li>速度<br>  TCP速度比较慢，因为要创建连接，保证消息的可靠性和有序性，需要额外做很多事。<br>  UDP比较适合对速度比较敏感的应用。比如在线视频媒体，电视广播，多人在线游戏。</li>
+<li>量级<br>  TCP属于重量级的<br>  UDP属于轻量级的<br>  体现在源数据头部大小  TCP 20个字节  UDP 8个字节</li>
+</ul>
+<h1 id="六-TCP的滑动窗口"><a href="#六-TCP的滑动窗口" class="headerlink" title="六.TCP的滑动窗口"></a>六.TCP的滑动窗口</h1><pre><code>https://blog.csdn.net/qq_41398448/article/details/100775989</code></pre>
+<h1 id="七-HTTP相关"><a href="#七-HTTP相关" class="headerlink" title="七.HTTP相关"></a>七.HTTP相关</h1><pre><code>https://blog.csdn.net/qq_41398448/article/details/100780050</code></pre>
+<h1 id="八-HTTP和HTTPS的区别"><a href="#八-HTTP和HTTPS的区别" class="headerlink" title="八.HTTP和HTTPS的区别"></a>八.HTTP和HTTPS的区别</h1><pre><code>https://blog.csdn.net/qq_41398448/article/details/100830299</code></pre>
+<h1 id="九-ping和talnet命令"><a href="#九-ping和talnet命令" class="headerlink" title="九.ping和talnet命令"></a>九.ping和talnet命令</h1><h3 id="ping"><a href="#ping" class="headerlink" title="ping"></a>ping</h3><p>基于ICMP协议，验证IP的可达性，<code>ping ip地址</code></p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ping <span class="number">192.168</span><span class="number">.205</span><span class="number">.10</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="talne"><a href="#talne" class="headerlink" title="talne"></a>talne</h3><p>检车服务的可用性,<code>ping ip地址 端口号</code></p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ping <span class="number">192.168</span><span class="number">.205</span><span class="number">.10</span> <span class="number">8080</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="十-网络抓包工具"><a href="#十-网络抓包工具" class="headerlink" title="十.网络抓包工具"></a>十.网络抓包工具</h1><p>wireshark</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    支持一下呗
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat1.png" alt="Jinping 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="Jinping 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>有问题随时找我，加我微信~</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/111.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">WeChat</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86/" rel="tag"># 基础知识</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/03/Flink%E6%B7%B1%E5%85%A5%E4%BA%86%E8%A7%A3/" rel="prev" title="Flink深入了解">
+      <i class="fa fa-chevron-left"></i> Flink深入了解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/20/redis%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="next" title="redis面试题">
+      redis面试题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MjcwNy8yOTE4NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%80-OSI%E4%B8%83%E5%B1%82%E5%8D%8F%E8%AE%AE"><span class="nav-number">1.</span> <span class="nav-text">一.OSI七层协议</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%8C-TCP-IP%E6%A6%82%E5%BF%B5%E5%B1%82%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">二.TCP&#x2F;IP概念层模型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-IP%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 IP协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-TCP%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 TCP协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-TCP%E6%8A%A5%E6%96%87%E5%A4%B4"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 TCP报文头</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%89-TCP%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number">3.</span> <span class="nav-text">三.TCP三次握手</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number">3.0.1.</span> <span class="nav-text">第一次握手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number">3.0.2.</span> <span class="nav-text">第二次握手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%AC%A1%E6%8F%A1%E6%89%8B"><span class="nav-number">3.0.3.</span> <span class="nav-text">第三次握手</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">3.0.4.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%9B%9B-TCP%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">4.</span> <span class="nav-text">四.TCP四次挥手</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">4.1.</span> <span class="nav-text">第一次挥手</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">4.2.</span> <span class="nav-text">第二次挥手</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">4.3.</span> <span class="nav-text">第三次挥手</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B"><span class="nav-number">4.4.</span> <span class="nav-text">第四次挥手</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93-1"><span class="nav-number">4.5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-1-%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BC%9A%E6%9C%89TIME-WAIT%E7%8A%B6%E6%80%81%EF%BC%9F"><span class="nav-number">4.6.</span> <span class="nav-text">4.1 为什么会有TIME_WAIT状态？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-2-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81%E5%9B%9B%E6%AC%A1%E6%8C%A5%E6%89%8B%E6%89%8D%E8%83%BD%E6%96%AD%E5%BC%80%E8%BF%9E%E6%8E%A5%EF%BC%9F"><span class="nav-number">4.7.</span> <span class="nav-text">4.2 为什么需要四次挥手才能断开连接？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-3-%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%87%BA%E7%8E%B0CLOSE-WAIT%E7%8A%B6%E6%80%81%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">4.8.</span> <span class="nav-text">4.3 服务器出现CLOSE_WAIT状态的原因</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-4-%E5%AF%B9%E6%96%B9%E5%85%B3%E9%97%ADSocket%E8%BF%9E%E6%8E%A5%EF%BC%8C%E6%88%91%E6%96%B9%E5%BF%99%E4%BA%8E%E8%AF%BB%E6%88%96%E5%86%99%EF%BC%8C%E6%B2%A1%E6%9C%89%E5%8F%8A%E6%97%B6%E5%85%B3%E9%97%AD%E8%BF%9E%E6%8E%A5"><span class="nav-number">4.9.</span> <span class="nav-text">4.4 对方关闭Socket连接，我方忙于读或写，没有及时关闭连接</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%94-TCP%E5%92%8CUDP%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">5.</span> <span class="nav-text">五.TCP和UDP的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1UDP%E7%9A%84%E7%89%B9%E7%82%B9"><span class="nav-number">5.1.</span> <span class="nav-text">5.1UDP的特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-%E6%80%BB%E7%BB%93"><span class="nav-number">5.2.</span> <span class="nav-text">5.2 总结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AD-TCP%E7%9A%84%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3"><span class="nav-number">6.</span> <span class="nav-text">六.TCP的滑动窗口</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B8%83-HTTP%E7%9B%B8%E5%85%B3"><span class="nav-number">7.</span> <span class="nav-text">七.HTTP相关</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%AB-HTTP%E5%92%8CHTTPS%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">8.</span> <span class="nav-text">八.HTTP和HTTPS的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%B9%9D-ping%E5%92%8Ctalnet%E5%91%BD%E4%BB%A4"><span class="nav-number">9.</span> <span class="nav-text">九.ping和talnet命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ping"><span class="nav-number">9.0.1.</span> <span class="nav-text">ping</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#talne"><span class="nav-number">9.0.2.</span> <span class="nav-text">talne</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8D%81-%E7%BD%91%E7%BB%9C%E6%8A%93%E5%8C%85%E5%B7%A5%E5%85%B7"><span class="nav-number">10.</span> <span class="nav-text">十.网络抓包工具</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jinping"
+      src="/images/image.png">
+  <p class="site-author-name" itemprop="name">Jinping</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jinping-dev" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jinping-dev" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:jinping0982@163.com" title="E-Mail → mailto:jinping0982@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/9e1f045b3f8d" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;9e1f045b3f8d" rel="noopener" target="_blank"><i class="fa fa-heartbeat fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">©2018 by Jinping</span>
+</div>
+  <div class="powered-by">Erstellt mit  <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+  <div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

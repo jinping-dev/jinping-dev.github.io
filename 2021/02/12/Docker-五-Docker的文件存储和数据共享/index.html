@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jinping-dev.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="问题 当我创建了一个容器，在这个容器中我有个mysql服务，在这个mysql里面我有各种各样的数据。但是有一天我一不小心删除了这个容器，那么这个容器中的相关服务以及数据也都没有了。这个时候就出问题了。 我们需要一种数据持久化机制来实现我们容器中数据的存储。  默认情况下docker数据是写在了container里面的，当我们将容器删除掉之后是找不到这个容器里面的文件及恢复的，那么我们可以用一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Docker(五)-Docker的文件存储和数据共享">
+<meta property="og:url" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/index.html">
+<meta property="og:site_name" content="靳平の博客">
+<meta property="og:description" content="问题 当我创建了一个容器，在这个容器中我有个mysql服务，在这个mysql里面我有各种各样的数据。但是有一天我一不小心删除了这个容器，那么这个容器中的相关服务以及数据也都没有了。这个时候就出问题了。 我们需要一种数据持久化机制来实现我们容器中数据的存储。  默认情况下docker数据是写在了container里面的，当我们将容器删除掉之后是找不到这个容器里面的文件及恢复的，那么我们可以用一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/1.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/2.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/3.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/4.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/5.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/5.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/6.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/7.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/8.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/9.png">
+<meta property="article:published_time" content="2021-02-11T19:59:13.000Z">
+<meta property="article:modified_time" content="2021-07-05T07:47:22.914Z">
+<meta property="article:author" content="Jinping">
+<meta property="article:tag" content="Docker">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/1.png">
+
+<link rel="canonical" href="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Docker(五)-Docker的文件存储和数据共享 | 靳平の博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?8963e74cb35315df308c698224929229";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">靳平の博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">51</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Docker(五)-Docker的文件存储和数据共享
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-02-12 03:59:13" itemprop="dateCreated datePublished" datetime="2021-02-12T03:59:13+08:00">2021-02-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:22" itemprop="dateModified" datetime="2021-07-05T15:47:22+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Docker/" itemprop="url" rel="index"><span itemprop="name">Docker</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <meta name="referrer" content="no-referrer">
+
+
+<p><strong>问题</strong></p>
+<p>当我创建了一个容器，在这个容器中我有个mysql服务，在这个mysql里面我有各种各样的数据。但是有一天我一不小心删除了这个容器，那么这个容器中的相关服务以及数据也都没有了。这个时候就出问题了。</p>
+<p>我们需要一种数据持久化机制来实现我们容器中数据的存储。</p>
+<p><img src="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/1.png" alt="1"></p>
+<p>默认情况下docker数据是写在了container里面的，当我们将容器删除掉之后是找不到这个容器里面的文件及恢复的，那么我们可以用一种机制类似于mock的方式去将容器中的数据保存在我们的磁盘上，这样就跟容器隔离开了，进而实现数据持久化。</p>
+<a id="more"></a>
+
+<h3 id="Docker持久化数据的两种方案"><a href="#Docker持久化数据的两种方案" class="headerlink" title="Docker持久化数据的两种方案"></a>Docker持久化数据的两种方案</h3><ul>
+<li>基于本地文件系统的Volume。可以在执行Docker create或Docker run时，通过-v参数将主机的目录作为容器的数据卷。这部分功能便是基于本地文件系统的volume管理。</li>
+<li>基于plugin的Volume，支持第三方的存储方案，比如NAS、aws</li>
+</ul>
+<h3 id="Volume的类型"><a href="#Volume的类型" class="headerlink" title="Volume的类型"></a>Volume的类型</h3><ul>
+<li>受管理的data Volome，由docker后台自动创建</li>
+<li>绑定挂载的Volome，具体挂载的位置可以由用户指定</li>
+</ul>
+<h4 id="小插曲"><a href="#小插曲" class="headerlink" title="小插曲"></a>小插曲</h4><p>我需要从我本地拷贝几份文件到vagrant的虚拟机中，需要安装vagrant的scp插件<code>vagrant plugin install scp</code>。</p>
+<p><img src="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/2.png" alt="2"></p>
+<ul>
+<li>将本地文件拷贝到虚拟机指定目录中<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vagrant scp <span class="tag">&lt;<span class="name">目标文件夹路径</span>&gt;</span> vmName:<span class="tag">&lt;<span class="name">虚拟机内文件夹路径</span>&gt;</span></span><br></pre></td></tr></table></figure></li>
+<li>注意：&lt;虚拟机内文件夹路径&gt;需要预先开通777权限<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod <span class="number">777</span> &lt;虚拟机内文件夹路径&gt;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="Data-Volume"><a href="#Data-Volume" class="headerlink" title="Data Volume"></a>Data Volume</h3><p>1.进入虚拟机，查看volume：<br><img src="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/3.png" alt="3"></p>
+<p>2.创建一个不需要密码登录的mysql应用</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker <span class="builtin-name">run</span> -d --name mysql1 -e <span class="attribute">MYSQL_ALLOW_EMPTY_PASSWORD</span>=<span class="literal">true</span> mysql</span><br></pre></td></tr></table></figure>
+<p>3.查看volume相关信息<br><img src="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/4.png" alt="4"><br>可以看到它这个volume映射到了虚拟机内部的路径上去</p>
+<p>4.再去创建另一个mysql</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker <span class="builtin-name">run</span> -d --name mysql2 -e <span class="attribute">MYSQL_ALLOW_EMPTY_PASSWORD</span>=<span class="literal">true</span> mysql</span><br></pre></td></tr></table></figure>
+<p>再去查看volume可以看到多了一个<br><img src="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/5.png" alt="5"></p>
+<p>5.现在我去停止并且remove掉两个容器</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">docker</span> rm -f mysql<span class="number">1</span> mysql<span class="number">2</span></span><br></pre></td></tr></table></figure>
+<p>可以发现但是他们的volume还在<br><img src="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/5.png" alt="5"></p>
+<p><strong>但是又有第二个问题，我们的volume的名字并不是特别友好， 我可以给volume起个别名</strong></p>
+<p>6.删除这两个volume</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="keyword">volume</span><span class="bash"> rm &lt;id&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>7.重新创建，指定别名为mysql</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker <span class="builtin-name">run</span> -d -v mysql:/var/lib/mysql --name mysql1 -e <span class="attribute">MYSQL_ALLOW_EMPTY_PASSWORD</span>=<span class="literal">true</span> mysql</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/6.png" alt="6"></p>
+<p>可以看到有一个mysql的volume</p>
+<p>我们的数据都会同步到这个volume里面去</p>
+<h5 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h5><ul>
+<li><p>进入到mysql1中</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo docker exec -it mysql1 /bin/bash</span><br><span class="line">mysql -u root</span><br><span class="line"><span class="keyword">create</span> <span class="keyword">database</span> docker;</span><br><span class="line"><span class="keyword">show</span> <span class="keyword">databases</span>;</span><br></pre></td></tr></table></figure>
+<p><img src="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/7.png" alt="7"></p>
+</li>
+<li><p>然后退出容器</p>
+</li>
+<li><p>强制删除mysql1</p>
+</li>
+<li><p>创建mysql3，使用这个volume</p>
+<figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo docker <span class="builtin-name">run</span> -d -v mysql:/var/lib/mysql --name mysql3 -e <span class="attribute">MYSQL_ALLOW_EMPTY_PASSWORD</span>=<span class="literal">true</span> mysql</span><br></pre></td></tr></table></figure></li>
+<li><p>进入容器，可以看到mysql3中有docker这个数据库<br><img src="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/8.png" alt="8"></p>
+</li>
+</ul>
+<h3 id="bind-Mounting做地址映射"><a href="#bind-Mounting做地址映射" class="headerlink" title="bind Mounting做地址映射"></a>bind Mounting做地址映射</h3><p>只需要在运行容器的时候去指定我们本地的目录和容器的目录的一一对应关系，通过这种方式可以去同步，让我们本地的目录文件和容器的目录文件是同步的。本质是同一个文件同一个目录做映射。</p>
+<p>我这里有个脚本文件Dockerfile</p>
+<figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"># this same shows how we can extend/change an existing official image <span class="keyword">from</span> Docker Hub</span><br><span class="line"></span><br><span class="line"><span class="keyword">FROM</span> nginx:latest</span><br><span class="line"># highly recommend you <span class="keyword">always</span> pin versions <span class="keyword">for</span> anything beyond dev/learn</span><br><span class="line"></span><br><span class="line">WORKDIR /usr/<span class="keyword">share</span>/nginx/html</span><br><span class="line"># change working directory <span class="keyword">to</span> root <span class="keyword">of</span> nginx webhost</span><br><span class="line"># <span class="keyword">using</span> WORKDIR <span class="keyword">is</span> prefered <span class="keyword">to</span> <span class="keyword">using</span> <span class="string">&#x27;RUN cd /some/path&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">COPY</span> <span class="keyword">index</span>.html <span class="keyword">index</span>.html</span><br><span class="line"></span><br><span class="line"># I don<span class="string">&#x27;t have to specify EXPOSE or CMD because they&#x27;</span>re <span class="keyword">in</span> my <span class="keyword">FROM</span></span><br></pre></td></tr></table></figure>
+
+<p>其实就是创建一个nginx服务，然后将我自定义的index.html覆盖到nginx中<br>构建：</p>
+<figure class="highlight erlang"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t tinner/mynginx .</span><br></pre></td></tr></table></figure>
+<p>做端口映射：</p>
+<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p <span class="number">80</span>:<span class="number">80</span> --name web tinner/mynginx</span><br></pre></td></tr></table></figure>
+<p>然后curl 127.0.0.1<br>可以看到首页就是我写的index.html</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;!doctype <span class="meta-keyword">html</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">html</span> <span class="attr">lang</span>=<span class="string">&quot;en&quot;</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">&quot;utf-8&quot;</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">title</span>&gt;</span>hello<span class="tag">&lt;/<span class="name">title</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">h1</span>&gt;</span>Hello Docker! <span class="tag">&lt;/<span class="name">h1</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>在本地输入(我的虚拟机ip)：<a target="_blank" rel="noopener" href="http://192.168.205.10/%EF%BC%8C%E5%90%8C%E6%A0%B7%E4%B9%9F%E8%83%BD%E7%9C%8B%E5%88%B0%E8%87%AA%E5%AE%9A%E4%B9%89%E9%A1%B5%E9%9D%A2">http://192.168.205.10/，同样也能看到自定义页面</a><br><img src="/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/9.png" alt="9"></p>
+<p>然后删除这个容器</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker <span class="built_in">rm</span> <span class="operator">-f</span> web</span><br></pre></td></tr></table></figure>
+
+<h4 id="用bind-Mounting进行映射"><a href="#用bind-Mounting进行映射" class="headerlink" title="用bind Mounting进行映射"></a>用bind Mounting进行映射</h4><figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -v <span class="variable">$(</span>pwd)<span class="symbol">:/usr/share/nginx/html</span> -p <span class="number">80:80</span> --name web tinner/mynginx</span><br></pre></td></tr></table></figure>
+
+<p>主要是-v参数，$(pwd)就是我当前虚拟机的目录，冒号后面就是我创建出来的容器的指定目录要与$(pwd)目录进行映射。</p>
+<p>然后进入容器</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">docker exec -it web <span class="regexp">/bin/</span>bash</span><br><span class="line">touch docker.txt</span><br></pre></td></tr></table></figure>
+<p>退出容器，可以看到在虚拟机内部也生成了一个docker.txt文件，同时在我本地也有一份</p>
+<p>这是因为我在构建vagrant的时候指定了</p>
+<figure class="highlight ruby"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">Vagrant.require_version <span class="string">&quot;&gt;= 1.6.0&quot;</span></span><br><span class="line"></span><br><span class="line">boxes = [</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="symbol">:name</span> =&gt; <span class="string">&quot;docker-host&quot;</span>,</span><br><span class="line">        <span class="symbol">:eth1</span> =&gt; <span class="string">&quot;192.168.205.31&quot;</span>,</span><br><span class="line">        <span class="symbol">:mem</span> =&gt; <span class="string">&quot;1024&quot;</span>,</span><br><span class="line">        <span class="symbol">:cpu</span> =&gt; <span class="string">&quot;1&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line">Vagrant.configure(<span class="number">2</span>) <span class="keyword">do</span> <span class="params">|config|</span></span><br><span class="line"></span><br><span class="line">  config.vm.box = <span class="string">&quot;centos/7&quot;</span></span><br><span class="line">  boxes.each <span class="keyword">do</span> <span class="params">|opts|</span></span><br><span class="line">    config.vm.define opts[<span class="symbol">:name</span>] <span class="keyword">do</span> <span class="params">|config|</span></span><br><span class="line">      config.vm.hostname = opts[<span class="symbol">:name</span>]</span><br><span class="line">      config.vm.provider <span class="string">&quot;vmware_fusion&quot;</span> <span class="keyword">do</span> <span class="params">|v|</span></span><br><span class="line">        v.vmx[<span class="string">&quot;memsize&quot;</span>] = opts[<span class="symbol">:mem</span>]</span><br><span class="line">        v.vmx[<span class="string">&quot;numvcpus&quot;</span>] = opts[<span class="symbol">:cpu</span>]</span><br><span class="line">      <span class="keyword">end</span></span><br><span class="line">      config.vm.provider <span class="string">&quot;virtualbox&quot;</span> <span class="keyword">do</span> <span class="params">|v|</span></span><br><span class="line">        v.customize [<span class="string">&quot;modifyvm&quot;</span>, <span class="symbol">:id</span>, <span class="string">&quot;--memory&quot;</span>, opts[<span class="symbol">:mem</span>]]</span><br><span class="line">        v.customize [<span class="string">&quot;modifyvm&quot;</span>, <span class="symbol">:id</span>, <span class="string">&quot;--cpus&quot;</span>, opts[<span class="symbol">:cpu</span>]]</span><br><span class="line">      <span class="keyword">end</span></span><br><span class="line">      config.vm.network <span class="symbol">:private_network</span>, <span class="symbol">ip:</span> opts[<span class="symbol">:eth1</span>]</span><br><span class="line">    <span class="keyword">end</span></span><br><span class="line">  <span class="keyword">end</span></span><br><span class="line">  config.vm.synced_folder <span class="string">&quot;./labs&quot;</span>, <span class="string">&quot;/home/vagrant/labs&quot;</span></span><br><span class="line">  config.vm.provision <span class="string">&quot;shell&quot;</span>, <span class="symbol">privileged:</span> <span class="literal">true</span>, <span class="symbol">path:</span> <span class="string">&quot;./setup.sh&quot;</span></span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+
+<p>在倒数第三行，进行了文件的映射，将本地的labs文件夹映射到了我构建出来的虚拟机的”/home/vagrant/labs”目录下，同时，在虚拟机中构建nginx容器的时候，也指定了文件映射，这三处地方实现了映射，进而实现了数据的存储</p>
+<figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">config</span>.vm.<span class="keyword">synced_folder </span><span class="string">&quot;./labs&quot;</span>, <span class="string">&quot;/home/vagrant/labs&quot;</span></span><br></pre></td></tr></table></figure>
+<p>同时，用这种方式可以实现在我们开发过程中同步查看一些改动</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    支持一下呗
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat1.png" alt="Jinping 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="Jinping 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>有问题随时找我，加我微信~</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/111.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">WeChat</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Docker/" rel="tag"># Docker</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/01/17/Docker-%E5%9B%9B-Docker%E7%9A%84%E7%BD%91%E7%BB%9C%E7%A9%BA%E9%97%B4/" rel="prev" title="Docker(四)Docker的网络空间">
+      <i class="fa fa-chevron-left"></i> Docker(四)Docker的网络空间
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/02/15/Docker-%E5%85%AD-DockerCompose/" rel="next" title="Docker(六)DockerCompose">
+      Docker(六)DockerCompose <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MjcwNy8yOTE4NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Docker%E6%8C%81%E4%B9%85%E5%8C%96%E6%95%B0%E6%8D%AE%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%96%B9%E6%A1%88"><span class="nav-number">1.</span> <span class="nav-text">Docker持久化数据的两种方案</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Volume%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">Volume的类型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%B0%8F%E6%8F%92%E6%9B%B2"><span class="nav-number">2.1.</span> <span class="nav-text">小插曲</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Data-Volume"><span class="nav-number">3.</span> <span class="nav-text">Data Volume</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81"><span class="nav-number">3.0.1.</span> <span class="nav-text">验证</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bind-Mounting%E5%81%9A%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84"><span class="nav-number">4.</span> <span class="nav-text">bind Mounting做地址映射</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%94%A8bind-Mounting%E8%BF%9B%E8%A1%8C%E6%98%A0%E5%B0%84"><span class="nav-number">4.1.</span> <span class="nav-text">用bind Mounting进行映射</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jinping"
+      src="/images/image.png">
+  <p class="site-author-name" itemprop="name">Jinping</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jinping-dev" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jinping-dev" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:jinping0982@163.com" title="E-Mail → mailto:jinping0982@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/9e1f045b3f8d" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;9e1f045b3f8d" rel="noopener" target="_blank"><i class="fa fa-heartbeat fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">©2018 by Jinping</span>
+</div>
+  <div class="powered-by">Erstellt mit  <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+  <div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

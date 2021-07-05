@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jinping-dev.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta property="og:type" content="article">
+<meta property="og:title" content="redis面试题">
+<meta property="og:url" content="https://jinping-dev.github.io/2020/11/20/redis%E9%9D%A2%E8%AF%95%E9%A2%98/index.html">
+<meta property="og:site_name" content="靳平の博客">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-11-19T17:22:01.000Z">
+<meta property="article:modified_time" content="2021-07-05T07:47:23.110Z">
+<meta property="article:author" content="Jinping">
+<meta property="article:tag" content="redis">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jinping-dev.github.io/2020/11/20/redis%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>redis面试题 | 靳平の博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?8963e74cb35315df308c698224929229";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">靳平の博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">51</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2020/11/20/redis%E9%9D%A2%E8%AF%95%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          redis面试题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-20 01:22:01" itemprop="dateCreated datePublished" datetime="2020-11-20T01:22:01+08:00">2020-11-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:23" itemprop="dateModified" datetime="2021-07-05T15:47:23+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/redis/" itemprop="url" rel="index"><span itemprop="name">redis</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <meta name="referrer" content="no-referrer">
+
+<a id="more"></a>
+<h2 id="一、redis和memcache的比较"><a href="#一、redis和memcache的比较" class="headerlink" title="一、redis和memcache的比较"></a>一、redis和memcache的比较</h2><h3 id="1-memcache"><a href="#1-memcache" class="headerlink" title="1. memcache"></a>1. memcache</h3><p>代码层面类似hash<br>支持简单数据类型<br>不支持数据持久化存储<br>不支持主从<br>不支持分片</p>
+<h3 id="2-redis"><a href="#2-redis" class="headerlink" title="2 redis"></a>2 redis</h3><p>数据类型丰富<br>支持数据磁盘持久化存储<br>支持主从<br>在3.0之后支持数据分片</p>
+<h2 id="二、redis相关"><a href="#二、redis相关" class="headerlink" title="二、redis相关"></a>二、redis相关</h2><h3 id="1-为什么redis能这么快？qps：10W-qps-每秒内查询的次数"><a href="#1-为什么redis能这么快？qps：10W-qps-每秒内查询的次数" class="headerlink" title="1. 为什么redis能这么快？qps：10W+(qps:每秒内查询的次数)"></a>1. 为什么redis能这么快？qps：10W+(qps:每秒内查询的次数)</h3><ul>
+<li>完全基于内存，绝大部分请求是纯粹的内存操作，执行效率高</li>
+<li>数据结构简单，对数据操作也简单</li>
+<li>主线程采用单线程，单线程也能处理高并发请求，想多核也可以启动多实例</li>
+<li>使用多路I/O复用模型，非阻塞IO</li>
+</ul>
+<h3 id="2-redis采用的IO多路复用函数：epoll-kqueue-evport-select"><a href="#2-redis采用的IO多路复用函数：epoll-kqueue-evport-select" class="headerlink" title="2. redis采用的IO多路复用函数：epoll/kqueue/evport/select?"></a>2. redis采用的IO多路复用函数：epoll/kqueue/evport/select?</h3><ul>
+<li>因地制宜</li>
+<li>优先选择时间复杂度为O(1)的IO多路复用函数作为底层实现</li>
+<li>以时间复杂度为O(n)的select作为保底</li>
+<li>基于react设计模式监听IO事件</li>
+<li>redis服务采用react设计模式来实现文件事件处理器的，文件事件处理器使用IO多路复用模块同时监听多个fd，当accept、read、write和close文件事件产生时，文件事件处理器就会回调fd绑定的文件事件处理器，虽然整个文件事件处理器是在单线程上运行的，但是通过IO多路复用模块的引用实现了同时对多个fd读写的监控，提高了网络通信模型的性能，同时也可以保证整个redis服务实现的简单。</li>
+</ul>
+<h3 id="3-基本使用类型"><a href="#3-基本使用类型" class="headerlink" title="3. 基本使用类型"></a>3. 基本使用类型</h3><ul>
+<li>String：最基本的数据类型，二进制安全<br>  底层保存字符串对象的结构：  <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sdshdr</span>&#123;</span></span><br><span class="line">    <span class="comment">//buf中已占用空间的长度</span></span><br><span class="line">    <span class="keyword">int</span> len;</span><br><span class="line">    <span class="comment">//buf中剩余可用空间的长度</span></span><br><span class="line">    <span class="keyword">int</span> <span class="built_in">free</span>;</span><br><span class="line">    <span class="comment">//数据空间，数据存储在这个buf[]中</span></span><br><span class="line">    <span class="keyword">char</span> buf[];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li>Hash：String元素组成的字典，适合用于存储对象</li>
+<li>List：列表，按照String元素插入顺序排序</li>
+<li>Set：String元素组成的无序集合，通过哈希表来实现，不允许重复</li>
+<li>Sorted Set：通过分数来为集合中的成员进行从小到大排序</li>
+<li>用于计数的HyperLogLog</li>
+<li>用于支持存储地理位置信息的Geo</li>
+</ul>
+<h3 id="4-底层数据类型基础"><a href="#4-底层数据类型基础" class="headerlink" title="4. 底层数据类型基础"></a>4. 底层数据类型基础</h3><ul>
+<li>简单动态字符串</li>
+<li>链表</li>
+<li>字典</li>
+<li>跳跃表</li>
+<li>整数集合</li>
+<li>压缩列表</li>
+<li>对象</li>
+</ul>
+<h2 id="三、相关面试题"><a href="#三、相关面试题" class="headerlink" title="三、相关面试题"></a>三、相关面试题</h2><h3 id="1-从海量key中查询出某一固定前缀的key"><a href="#1-从海量key中查询出某一固定前缀的key" class="headerlink" title="1. 从海量key中查询出某一固定前缀的key"></a>1. 从海量key中查询出某一固定前缀的key</h3><ul>
+<li>keys指令对线上业务的影响：<br>  <code>KEYS pattern</code>：查找出所有符合给定模式pattern的key<br>  <code>KEYS</code>指令一次性返回所有匹配的key<br>  键的数量过大会使得服务卡顿</li>
+<li>scan指令：<br>  无阻塞地提取。会返回两个值：游标和结果集<br>  <code>SCAN cursor [MATCH pattern][COUNT count]</code><br>  <code>scan</code>指令时一个基于游标的迭代器，需要基于上一次的游标延续之前的迭代过程<br>  以0作为游标开始一次新的迭代，直到命令返回游标0完成一次遍历。从0到0的过程为一次完整的遍历<br>  不保证每次执行都返回某个给定数量的元素，支持模糊查询<br>  一次返回的数量不可控，只是大概率符合count参数</li>
+</ul>
+<h3 id="2-如何实现分布式锁？"><a href="#2-如何实现分布式锁？" class="headerlink" title="2. 如何实现分布式锁？"></a>2. 如何实现分布式锁？</h3><p>分布式锁是控制分布式系统或不用系统之间共同访问共享资源的一种锁的实现，不同系统之间需要互斥来保证共享数据的线程安全。</p>
+<h4 id="2-1-分布式锁需要解决的问题："><a href="#2-1-分布式锁需要解决的问题：" class="headerlink" title="2.1 分布式锁需要解决的问题："></a>2.1 分布式锁需要解决的问题：</h4><ul>
+<li>互斥性：任一时刻，只能允许有一个客户端获取锁</li>
+<li>安全性：锁只能由持有锁的客户端删除，不能由其他没锁的客户端删除</li>
+<li>死锁：获得锁的客户端由于某些原因宕机了而不能释放锁，其他客户端不能获取锁而产生死锁，此时需要有机制来避免该问题的发生</li>
+<li>容错：当redis某些节点宕机的时候，客户端仍然能够获取锁或释放锁</li>
+</ul>
+<h4 id="2-2-实现"><a href="#2-2-实现" class="headerlink" title="2.2 实现"></a>2.2 实现</h4><p><code>SETNX key value</code>：如果key不存在，则创建并赋值<br>时间复杂度：O(1)<br>返回值：设置成功-1；设置失败-0</p>
+<h4 id="2-3-如何解决SETNX长期有效的问题？"><a href="#2-3-如何解决SETNX长期有效的问题？" class="headerlink" title="2.3 如何解决SETNX长期有效的问题？"></a>2.3 如何解决SETNX长期有效的问题？</h4><ul>
+<li><p><code>EXPIRE key seconds</code>，为key设定给定的过期时间<br>  这种方式的缺点：不能保证原子性</p>
+</li>
+<li><p>在2.6.12之后：<br>  <code>SET key value [EX seconds][PX miliseconds][NX|XX]</code></p>
+<p>  EX seconds：设置键的过期时间为second秒<br>  PX miliseconds：设置键的过期时间为miliseconds毫秒<br>  NX：只有在键不存在时，才对键进行设置操作<br>  XX：只有在键已经存在时，才对键进行设置操作<br>  SET操作成功时，返回Ok，否则返回nil</p>
+</li>
+</ul>
+<h4 id="2-4-大量的key同时过期的注意事项"><a href="#2-4-大量的key同时过期的注意事项" class="headerlink" title="2.4 大量的key同时过期的注意事项"></a>2.4 大量的key同时过期的注意事项</h4><p>集中过期，由于清除大量的key会很耗时，会出现短暂的卡顿现象<br>解决方案：<strong>在设置key的过期时间的时候，给每个时间加上随机值，使得过期时间分散一些</strong></p>
+<h3 id="3-如何使用redis做异步队列？"><a href="#3-如何使用redis做异步队列？" class="headerlink" title="3. 如何使用redis做异步队列？"></a>3. 如何使用redis做异步队列？</h3><ul>
+<li>使用list作为队列，Rpush生产消息，Lpop消费消息<br>  缺点：没有等待队列里有值就直接消费<br>  弥补：可以通过在应用层引入sleep机制去调用lpop重试</li>
+</ul>
+<p><code>BLPOP key timeout</code>:阻塞直到队列有消息或者超时<br>缺点：只能供一个消费者消费</p>
+<p><strong>如何让生产者消费，多个消费者消费？</strong></p>
+<ul>
+<li><p>pub/sub：主题订阅者模式<br>  发送者（pub）发送消息，订阅者（sub）接收消息<br>  订阅者可以订阅任意数量的频道（topic）</p>
+</li>
+<li><p>多个客户端运行：<code>subscribe myTopic</code>命令</p>
+</li>
+<li><p>在一个客户端中：<code>public myTopic &quot;Hello&quot;</code>,那么在其他订阅该topic的消费者能够接收到这个消息<br>  缺点：消息的发布是无状态的，无法保证可达。某个客户端在获取的时候宕机，重启之后是接收不到这个消息的，如果要解决这个问题，需要借助消息队列，即kafka等。</p>
+</li>
+</ul>
+<h3 id="4-redis如何做持久化？"><a href="#4-redis如何做持久化？" class="headerlink" title="4. redis如何做持久化？"></a>4. redis如何做持久化？</h3><h4 id="4-1-RDB（快照）持久化：保存某个时间点的全量数据快照"><a href="#4-1-RDB（快照）持久化：保存某个时间点的全量数据快照" class="headerlink" title="4.1 RDB（快照）持久化：保存某个时间点的全量数据快照"></a>4.1 RDB（快照）持久化：保存某个时间点的全量数据快照</h4><p>在redis.conf配置文件中，默认：</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 900秒之内如果有一条写入指令则执行一次备份</span></span><br><span class="line"><span class="string">save</span> <span class="number">900</span> <span class="number">1</span></span><br><span class="line"><span class="comment"># 300秒之内如果有十条写入指令则执行一次备份</span></span><br><span class="line"><span class="string">save</span> <span class="number">300</span> <span class="number">10</span></span><br><span class="line"><span class="comment"># 60秒之内如果有十万条写入指令则执行一次备份            </span></span><br><span class="line"><span class="string">save</span> <span class="number">60</span> <span class="number">10000</span></span><br><span class="line"><span class="comment"># 设置成yes的时候表示当备份进程出错的时候主进程就停止接收写入操作了，为了保护数据持久化的一致性问题</span></span><br><span class="line"><span class="string">stop-writes-on-basave-error</span> <span class="literal">yes</span></span><br><span class="line"><span class="comment"># rdb持久化的时候，对持久化备份文件进行压缩，建议设置为no，因为redis是数据cpu密集型服务，开启压缩会带来更多的cpu消耗</span></span><br><span class="line"><span class="string">rdbcompression</span> <span class="literal">yes</span></span><br><span class="line"><span class="comment"># 禁用rdb配置</span></span><br><span class="line"><span class="string">save</span> <span class="string">&quot;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>在src目录下，会生成rdb后缀的文件（dump.rdb），即备份文件,是二进制文件</p>
+<p><strong>rdb文件可以通过两个命令来生成：</strong><br>    <code>SAVE</code>：阻塞redis的服务器进程，直到RDB文件被创建完毕（很少被使用）<br>    <code>BGSAVE</code>：fork出一个子进程来创建RDB文件，不会阻塞服务器进程。主进程会继续接收客户端的操作命令</p>
+<p><strong>自动化触发RDB持久化方式</strong><br>    根据redis.conf配置中的save m n定时触发（用的是BGSAVE）<br>    主从复制时，主节点自动触发<br>    执行Debug Reload<br>    执行Shutdown且没有开启AOF持久化</p>
+<p><strong>BGSAVE原理</strong><br>    系统调用fork():创建进程，实现了copy-on-write</p>
+<p><strong>copy-on-write</strong><br>如果有多个调用者同时要求相同资源（如内存或磁盘上的数据存储），他们会共同获取相同的指针指向相同的资源，直到某个调用者试图修改资源的内容时，系统才会真正复制一份专属副本给该调用者，而其他调用者所见到的最初的资源仍然保持不变。</p>
+<p><strong>RDB缺点</strong></p>
+<ul>
+<li>内存数据的全量同步，数据量大会由于IO而严重影响性能</li>
+<li>可能会因为redis挂掉而丢失当前至最近一次快照期间的数据</li>
+</ul>
+<h4 id="4-2-AOF-append-only-file-持久化：保存写状态"><a href="#4-2-AOF-append-only-file-持久化：保存写状态" class="headerlink" title="4.2 AOF(append-only-file)持久化：保存写状态"></a>4.2 AOF(append-only-file)持久化：保存写状态</h4><p>记录下除了查询以外的所有变更数据库状态的指令,以append的形式追加保存到AOF文件中（增量）,默认是关闭的</p>
+<figure class="highlight vala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">appendonly no</span><br><span class="line">appendfilename <span class="string">&quot;appendonly.conf&quot;</span></span><br><span class="line"><span class="meta"># always:一旦缓冲区的内容发生变化，则总是及时地将缓冲区的内容写入到aof当中</span></span><br><span class="line"><span class="meta"># everysec：将缓冲区的内容每隔一秒写入到aof中（推荐且默认，速度比较快，安全性也不错）</span></span><br><span class="line"><span class="meta"># no：写入aof的操作交给操作系统去决定，一般而言操作系统会等待缓冲区被填满才同步</span></span><br><span class="line">appendfsync everysec</span><br></pre></td></tr></table></figure>
+
+<p>导致的问题：随着时间的推移，数据量越来越大，AOF文件也很大，怎么办？</p>
+<p><strong>日志重写解决AOF文件大小不断增大的问题</strong></p>
+<p>原理如下：</p>
+<ul>
+<li>调用fork()，创建一个子进程</li>
+<li>子进程把新的AOF写到一个临时文件中，新的AOF的重写直接将当前内存的数据生成对应的命令，不依赖原来的AOF文件</li>
+<li>主进程持续将新的变动同时写到内存和原来的AOF中</li>
+<li>主进程获取子进程重写AOF的完成信号之后，往新的AOF同步增量变动</li>
+<li>使用新的AOF文件替换掉旧的AOF文件</li>
+</ul>
+<p><strong>BGOVERWRITEAOF指令即可触发AOF的重写，也可以让redis自动触发</strong></p>
+<h4 id="4-3-RDB和AOF的优缺点"><a href="#4-3-RDB和AOF的优缺点" class="headerlink" title="4.3 RDB和AOF的优缺点"></a>4.3 RDB和AOF的优缺点</h4><p>RDB优点：全量数据快照，文件小，恢复快<br>RDB缺点：无法保存最近一次快照之后的数据<br>AOF优点：可读性高，适合保存增量数据，数据不易丢失<br>AOF缺点：文件体积大，恢复时间长</p>
+<h4 id="4-4-Redis4-0之后提出了结合两种的RDB-AOF混合持久化方式，并且作为默认的配置来使用"><a href="#4-4-Redis4-0之后提出了结合两种的RDB-AOF混合持久化方式，并且作为默认的配置来使用" class="headerlink" title="4.4 Redis4.0之后提出了结合两种的RDB-AOF混合持久化方式，并且作为默认的配置来使用"></a>4.4 Redis4.0之后提出了结合两种的RDB-AOF混合持久化方式，并且作为默认的配置来使用</h4><ul>
+<li>子进程在做AOF重写时，会通过管道从父进程读取增量数据并缓存下来，在以RDB格式保存全量数据时，也会从管道读取数据，同时不会造成管道的阻塞，也就是说AOF文件的前半段是RDB格式的全量数据，而后半段是redis命令格式的增量数据</li>
+<li>BGSAVE做镜像全量持久化，AOF做增量持久化</li>
+</ul>
+<h3 id="5-pipeline"><a href="#5-pipeline" class="headerlink" title="5. pipeline"></a>5. pipeline</h3><p>pipeline和linux的管道类似<br>redis基于请求/响应模型，单个请求处理需要一一应答<br>pipeline批量执行指令，节省多次IO往返的时间<br>有顺序依赖的指令建议分批发送</p>
+<h2 id="四、集群相关"><a href="#四、集群相关" class="headerlink" title="四、集群相关"></a>四、集群相关</h2><h3 id="1-redis的同步机制（主从、哨兵）"><a href="#1-redis的同步机制（主从、哨兵）" class="headerlink" title="1. redis的同步机制（主从、哨兵）"></a>1. redis的同步机制（主从、哨兵）</h3><p>主从同步原理</p>
+<ul>
+<li>一个master进行写操作，多个salve进行读操作</li>
+<li>定期的数据备份操作是单独选择一个salve去完成的，这样可以最大程度发挥出redis的性能，为的是让redis支持弱一致性，即最终一致性。我们不需要实时保证master和salve的数据是同步的，但是在过了一段时间之后他们的数据是趋于同步的。</li>
+<li>redis可以使用主从同步、从从同步。</li>
+<li>第一次同步时主节点进行一次BGSAVE并同时将后续的写操作记录到内存中的buffer中去，待完成后将rdb文件全量同步到从节点中，从节点接收到rdb文件之后将rdb文件加载到内存中，加载完成后再通知主节点将期间修改的操作记录（即增量数据）同步到从节点进行重放，这样子就完成了整个同步的过程。</li>
+</ul>
+<p><strong>全同步过程</strong><br>Slave发送sync命令到master<br>master启动一个后台进程，将redis中的数据快照保存到文件中（BGSAVE）<br>master将保存数据快照期间接收到的写命令缓存起来<br>master完成写文件操作后，将该文件发送给Slave<br>使用新的RDB文件替换掉旧的RDB文件<br>master将这期间收集的增量写命令发送给slave端。</p>
+<p><strong>增量同步过程</strong></p>
+<p>Master接收到用户的操作指令，判断是否需要传播到Slave（增删改）<br>将操作记录追加到AOF文件中<br>将操作传播到其他slave中：<br>    - 1.对齐主从库。确保从数据库是该操作所对应的数据库<br>    - 2.往响应缓存写入指令。将命令和参数按照redis的协议格式写入到相应的缓存中<br>将缓存中的数据发送给Slave</p>
+<p><strong>主从模式的弊端</strong></p>
+<p>不具备高可用性，当master宕机之后redis将不能对外提供写入操作</p>
+<h3 id="2-哨兵模式：解决主从同步Master宕机后的主从切换问题"><a href="#2-哨兵模式：解决主从同步Master宕机后的主从切换问题" class="headerlink" title="2. 哨兵模式：解决主从同步Master宕机后的主从切换问题"></a>2. 哨兵模式：解决主从同步Master宕机后的主从切换问题</h3><p>监控：sentinel检查主从服务器是否运行正常<br>提醒：通过API向管理员或者其他应用程序发送故障通知<br>自动故障迁移：主从切换</p>
+<p><strong>流言协议Gossip</strong></p>
+<p>在杂乱无章中寻求一致<br>每个节点都随机地与对方通信，最终所有节点的状态达成一致<br>种子节点定期随机向其他节点发送节点列表以及需要传播的消息<br>不保证信息一定会传递给所有节点，但是最终会趋于一致</p>
+<h3 id="3-如何从海量数据中快速找到所需要的数据？（集群）"><a href="#3-如何从海量数据中快速找到所需要的数据？（集群）" class="headerlink" title="3.如何从海量数据中快速找到所需要的数据？（集群）"></a>3.如何从海量数据中快速找到所需要的数据？（集群）</h3><p>分片：按照某种规则去划分数据，分散存储在多个节点上<br>通过数据分片，来降低单节点服务器的压力<br>redisCluster采用无中心结构，每个节点保存数据和整个redis集群的状态，每个节点和其他所有节点连接，每个节点通过Gossip协议传播信息以及发现新的节点。<br>常规的按照hash无法实现节点的动态增减，采用<code>一致性hash</code>算法来实现</p>
+<h3 id="4-一致性hash算法"><a href="#4-一致性hash算法" class="headerlink" title="4.一致性hash算法"></a>4.一致性hash算法</h3><ul>
+<li>一致性hash：对2^32取模，将hash值空间组织成虚拟的圆环</li>
+<li>物理机的ip经过hash计算得出hash值，所有节点得到的hash值组织成一个虚拟的圆环</li>
+<li>当数据需要被存储的时候，按照key的hash值，按照圆环的顺时针方向保存到离他最近的hash对应的节点上，经过这样的方式就可以实现数据的分片</li>
+</ul>
+<p><strong>好处：</strong><br>假设<code>一个节点C宕机</code>，此时ABD并不会收到影响，原先需要分配到C节点的数据会重新定位到D中去，在一致性hash算法中，如果一个机器不可用，则受影响的仅仅是此服务器到其环空间前一台之间的服务器，即沿着逆时针方向行走遇到第一台服务器中间的数据，做到最小化有损的服务。如果在系统中<code>新增了服务器</code>，则影响的数据是新服务器到其环空间中的前一台服务器之间的数据，其他的数据不会受到影响</p>
+<p><strong>Hash环的数据倾斜问题</strong></p>
+<p>如果节点数量很少的时候，容易在圆环上造成hash分布不均匀的情况，导致一个节点上的数据比其他节点上的数据多出很多的情况。造成数据倾斜，数据倾斜就是大部分的数据分布在同一个节点上。</p>
+<p><strong>引入虚拟节点来解决数据倾斜问题</strong></p>
+<ul>
+<li>对每个服务器节点计算多个hash，每个计算结果位置都放置一个节点为该节点的虚拟节点（具体做法可以在主机名或者ip后增加编号来实现），这样来实现圆环的大致均匀。数据算法不变，只是多了一步虚拟节点到真实节点的映射。</li>
+<li>通常将虚拟节点设置为32甚至更大。</li>
+</ul>
+<h2 id="五、Redis的五种淘汰策略"><a href="#五、Redis的五种淘汰策略" class="headerlink" title="五、Redis的五种淘汰策略"></a>五、Redis的五种淘汰策略</h2><ul>
+<li><code>volatile-lru</code>:从设置了过期时间的数据集中，选择最近最久未使用的数据释放；</li>
+<li><code>allkeys-lru</code>:从数据集中(包括设置过期时间以及未设置过期时间的数据集中)，选择最近最久未使用的数据释放；</li>
+<li><code>volatile-random</code>:从设置了过期时间的数据集中，随机选择一个数据进行释放；</li>
+<li><code>allkeys-random</code>:从数据集中(包括了设置过期时间以及未设置过期时间)随机选择一个数据进行入释放；</li>
+<li><code>volatile-ttl</code>：从设置了过期时间的数据集中，选择马上就要过期的数据进行释放操作；</li>
+<li><code>noeviction</code>：不删除任意数据(但redis还会根据引用计数器进行释放),这时如果内存不够时，会直接返回错误。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    支持一下呗
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat1.png" alt="Jinping 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="Jinping 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>有问题随时找我，加我微信~</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/111.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">WeChat</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/redis/" rel="tag"># redis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/14/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C/" rel="prev" title="计算机网络">
+      <i class="fa fa-chevron-left"></i> 计算机网络
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/22/Spring%E5%88%9D%E6%8E%A2/" rel="next" title="Spring初探">
+      Spring初探 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MjcwNy8yOTE4NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81redis%E5%92%8Cmemcache%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">1.</span> <span class="nav-text">一、redis和memcache的比较</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-memcache"><span class="nav-number">1.1.</span> <span class="nav-text">1. memcache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-redis"><span class="nav-number">1.2.</span> <span class="nav-text">2 redis</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81redis%E7%9B%B8%E5%85%B3"><span class="nav-number">2.</span> <span class="nav-text">二、redis相关</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%BA%E4%BB%80%E4%B9%88redis%E8%83%BD%E8%BF%99%E4%B9%88%E5%BF%AB%EF%BC%9Fqps%EF%BC%9A10W-qps-%E6%AF%8F%E7%A7%92%E5%86%85%E6%9F%A5%E8%AF%A2%E7%9A%84%E6%AC%A1%E6%95%B0"><span class="nav-number">2.1.</span> <span class="nav-text">1. 为什么redis能这么快？qps：10W+(qps:每秒内查询的次数)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-redis%E9%87%87%E7%94%A8%E7%9A%84IO%E5%A4%9A%E8%B7%AF%E5%A4%8D%E7%94%A8%E5%87%BD%E6%95%B0%EF%BC%9Aepoll-kqueue-evport-select"><span class="nav-number">2.2.</span> <span class="nav-text">2. redis采用的IO多路复用函数：epoll&#x2F;kqueue&#x2F;evport&#x2F;select?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.3.</span> <span class="nav-text">3. 基本使用类型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E5%9F%BA%E7%A1%80"><span class="nav-number">2.4.</span> <span class="nav-text">4. 底层数据类型基础</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98"><span class="nav-number">3.</span> <span class="nav-text">三、相关面试题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%BB%8E%E6%B5%B7%E9%87%8Fkey%E4%B8%AD%E6%9F%A5%E8%AF%A2%E5%87%BA%E6%9F%90%E4%B8%80%E5%9B%BA%E5%AE%9A%E5%89%8D%E7%BC%80%E7%9A%84key"><span class="nav-number">3.1.</span> <span class="nav-text">1. 从海量key中查询出某一固定前缀的key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%EF%BC%9F"><span class="nav-number">3.2.</span> <span class="nav-text">2. 如何实现分布式锁？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81%E9%9C%80%E8%A6%81%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9A"><span class="nav-number">3.2.1.</span> <span class="nav-text">2.1 分布式锁需要解决的问题：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.2.2.</span> <span class="nav-text">2.2 实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-3-%E5%A6%82%E4%BD%95%E8%A7%A3%E5%86%B3SETNX%E9%95%BF%E6%9C%9F%E6%9C%89%E6%95%88%E7%9A%84%E9%97%AE%E9%A2%98%EF%BC%9F"><span class="nav-number">3.2.3.</span> <span class="nav-text">2.3 如何解决SETNX长期有效的问题？</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-%E5%A4%A7%E9%87%8F%E7%9A%84key%E5%90%8C%E6%97%B6%E8%BF%87%E6%9C%9F%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">3.2.4.</span> <span class="nav-text">2.4 大量的key同时过期的注意事项</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8redis%E5%81%9A%E5%BC%82%E6%AD%A5%E9%98%9F%E5%88%97%EF%BC%9F"><span class="nav-number">3.3.</span> <span class="nav-text">3. 如何使用redis做异步队列？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-redis%E5%A6%82%E4%BD%95%E5%81%9A%E6%8C%81%E4%B9%85%E5%8C%96%EF%BC%9F"><span class="nav-number">3.4.</span> <span class="nav-text">4. redis如何做持久化？</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-RDB%EF%BC%88%E5%BF%AB%E7%85%A7%EF%BC%89%E6%8C%81%E4%B9%85%E5%8C%96%EF%BC%9A%E4%BF%9D%E5%AD%98%E6%9F%90%E4%B8%AA%E6%97%B6%E9%97%B4%E7%82%B9%E7%9A%84%E5%85%A8%E9%87%8F%E6%95%B0%E6%8D%AE%E5%BF%AB%E7%85%A7"><span class="nav-number">3.4.1.</span> <span class="nav-text">4.1 RDB（快照）持久化：保存某个时间点的全量数据快照</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-AOF-append-only-file-%E6%8C%81%E4%B9%85%E5%8C%96%EF%BC%9A%E4%BF%9D%E5%AD%98%E5%86%99%E7%8A%B6%E6%80%81"><span class="nav-number">3.4.2.</span> <span class="nav-text">4.2 AOF(append-only-file)持久化：保存写状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-RDB%E5%92%8CAOF%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">3.4.3.</span> <span class="nav-text">4.3 RDB和AOF的优缺点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-4-Redis4-0%E4%B9%8B%E5%90%8E%E6%8F%90%E5%87%BA%E4%BA%86%E7%BB%93%E5%90%88%E4%B8%A4%E7%A7%8D%E7%9A%84RDB-AOF%E6%B7%B7%E5%90%88%E6%8C%81%E4%B9%85%E5%8C%96%E6%96%B9%E5%BC%8F%EF%BC%8C%E5%B9%B6%E4%B8%94%E4%BD%9C%E4%B8%BA%E9%BB%98%E8%AE%A4%E7%9A%84%E9%85%8D%E7%BD%AE%E6%9D%A5%E4%BD%BF%E7%94%A8"><span class="nav-number">3.4.4.</span> <span class="nav-text">4.4 Redis4.0之后提出了结合两种的RDB-AOF混合持久化方式，并且作为默认的配置来使用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-pipeline"><span class="nav-number">3.5.</span> <span class="nav-text">5. pipeline</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E9%9B%86%E7%BE%A4%E7%9B%B8%E5%85%B3"><span class="nav-number">4.</span> <span class="nav-text">四、集群相关</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-redis%E7%9A%84%E5%90%8C%E6%AD%A5%E6%9C%BA%E5%88%B6%EF%BC%88%E4%B8%BB%E4%BB%8E%E3%80%81%E5%93%A8%E5%85%B5%EF%BC%89"><span class="nav-number">4.1.</span> <span class="nav-text">1. redis的同步机制（主从、哨兵）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%93%A8%E5%85%B5%E6%A8%A1%E5%BC%8F%EF%BC%9A%E8%A7%A3%E5%86%B3%E4%B8%BB%E4%BB%8E%E5%90%8C%E6%AD%A5Master%E5%AE%95%E6%9C%BA%E5%90%8E%E7%9A%84%E4%B8%BB%E4%BB%8E%E5%88%87%E6%8D%A2%E9%97%AE%E9%A2%98"><span class="nav-number">4.2.</span> <span class="nav-text">2. 哨兵模式：解决主从同步Master宕机后的主从切换问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%A6%82%E4%BD%95%E4%BB%8E%E6%B5%B7%E9%87%8F%E6%95%B0%E6%8D%AE%E4%B8%AD%E5%BF%AB%E9%80%9F%E6%89%BE%E5%88%B0%E6%89%80%E9%9C%80%E8%A6%81%E7%9A%84%E6%95%B0%E6%8D%AE%EF%BC%9F%EF%BC%88%E9%9B%86%E7%BE%A4%EF%BC%89"><span class="nav-number">4.3.</span> <span class="nav-text">3.如何从海量数据中快速找到所需要的数据？（集群）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E4%B8%80%E8%87%B4%E6%80%A7hash%E7%AE%97%E6%B3%95"><span class="nav-number">4.4.</span> <span class="nav-text">4.一致性hash算法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81Redis%E7%9A%84%E4%BA%94%E7%A7%8D%E6%B7%98%E6%B1%B0%E7%AD%96%E7%95%A5"><span class="nav-number">5.</span> <span class="nav-text">五、Redis的五种淘汰策略</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jinping"
+      src="/images/image.png">
+  <p class="site-author-name" itemprop="name">Jinping</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jinping-dev" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jinping-dev" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:jinping0982@163.com" title="E-Mail → mailto:jinping0982@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/9e1f045b3f8d" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;9e1f045b3f8d" rel="noopener" target="_blank"><i class="fa fa-heartbeat fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">©2018 by Jinping</span>
+</div>
+  <div class="powered-by">Erstellt mit  <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+  <div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

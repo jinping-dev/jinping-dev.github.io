@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jinping-dev.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="数据库和文件系统的关系像InnoDB、MyISAM这样的存储引擎都是把数据存储在文件系统中上。当我们想读取数据的时候，这些存储引擎会从文件系统中把数据读出来返回给我们；当我们想写入数据的时候，这些存储引擎会把这些数据又写回操作系统。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysql(二)Mysql的数据目录">
+<meta property="og:url" content="https://jinping-dev.github.io/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/index.html">
+<meta property="og:site_name" content="靳平の博客">
+<meta property="og:description" content="数据库和文件系统的关系像InnoDB、MyISAM这样的存储引擎都是把数据存储在文件系统中上。当我们想读取数据的时候，这些存储引擎会从文件系统中把数据读出来返回给我们；当我们想写入数据的时候，这些存储引擎会把这些数据又写回操作系统。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/1.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/2.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/2.png">
+<meta property="article:published_time" content="2020-12-07T15:33:43.000Z">
+<meta property="article:modified_time" content="2021-07-05T07:47:22.962Z">
+<meta property="article:author" content="Jinping">
+<meta property="article:tag" content="Mysql">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jinping-dev.github.io/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/1.png">
+
+<link rel="canonical" href="https://jinping-dev.github.io/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mysql(二)Mysql的数据目录 | 靳平の博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?8963e74cb35315df308c698224929229";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">靳平の博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">51</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mysql(二)Mysql的数据目录
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-12-07 23:33:43" itemprop="dateCreated datePublished" datetime="2020-12-07T23:33:43+08:00">2020-12-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:22" itemprop="dateModified" datetime="2021-07-05T15:47:22+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Mysql/" itemprop="url" rel="index"><span itemprop="name">Mysql</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <meta name="referrer" content="no-referrer">
+
+<h3 id="数据库和文件系统的关系"><a href="#数据库和文件系统的关系" class="headerlink" title="数据库和文件系统的关系"></a>数据库和文件系统的关系</h3><p>像InnoDB、MyISAM这样的存储引擎都是把数据存储在文件系统中上。当我们想读取数据的时候，这些存储引擎会从文件系统中把数据读出来返回给我们；当我们想写入数据的时候，这些存储引擎会把这些数据又写回操作系统。</p>
+<a id="more"></a>
+
+<h3 id="Mysql数据目录"><a href="#Mysql数据目录" class="headerlink" title="Mysql数据目录"></a>Mysql数据目录</h3><p>Mysql服务器程序在启动时，会到文件系统的某个目录下加载一些数据，之后在运行过程中产生的数据也会存储到这个目录下的某些文件中。这个目录就称为数据目录。</p>
+<h5 id="确定Mysql中的数据目录"><a href="#确定Mysql中的数据目录" class="headerlink" title="确定Mysql中的数据目录"></a>确定Mysql中的数据目录</h5><p>运行如下命令：</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW VARIABLES LIKE <span class="emphasis">&#x27;datadir&#x27;</span>;</span><br><span class="line"><span class="code">+---------------+</span>-----------------------+</span><br><span class="line">| Variable<span class="emphasis">_name | Value                 |</span></span><br><span class="line"><span class="emphasis">+---------------+-----------------------+</span></span><br><span class="line"><span class="emphasis">| datadir       | /usr/local/var/mysql/ |</span></span><br><span class="line"><span class="emphasis">+---------------+-----------------------+</span></span><br><span class="line"><span class="emphasis">1 row in set (0.00 sec)</span></span><br></pre></td></tr></table></figure>
+<p>即可看到数据目录在我们计算机中的位置</p>
+<h5 id="创建数据库的时候都发生了什么"><a href="#创建数据库的时候都发生了什么" class="headerlink" title="创建数据库的时候都发生了什么"></a>创建数据库的时候都发生了什么</h5><p>在我们使用“CREATE DATABASE 数据库名”语句创建一个数据库的时候，会在文件系统中发生：</p>
+<ul>
+<li>在数据目录下创建一个与数据库名同名的子目录（或者说是文件夹）</li>
+<li>在与该数据库名同名的子目录下创建一个名为db.opt的文件。这个文件中包含了该数据库的一些属性，比如该数据库的字符集和比较规则</li>
+</ul>
+<h5 id="数据库的文件表示"><a href="#数据库的文件表示" class="headerlink" title="数据库的文件表示"></a>数据库的文件表示</h5><p>我先来查看我当前拥有的数据库</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; SHOW DATABASES;</span><br><span class="line"><span class="code">+--------------------+</span></span><br><span class="line">| Database           |</span><br><span class="line"><span class="code">+--------------------+</span></span><br><span class="line">| information<span class="emphasis">_schema |</span></span><br><span class="line"><span class="emphasis">| gateway_</span>config     |</span><br><span class="line">| mysql              |</span><br><span class="line">| nacos<span class="emphasis">_config       |</span></span><br><span class="line"><span class="emphasis">| performance_</span>schema |</span><br><span class="line">| sys                |</span><br><span class="line">| tinner             |</span><br><span class="line"><span class="code">+--------------------+</span></span><br><span class="line">7 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+<p>可以看到，当前在我的计算机上有7个数据库，其中gateway_config、nacos_config和tinner是我自定义的，其余4个数据库都是Mysql自带的系统数据库</p>
+<p>再来看看我的目录结构<br><img src="/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/1.png" alt="目录结构"><br>自己看会发现，除了information_schema这个系统数据库外，其他数据库在数据目录下都有对应的子目录</p>
+<h5 id="表在文件系统中的表示"><a href="#表在文件系统中的表示" class="headerlink" title="表在文件系统中的表示"></a>表在文件系统中的表示</h5><p>我们的数据其实都是以记录的形式插入到表中的。每个表的信息可以分为两种：</p>
+<ul>
+<li>表结构的定义</li>
+<li>表中的数据</li>
+</ul>
+<p>MyISAM和InooDB都在数据目录下对应的数据库子目录创建了一个专门用于描述<code>表结构</code>的文件，文件名是<code>表名.frm</code>，以二进制格式存储。</p>
+<p>而在数据存入文件上MyISAM和InooDB产生了分歧：</p>
+<h6 id="lt-1-gt-InnoDB："><a href="#lt-1-gt-InnoDB：" class="headerlink" title="&lt;1&gt;InnoDB："></a>&lt;1&gt;InnoDB：</h6><ul>
+<li>InnoDB使用页为基本单位来管理存储空间的，默认的页大小为16KB</li>
+<li>对于InnoDB存储引擎来说，每个索引都对应着一棵B+树，该树的每个节点都是一个数据页。数据页之间没有必要是物理连续的，因为数据页之间有双向链表来维护这些页的顺序</li>
+<li>InnoDB的聚簇索引的叶子节点存储了完整的用户记录，也就是“索引即数据，数据即索引”</li>
+</ul>
+<p><strong>1.系统表空间</strong></p>
+<p>在默认情况下，InnoDB会在数据目录下创建爱你一个名为ibdata1、大小为12MB的文件，这个文件就是对应的系统表空间在文件系统上的表示。这个文件是自扩展文件，当不够用的时候它会自己增加文件大小</p>
+<p>在一个Mysql服务器中，系统表空间只有一份。从Mysql5.5.7到Mysql5.6.5之间的各个版本中，表中的数据都会被默认存储到这个系统表空间。</p>
+<p><strong>2.独立表空间</strong></p>
+<p>在Mysql5.6.6以及之后的版本中，InnoDB会为每个表建立一个独立表空间。在存储表数据时，会在该表所属数据库对应的子目录下创建一个表示该独立表空间的文件，该文件为<code>表名.ibd</code>。</p>
+<p>假如我在tinner库下创建了s1表，那么在对应的tinner目录下回生成两个文件：</p>
+<ul>
+<li>s1.frm</li>
+<li>s1.ibd<br><img src="/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/2.png" alt="innodb"><br>其中ibd文件用来存储表中的数据</li>
+</ul>
+<p>当我们想刻意将表数据都存储到系统表空间时，在配置文件中修改：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="selector-attr">[server]</span></span><br><span class="line"><span class="selector-tag">innodb_file_per_table</span><span class="selector-pseudo">:0</span></span><br></pre></td></tr></table></figure>
+<p>当innodb_file_per_table为0时，代表使用系统表空间，为1时使用独立表空间。不过只对新增的表有效</p>
+<p>将已经存储到系统表空间中的表转移到独立表空间：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> 表名 <span class="keyword">TABLESPACE</span> innodb_file_per_table;</span><br></pre></td></tr></table></figure>
+
+<p>将已经存储到独立表空间的表转移到系统表空间:</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> 表名 <span class="keyword">TABLESPACE</span> innodb_system;</span><br></pre></td></tr></table></figure>
+
+<p><strong>3其他类型的表空间</strong><br>通用表空间、undo表空间、临时表空间等</p>
+<h6 id="lt-2-gt-MyISAM："><a href="#lt-2-gt-MyISAM：" class="headerlink" title="&lt;2&gt;MyISAM："></a>&lt;2&gt;MyISAM：</h6><p>MyISAM中的索引相当于全部都是二级索引，该存储引擎的数据和索引是分开存放的。没有表空间一说。在创建爱你表之后会创建如下三个文件：</p>
+<ul>
+<li>表名.frm</li>
+<li>表名.MYD</li>
+<li>表名.MYI</li>
+</ul>
+<p><img src="/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/2.png" alt="myisam"></p>
+<p>其中，表名.MYD表示表的数据文件，表名MYI表示表的索引文件。</p>
+<h5 id="其他文件"><a href="#其他文件" class="headerlink" title="其他文件"></a>其他文件</h5><p>除了上面说的这些童虎自己存储的数据以外，数据目录下还包含了一些确保程序更好运行的额外文件，主要包括：</p>
+<ul>
+<li>服务器进程文件：每运行一个mysql服务器程序，都意味着启动一个进程。mysql服务器会把自己的进程ID写到这个文件中</li>
+<li>服务器日志文件</li>
+<li>ssl和rsa证书与秘钥文件：主要是为了客户端和服务器安全通信而创建的一些文件</li>
+</ul>
+<h3 id="文件系统对数据库的影响"><a href="#文件系统对数据库的影响" class="headerlink" title="文件系统对数据库的影响"></a>文件系统对数据库的影响</h3><ul>
+<li>数据库名称和表名不得超过文件系统所允许的最大长度</li>
+<li>特殊字符的问题：比如创建‘test?’表，则生成了‘test@003f.frm’文件</li>
+<li>文件长度受文件系统最大长度限制</li>
+</ul>
+<h3 id="Mysql系统数据库简介"><a href="#Mysql系统数据库简介" class="headerlink" title="Mysql系统数据库简介"></a>Mysql系统数据库简介</h3><p>在前文看到除了我自定义的3个数据库，还有4个数据库，属于系统自带的数据库</p>
+<ul>
+<li>mysql：存储了Mysql的用户账户和权限信息、一些存储过程和事件的定义信息、一些运行过程中产生的日志信息、一些帮助信息以及时区信息等</li>
+<li>information_schema：存放元数据信息，保存着服务器维护的所有其他数据库的信息（表、视图、触发器、列、索引等）</li>
+<li>performance_schema：存放运行过程中的状态信息，算是对Mysql服务器的一个性能监控</li>
+<li>sys：通过视图的形式将information_schema和performance_schema结合起来</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    支持一下呗
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat1.png" alt="Jinping 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="Jinping 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>有问题随时找我，加我微信~</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/111.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">WeChat</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Mysql/" rel="tag"># Mysql</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/" rel="prev" title="Docker(三)Image概述">
+      <i class="fa fa-chevron-left"></i> Docker(三)Image概述
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/12/18/mongo%E6%9C%8D%E5%8A%A1/" rel="next" title="mongo服务">
+      mongo服务 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MjcwNy8yOTE4NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E5%92%8C%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number">1.</span> <span class="nav-text">数据库和文件系统的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95"><span class="nav-number">2.</span> <span class="nav-text">Mysql数据目录</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E7%A1%AE%E5%AE%9AMysql%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95"><span class="nav-number">2.0.1.</span> <span class="nav-text">确定Mysql中的数据目录</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E6%97%B6%E5%80%99%E9%83%BD%E5%8F%91%E7%94%9F%E4%BA%86%E4%BB%80%E4%B9%88"><span class="nav-number">2.0.2.</span> <span class="nav-text">创建数据库的时候都发生了什么</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E6%96%87%E4%BB%B6%E8%A1%A8%E7%A4%BA"><span class="nav-number">2.0.3.</span> <span class="nav-text">数据库的文件表示</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E8%A1%A8%E5%9C%A8%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B8%AD%E7%9A%84%E8%A1%A8%E7%A4%BA"><span class="nav-number">2.0.4.</span> <span class="nav-text">表在文件系统中的表示</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#lt-1-gt-InnoDB%EF%BC%9A"><span class="nav-number">2.0.4.1.</span> <span class="nav-text">&lt;1&gt;InnoDB：</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#lt-2-gt-MyISAM%EF%BC%9A"><span class="nav-number">2.0.4.2.</span> <span class="nav-text">&lt;2&gt;MyISAM：</span></a></li></ol></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%96%87%E4%BB%B6"><span class="nav-number">2.0.5.</span> <span class="nav-text">其他文件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E5%AF%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E5%BD%B1%E5%93%8D"><span class="nav-number">3.</span> <span class="nav-text">文件系统对数据库的影响</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Mysql%E7%B3%BB%E7%BB%9F%E6%95%B0%E6%8D%AE%E5%BA%93%E7%AE%80%E4%BB%8B"><span class="nav-number">4.</span> <span class="nav-text">Mysql系统数据库简介</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jinping"
+      src="/images/image.png">
+  <p class="site-author-name" itemprop="name">Jinping</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jinping-dev" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jinping-dev" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:jinping0982@163.com" title="E-Mail → mailto:jinping0982@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/9e1f045b3f8d" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;9e1f045b3f8d" rel="noopener" target="_blank"><i class="fa fa-heartbeat fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">©2018 by Jinping</span>
+</div>
+  <div class="powered-by">Erstellt mit  <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+  <div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

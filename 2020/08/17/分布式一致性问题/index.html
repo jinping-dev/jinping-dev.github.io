@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jinping-dev.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="分布式事务一致性框架与分布式系统一致性算法分布式事务一致性框架： 核心就是解决我们在实际系统中产生跨事务导致分布式事务的问题，核心靠的是最终一致性。比如：rocketMq事务消息、rabbitmq补单、lcn、seata等。分布式系统一致性算法： 解决我们系统之间集群之后每隔节点保持数据的一致性。比如：raft、zab、paxos等分布式系统一致性算法应用于系统软件实现集群保持每隔节点数据的同">
+<meta property="og:type" content="article">
+<meta property="og:title" content="分布式一致性问题">
+<meta property="og:url" content="https://jinping-dev.github.io/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/index.html">
+<meta property="og:site_name" content="靳平の博客">
+<meta property="og:description" content="分布式事务一致性框架与分布式系统一致性算法分布式事务一致性框架： 核心就是解决我们在实际系统中产生跨事务导致分布式事务的问题，核心靠的是最终一致性。比如：rocketMq事务消息、rabbitmq补单、lcn、seata等。分布式系统一致性算法： 解决我们系统之间集群之后每隔节点保持数据的一致性。比如：raft、zab、paxos等分布式系统一致性算法应用于系统软件实现集群保持每隔节点数据的同">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/4.jpg">
+<meta property="article:published_time" content="2020-08-17T09:53:50.000Z">
+<meta property="article:modified_time" content="2021-07-05T07:47:23.115Z">
+<meta property="article:author" content="Jinping">
+<meta property="article:tag" content="Java高级">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jinping-dev.github.io/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/4.jpg">
+
+<link rel="canonical" href="https://jinping-dev.github.io/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>分布式一致性问题 | 靳平の博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?8963e74cb35315df308c698224929229";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">靳平の博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">51</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          分布式一致性问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-17 17:53:50" itemprop="dateCreated datePublished" datetime="2020-08-17T17:53:50+08:00">2020-08-17</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:23" itemprop="dateModified" datetime="2021-07-05T15:47:23+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E9%AB%98%E7%BA%A7/" itemprop="url" rel="index"><span itemprop="name">Java高级</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <meta name="referrer" content="no-referrer">
+
+<h3 id="分布式事务一致性框架与分布式系统一致性算法"><a href="#分布式事务一致性框架与分布式系统一致性算法" class="headerlink" title="分布式事务一致性框架与分布式系统一致性算法"></a>分布式事务一致性框架与分布式系统一致性算法</h3><p><strong>分布式事务一致性框架：</strong> 核心就是解决我们在实际系统中产生跨事务导致分布式事务的问题，核心靠的是最终一致性。比如：rocketMq事务消息、rabbitmq补单、lcn、seata等。<br><strong>分布式系统一致性算法：</strong> 解决我们系统之间集群之后每隔节点保持数据的一致性。比如：raft、zab、paxos等<br>分布式系统一致性算法应用于系统软件实现集群保持每隔节点数据的同步性。保持我们的集群中每个节点的数据的一致性问题。</p>
+<a id="more"></a>
+
+<h3 id="相关算法"><a href="#相关算法" class="headerlink" title="相关算法"></a>相关算法</h3><p>在集群环境下，如何去进行领导角色的选举？由以下两个选举算法：</p>
+<h4 id="1、rap协议"><a href="#1、rap协议" class="headerlink" title="1、rap协议"></a>1、rap协议</h4><p>  对每个结点配置一个myid或者serverid，数值越大表示能力越强，或者随机时间<br>  整个集群中为了保持数据的一致性的问题，必须满足大多数情况下&gt; n/2+1,可运行的节点环境才可以使用<br>  ZAP的协议实现原理是通过比较myid，myid谁最大谁就最可能是领导角色，只要满足过半的机制就可以成为领导角色，后来启动的节点不会参与选举的。</p>
+<p><strong>ZAP如何保持数据的一致性问题：</strong><br>  所有写的请求统一交给我们的领导角色实现，领导角色写完数据之后，领导角色再将数据同步给每个节点。数据之间同步采用<strong>2pc两阶段提交协议</strong>。</p>
+<p><strong>选举过程：</strong><br>  先去比较zxid，zxid谁最大谁就为领导角色<br>  如果zxid相等的情况下，myid谁最大谁就为领导角色。</p>
+<p><strong>关于zxid和2pc两阶段提交协议</strong><br>  zxid是每个节点都有的一个标记，所有的写请求都是交给主节点去进行操作的，当主节点操作完之后，会将zxid+1，然后同步给其他节点，其他节点确认自己本身能够将自己的zxid实现自增之后将确认信号给到主节点，当主节点全部收到确认信号之后将会通知所有节点进行zxid自增的操作。<br>  <img src="/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98/4.jpg" alt="zxid和两节点提交"></p>
+<h4 id="2、Raft协议"><a href="#2、Raft协议" class="headerlink" title="2、Raft协议"></a>2、Raft协议</h4><p><strong>在Raft协议算法中分为三个角色|名词：</strong></p>
+<ul>
+<li>状态：分为三种：跟随者、竞选者（候选人）、领导角色</li>
+<li>大多数：&gt;n/2+1</li>
+<li>任期：每次选举一个新的领导角色，任期都会实现增加</li>
+<li>竞选者谁的票数最多，谁就是领导角色</li>
+</ul>
+<p><strong>选举的过程是怎么样的？</strong></p>
+<ul>
+<li>默认的情况下每个节点都是位跟随者</li>
+<li>每个节点会随机地生成一个选举地超时时间，例如大概是100-300ms，在这个超时时间范围内必须要等待</li>
+<li>超时时间过后，当前的节点状态可能由跟随者变为竞选者状态，会给其他的节点发出选举投票的通知，只要该竞选者有超过半数以上的票数即可选为领导角色<br>核心的设计原理其实就是靠的谁的超时时间最短谁就有非常大的概率成为领导角色。</li>
+</ul>
+<p><strong>核心设计的原理：</strong>谁超时时间最短谁就有大概率地成为领导角色。</p>
+<p><strong>随机超时时间有可能一样的情况下：</strong><br>  1、如果所有地节点的超时随机数都是一样的情况下，当前投票全部作废，重新进入随机生成超时时间的状态<br>  2、如果由多个节点生成的随机数都是一样的情况下，比较谁的票数最多，谁就是领导。如果票数完全一样的情况，直接作废，重新进入随机生成超时时间的状态。</p>
+<p>建议:集群节点设为<strong>奇数</strong></p>
+<p><strong>故障的重新选举：</strong><br>  如果我们的跟随者节点不能够及时地收到领导角色消息，那么这个时候跟随者就会将当前自己的状态由跟随者变为竞选者的角色，会给其他的节点发出选举投票的通知，只要该竞选者有超过半数以上的票数即可选为领导角色。</p>
+<p><em>疑问：是否可能会产生两个同时的竞选者，同时实现拉票呢？</em><br>    当我们的节点为偶数的情况下，可能会存在该问题，如果两个竞选者获取的票数相等的情况下，开始重置竞选的超时时间，一直到谁的票数最多谁就为领导。</p>
+<p><strong>数据是如何保持一致性的？</strong><br>  类似zap两阶段提交协议。</p>
+<p><strong>如何实现日志的复制？</strong></p>
+<ul>
+<li>所有的写的请求都是统一地交给我们的领导角色完成的，写入该对应的日志，标记该日志为被提交状态。</li>
+<li>为了提交该日志，领导角色就会将该日志以心跳的形式发送给其他的跟随者，只要满足过半的跟随者可以写入该数据，则会通知其他节点同步该数据，这个称作为日志复制。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    支持一下呗
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat1.png" alt="Jinping 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="Jinping 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>有问题随时找我，加我微信~</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/111.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">WeChat</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java%E9%AB%98%E7%BA%A7/" rel="tag"># Java高级</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/08/17/Nacos%E5%92%8C%E5%85%B6%E4%BB%96%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E7%9A%84%E6%AF%94%E8%BE%83/" rel="prev" title="Nacos和其他注册中心的比较">
+      <i class="fa fa-chevron-left"></i> Nacos和其他注册中心的比较
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/08/18/Gateway/" rel="next" title="Gateway">
+      Gateway <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MjcwNy8yOTE4NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1%E4%B8%80%E8%87%B4%E6%80%A7%E6%A1%86%E6%9E%B6%E4%B8%8E%E5%88%86%E5%B8%83%E5%BC%8F%E7%B3%BB%E7%BB%9F%E4%B8%80%E8%87%B4%E6%80%A7%E7%AE%97%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">分布式事务一致性框架与分布式系统一致性算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E7%AE%97%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">相关算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1%E3%80%81rap%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.1.</span> <span class="nav-text">1、rap协议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2%E3%80%81Raft%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.2.</span> <span class="nav-text">2、Raft协议</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jinping"
+      src="/images/image.png">
+  <p class="site-author-name" itemprop="name">Jinping</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jinping-dev" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jinping-dev" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:jinping0982@163.com" title="E-Mail → mailto:jinping0982@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/9e1f045b3f8d" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;9e1f045b3f8d" rel="noopener" target="_blank"><i class="fa fa-heartbeat fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">©2018 by Jinping</span>
+</div>
+  <div class="powered-by">Erstellt mit  <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+  <div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jinping-dev.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="基本操作就不说了，这里详细介绍其他中高级操作 ##### 1、查看日志 1git log">
+<meta property="og:type" content="article">
+<meta property="og:title" content="git操作">
+<meta property="og:url" content="https://jinping-dev.github.io/2020/07/13/git%E6%93%8D%E4%BD%9C/index.html">
+<meta property="og:site_name" content="靳平の博客">
+<meta property="og:description" content="基本操作就不说了，这里详细介绍其他中高级操作 ##### 1、查看日志 1git log">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-ef3f18e06870f830.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-4f6a48f749025f40.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-a972ff6bedf30c71.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-8e9e83fcd28a6c6e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-3b3f6b8f63f04ea9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-b8880068ad06e4c5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-41d742ccc7ace756.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-30ceb22e3d0b5e90.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-81c651ad31eed27d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/6081878-f7c90a58674a5584.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/895">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-f7ea47cfb59ac349.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-57c8edc0e40ec346.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-5e47e69158aed78a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-45ac44d2f7a193ff.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-57f1b8f25ab5d35a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="article:published_time" content="2020-07-13T09:31:28.000Z">
+<meta property="article:modified_time" content="2021-07-05T07:47:23.079Z">
+<meta property="article:author" content="Jinping">
+<meta property="article:tag" content="Java高级">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/15200008-ef3f18e06870f830.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+<link rel="canonical" href="https://jinping-dev.github.io/2020/07/13/git%E6%93%8D%E4%BD%9C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>git操作 | 靳平の博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?8963e74cb35315df308c698224929229";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">靳平の博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">51</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2020/07/13/git%E6%93%8D%E4%BD%9C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          git操作
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-07-13 17:31:28" itemprop="dateCreated datePublished" datetime="2020-07-13T17:31:28+08:00">2020-07-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:23" itemprop="dateModified" datetime="2021-07-05T15:47:23+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E9%AB%98%E7%BA%A7/" itemprop="url" rel="index"><span itemprop="name">Java高级</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <meta name="referrer" content="no-referrer">
+基本操作就不说了，这里详细介绍其他中高级操作
+##### 1、查看日志
+<figure class="highlight 1c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">log</span></span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+这个命令对于提交少的项目比较友好，但是对于提交很多的项目，会输出一大长串，很不方便，于是有一个比较简便的命令：
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">log</span> <span class="comment">--pretty=oneline</span></span><br></pre></td></tr></table></figure>
+输出：
+![git log](https://upload-images.jianshu.io/upload_images/15200008-45ddb710fbaa4feb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+<h5 id="2、撤销修改"><a href="#2、撤销修改" class="headerlink" title="2、撤销修改"></a>2、撤销修改</h5><p><strong>背景</strong><br>在一个文件中添加了一点代码，现在我<code>git add .</code>了但是没提交，现在我想撤销我修改的东西</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-ef3f18e06870f830.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="想要撤销修改"><br><strong>解决方案</strong><br>两个命令：</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git reset HEAD  src<span class="regexp">/main/</span>java<span class="regexp">/com/</span>tinner<span class="regexp">/demo03/</span>constant/RedisContant.java</span><br><span class="line">git checkout --  src<span class="regexp">/main/</span>java<span class="regexp">/com/</span>tinner<span class="regexp">/demo03/</span>constant/RedisContant.java</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>效果</strong><br><img src="https://upload-images.jianshu.io/upload_images/15200008-4f6a48f749025f40.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="效果"></p>
+<h5 id="3、创建分支"><a href="#3、创建分支" class="headerlink" title="3、创建分支"></a>3、创建分支</h5><p>两个命令：</p>
+<figure class="highlight llvm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git checkout -b dev</span><br><span class="line">git <span class="keyword">switch</span> -<span class="keyword">c</span> dev</span><br></pre></td></tr></table></figure>
+<h5 id="4、删除分支"><a href="#4、删除分支" class="headerlink" title="4、删除分支"></a>4、删除分支</h5><figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git branch -d &lt;<span class="built_in">name</span>&gt;</span><br></pre></td></tr></table></figure>
+<p>如果要丢弃一个没有被合并过的分支，可以通过<code>git branch -D &lt;name&gt;</code>强行删除。</p>
+<h5 id="5、合并代码"><a href="#5、合并代码" class="headerlink" title="5、合并代码"></a>5、合并代码</h5><figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">git</span> merge --<span class="literal">no</span>-ff -m <span class="string">&quot;注释。。。。&quot;</span> &lt;分支名&gt;</span><br></pre></td></tr></table></figure>
+<h5 id="6、stash"><a href="#6、stash" class="headerlink" title="6、stash"></a>6、stash</h5><p><strong>背景</strong><br>在一个新的需求开发过程中，我在dev分支开发了一些东西，但是并没有提交我也不想提交，这个时候来了一个bug，我必须将bug改完才能进行dev的开发，那么这个时候就需要用到<code>git stash</code>命令<br><strong>步骤</strong></p>
+<ul>
+<li>首先，我看看git仓库中的状态<br><img src="https://upload-images.jianshu.io/upload_images/15200008-a972ff6bedf30c71.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git状态"><br>可以看到，在dev分支，我创建了一个文件，修改了一个文件。</li>
+<li>然后，使用<code>git stash</code>命令，之后再来查看状态：<br><img src="https://upload-images.jianshu.io/upload_images/15200008-8e9e83fcd28a6c6e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="储藏代码"><br>此时工作区是干净的。然后我切换到master分支，创建一个issue分支，解决bug，合并到master，发版，之后再切换到dev分支，可以看到我的工作区还是干净的，那么之前的代码跑哪去了？</li>
+<li>使用<code>git stash list</code>可以查看储藏的代码列表<br><img src="https://upload-images.jianshu.io/upload_images/15200008-3b3f6b8f63f04ea9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git stash list"></li>
+<li>现在我们需要恢复之前的代码，有两个命令可以参考：<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">git stash <span class="built_in">apply</span></span><br><span class="line">git stash <span class="built_in">pop</span></span><br></pre></td></tr></table></figure>
+<code>git stash apply</code>命令恢复后，stash内容并不删除，你需要用<code>git stash drop</code>来删除；<br><img src="https://upload-images.jianshu.io/upload_images/15200008-b8880068ad06e4c5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git stash apply"></li>
+</ul>
+<p>另一种方式是用<code>git stash pop</code>，恢复的同时把stash内容也删了</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-41d742ccc7ace756.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git stash pop"></p>
+<ul>
+<li>你可以多次stash，恢复的时候，先用<code>git stash list</code>查看，然后恢复指定的stash，用命令:<figure class="highlight angelscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git stash apply <span class="symbol">stash@</span>&#123;<span class="number">0</span>&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>扩展</strong><br>我们知道，master的bug修复之后，在现在的dev代码相关的bug并没有修复，所以，这个bug其实在当前dev分支上也存在。<br><em>如何快速修复？</em><br>同样的bug，要在dev上修复，我们只需要把<code>修复issuebug</code>这个提交所做的修改“复制”到dev分支。注意：我们只想复制<code>修复issuebug</code>这个提交所做的修改，并不是把整个master分支<code>merge</code>过来。</p>
+<p>为了方便操作，Git专门提供了一个<code>cherry-pick</code>命令，让我们能复制一个特定的提交到当前分支：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git cherry-pick <span class="tag">&lt;<span class="name">版本号</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-30ceb22e3d0b5e90.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="修复bug"><br><img src="https://upload-images.jianshu.io/upload_images/15200008-81c651ad31eed27d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>用<code>git cherry-pick</code>，我们就不需要在dev分支上手动再把修bug的过程重复一遍。</p>
+<h3 id="几个命令的区别"><a href="#几个命令的区别" class="headerlink" title="几个命令的区别"></a>几个命令的区别</h3><h5 id="merge和rebase的区别"><a href="#merge和rebase的区别" class="headerlink" title="merge和rebase的区别"></a>merge和rebase的区别</h5><p>merge和rebase都是用来合并分支的。</p>
+<ul>
+<li>采用merge和rebase后，git log的区别，<strong>merge命令不会保留merge的分支的commit</strong>：</li>
+</ul>
+<p><img src="//upload-images.jianshu.io/upload_images/6081878-f7c90a58674a5584.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/895" alt="merge和rebase"></p>
+<ul>
+<li>处理冲突的方式：<br><code>（一股脑）</code>使用merge命令合并分支，解决完冲突，执行git add .和git commit -m ‘fix conflict’。这个时候会产生一个commit。<br><code>（交互式）</code>使用rebase命令合并分支，解决完冲突，执行git add .和git rebase –continue，不会产生额外的commit。这样的好处是”干净”，分支上不会有无意义的解决分支的commit；坏处：如果合并的分支中存在多个commit，需要重复处理多次冲突。<h5 id="git-pull和git-pull-–rebase"><a href="#git-pull和git-pull-–rebase" class="headerlink" title="git pull和git pull –rebase"></a>git pull和git pull –rebase</h5><code>git pull</code>做了两个操作分别是<code>获取</code>和<code>合并</code>。所以加了<code>rebase</code>就是以<code>rebase</code>的方式进行合并分支，默认为<code>merge</code>。<h5 id="git-merge-和-git-merge-–no-ff的区别"><a href="#git-merge-和-git-merge-–no-ff的区别" class="headerlink" title="git merge 和 git merge –no-ff的区别"></a>git merge 和 git merge –no-ff的区别</h5><code>git merge –no-ff</code> 可以保存你之前的分支历史。能够更好的查看 merge历史，以及branch 状态。<br><code>git merge</code> 则不会显示 feature，只保留单条分支记录。<br><img src="https://upload-images.jianshu.io/upload_images/15200008-f7ea47cfb59ac349.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git merge 和 git merge --no-ff的区别"></li>
+</ul>
+<h3 id="tag相关"><a href="#tag相关" class="headerlink" title="tag相关"></a>tag相关</h3><p>在当前分支的最新commit上打tag</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="keyword">tag</span> <span class="title">v1</span>.<span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>在f52c633版本的提交上打tag</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">git</span> tag v<span class="number">0</span>.<span class="number">9</span> f<span class="number">52</span>c<span class="number">633</span></span><br></pre></td></tr></table></figure>
+<p>查看所有的tag</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="keyword">tag</span></span><br></pre></td></tr></table></figure>
+<p><em>注意，标签不是按时间顺序列出，而是按字母排序的</em></p>
+<p>还可以创建带有说明的标签，用-a指定标签名，-m指定说明文字：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">git</span> tag -a v<span class="number">0</span>.<span class="number">1</span> -m <span class="string">&quot;文字说明&quot;</span> <span class="number">1094</span>adb</span><br></pre></td></tr></table></figure>
+<p>用命令<code>git show &lt;tagname&gt;</code>可以看到说明文字<br>提交v1.0标签</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">git</span> push origin v<span class="number">1</span>.<span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>提交所有的标签</p>
+<figure class="highlight maxima"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">push</span> <span class="built_in">origin</span> --tags</span><br></pre></td></tr></table></figure>
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-57c8edc0e40ec346.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="标签"><br><img src="https://upload-images.jianshu.io/upload_images/15200008-5e47e69158aed78a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="tag"><br>从本地删除tag：</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="keyword">tag</span> <span class="title">-d</span> v0.<span class="number">9</span></span><br></pre></td></tr></table></figure>
+<p>删除远程tag：</p>
+<figure class="highlight elixir"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git push origin <span class="symbol">:refs/tags/v0</span>.<span class="number">9</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-45ac44d2f7a193ff.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="tag删除"></p>
+<h3 id="Git-HEAD-与HEAD-的关系"><a href="#Git-HEAD-与HEAD-的关系" class="headerlink" title="Git HEAD^与HEAD~的关系"></a>Git HEAD^与HEAD~的关系</h3><p>一张图：<br><img src="https://upload-images.jianshu.io/upload_images/15200008-57f1b8f25ab5d35a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Git HEAD^与HEAD~的关系"></p>
+<h3 id="Git-reset后面跟的参数"><a href="#Git-reset后面跟的参数" class="headerlink" title="Git reset后面跟的参数"></a>Git reset后面跟的参数</h3><p>比如我在我的本地目录下面新建了一个文件c.txt，add到了我的暂存区（缓冲区），同时也commit提交到了本地仓库<br>默认：<code>git reset</code> = <code>git reset --mixed</code>，这个命令会跳转到指定版本、<strong>缓存区的文件还原、但是工作区（本地目录）下的文件不会还原</strong><br><code>git reset --hard</code>这个命令会跳转到指定版本、<strong>缓存区的文件还原、工作区（本地目录）下的文件也会被还原</strong><br><code>git reset --soft</code>这个命令会跳转到指定版本、<strong>缓存区的文件不会被还原、而且工作区（本地目录）下的文件也不会还原</strong></p>
+<h3 id="git-revert"><a href="#git-revert" class="headerlink" title="git revert"></a>git revert</h3><p><code>git revert</code>会产生一个commit，撤销某次操作，此次操作之前和之后的commit和history都会被保留，并且会把这次撤销作为一次最新的提交。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    支持一下呗
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat1.png" alt="Jinping 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="Jinping 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>有问题随时找我，加我微信~</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/111.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">WeChat</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java%E9%AB%98%E7%BA%A7/" rel="tag"># Java高级</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/01/gitFlow%E5%B7%A5%E4%BD%9C%E6%B5%81/" rel="prev" title="gitFlow工作流.md">
+      <i class="fa fa-chevron-left"></i> gitFlow工作流.md
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/13/Maven%E8%A7%A3%E5%86%B3jar%E5%8C%85%E5%86%B2%E7%AA%81/" rel="next" title="Maven解决jar包冲突">
+      Maven解决jar包冲突 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MjcwNy8yOTE4NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#2%E3%80%81%E6%92%A4%E9%94%80%E4%BF%AE%E6%94%B9"><span class="nav-number">1.</span> <span class="nav-text">2、撤销修改</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3%E3%80%81%E5%88%9B%E5%BB%BA%E5%88%86%E6%94%AF"><span class="nav-number">2.</span> <span class="nav-text">3、创建分支</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4%E3%80%81%E5%88%A0%E9%99%A4%E5%88%86%E6%94%AF"><span class="nav-number">3.</span> <span class="nav-text">4、删除分支</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5%E3%80%81%E5%90%88%E5%B9%B6%E4%BB%A3%E7%A0%81"><span class="nav-number">4.</span> <span class="nav-text">5、合并代码</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6%E3%80%81stash"><span class="nav-number">5.</span> <span class="nav-text">6、stash</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%A0%E4%B8%AA%E5%91%BD%E4%BB%A4%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number"></span> <span class="nav-text">几个命令的区别</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#merge%E5%92%8Crebase%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.</span> <span class="nav-text">merge和rebase的区别</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#git-pull%E5%92%8Cgit-pull-%E2%80%93rebase"><span class="nav-number">2.</span> <span class="nav-text">git pull和git pull –rebase</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#git-merge-%E5%92%8C-git-merge-%E2%80%93no-ff%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">3.</span> <span class="nav-text">git merge 和 git merge –no-ff的区别</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tag%E7%9B%B8%E5%85%B3"><span class="nav-number"></span> <span class="nav-text">tag相关</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Git-HEAD-%E4%B8%8EHEAD-%E7%9A%84%E5%85%B3%E7%B3%BB"><span class="nav-number"></span> <span class="nav-text">Git HEAD^与HEAD~的关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Git-reset%E5%90%8E%E9%9D%A2%E8%B7%9F%E7%9A%84%E5%8F%82%E6%95%B0"><span class="nav-number"></span> <span class="nav-text">Git reset后面跟的参数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#git-revert"><span class="nav-number"></span> <span class="nav-text">git revert</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jinping"
+      src="/images/image.png">
+  <p class="site-author-name" itemprop="name">Jinping</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jinping-dev" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jinping-dev" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:jinping0982@163.com" title="E-Mail → mailto:jinping0982@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/9e1f045b3f8d" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;9e1f045b3f8d" rel="noopener" target="_blank"><i class="fa fa-heartbeat fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">©2018 by Jinping</span>
+</div>
+  <div class="powered-by">Erstellt mit  <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+  <div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

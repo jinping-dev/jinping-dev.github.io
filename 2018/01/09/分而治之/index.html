@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jinping-dev.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、十大经典算法快速排序、堆排序、归并排序、二分查找、线性查找、深度优先、广度优先、Dijkstra、动态规划、朴素贝叶斯分类（黑体的算法体现了分而治之的思想）动态规划与分而治之特别像，但是不算是分而治之。  分而治之的小问题之间是相互独立的，没有关联的。 动态规划的小问题之间是有关联的。外部排序：https:&#x2F;&#x2F;blog.csdn.net&#x2F;zssapple&#x2F;article&#x2F;details&#x2F;8">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fork&#x2F;Join分而治之">
+<meta property="og:url" content="https://jinping-dev.github.io/2018/01/09/%E5%88%86%E8%80%8C%E6%B2%BB%E4%B9%8B/index.html">
+<meta property="og:site_name" content="靳平の博客">
+<meta property="og:description" content="一、十大经典算法快速排序、堆排序、归并排序、二分查找、线性查找、深度优先、广度优先、Dijkstra、动态规划、朴素贝叶斯分类（黑体的算法体现了分而治之的思想）动态规划与分而治之特别像，但是不算是分而治之。  分而治之的小问题之间是相互独立的，没有关联的。 动态规划的小问题之间是有关联的。外部排序：https:&#x2F;&#x2F;blog.csdn.net&#x2F;zssapple&#x2F;article&#x2F;details&#x2F;8">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-27d049765131366e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/15200008-1ebc9006d4c70f21.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="article:published_time" content="2018-01-09T06:10:00.000Z">
+<meta property="article:modified_time" content="2021-07-05T07:47:23.122Z">
+<meta property="article:author" content="Jinping">
+<meta property="article:tag" content="Java基础">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/15200008-27d049765131366e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+<link rel="canonical" href="https://jinping-dev.github.io/2018/01/09/%E5%88%86%E8%80%8C%E6%B2%BB%E4%B9%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Fork/Join分而治之 | 靳平の博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?8963e74cb35315df308c698224929229";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">靳平の博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">51</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2018/01/09/%E5%88%86%E8%80%8C%E6%B2%BB%E4%B9%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Fork/Join分而治之
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-01-09 14:10:00" itemprop="dateCreated datePublished" datetime="2018-01-09T14:10:00+08:00">2018-01-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:23" itemprop="dateModified" datetime="2021-07-05T15:47:23+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E5%9F%BA%E7%A1%80/" itemprop="url" rel="index"><span itemprop="name">Java基础</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <meta name="referrer" content="no-referrer">
+
+<h3 id="一、十大经典算法"><a href="#一、十大经典算法" class="headerlink" title="一、十大经典算法"></a>一、十大经典算法</h3><p><strong>快速排序</strong>、堆排序、<strong>归并排序</strong>、<strong>二分查找</strong>、线性查找、深度优先、广度优先、Dijkstra、动态规划、朴素贝叶斯分类<br>（黑体的算法体现了分而治之的思想）<br>动态规划与分而治之特别像，但是不算是分而治之。</p>
+<ul>
+<li>分而治之的小问题之间是相互独立的，没有关联的。</li>
+<li>动态规划的小问题之间是有关联的。<h5 id="外部排序：https-blog-csdn-net-zssapple-article-details-82770607"><a href="#外部排序：https-blog-csdn-net-zssapple-article-details-82770607" class="headerlink" title="外部排序：https://blog.csdn.net/zssapple/article/details/82770607"></a>外部排序：<a target="_blank" rel="noopener" href="https://blog.csdn.net/zssapple/article/details/82770607">https://blog.csdn.net/zssapple/article/details/82770607</a></h5>体现了分而治之的思想，本质上来说就是归并排序</li>
+</ul>
+<h4 id="二、Fork-Join"><a href="#二、Fork-Join" class="headerlink" title="二、Fork/Join"></a>二、Fork/Join</h4><p><strong>Fork/Join框架</strong>：就是在必要的情况下，将一个大任务拆分（fork）成若干个小任务（拆到不可再拆时），再将一个个的小任务运算的结果进行join汇总。<br>Fork/Join 将任务调度的部分给程序员屏蔽掉了。我们只需要关心如何把任务进行拆解以及每个具体任务怎么做就可以了。除此之外，Fork/Join还提供了一个<strong>工作密取</strong>的概念。不同的小任务执行的速度也是不一样的，<code>假设现在有两个线程去分别执行50个小任务，A线程提前完事了，然后看到B线程还有20个任务没有完事，A线程就会去窃取B线程尾部的任务去处理，处理完之后再将任务塞回到B线程的任务队列中去。</code>工作密取就是为了提高CPU的利用率而设计的。</p>
+<a id="more"></a>
+
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-27d049765131366e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="工作密取"></p>
+<h5 id="如何使用？"><a href="#如何使用？" class="headerlink" title="如何使用？"></a>如何使用？</h5><p>JDK将Fork/Join框架进行了一个抽象，抽象成了一个<code>ForkJoinTask</code>抽象类。为了方便实现，还提供了两个实现类，一个是<code>RecursiveTask</code>，另一个是<code>RecursiveAction</code>。它们都是抽象类，RecursiveTask有个泛型，泛型意味着有返回结果，而action是没有返回结果的任务。<br>产生任务之后如何去执行呢？jdk交给<code>ForkJoinPool</code>这个线程池去执行。<br>ForkJoinPool中有三个方法：</p>
+<ul>
+<li>invoke：是一个同步方法,当我们调用这个方法之后，必须等这个任务全部完成了，invoke会返回一个任务的执行结果，在那之后我才能执行后面的代码。</li>
+<li>submit、execute：异步方法，不必要等待全部执行，可以执行后面的代码。execute没有返回值，而submit会有一个返回值，返回一个ForkJoinTask，然后我们可以通过一个get()方法拿到执行结果。</li>
+</ul>
+<h5 id="使用范式"><a href="#使用范式" class="headerlink" title="使用范式"></a>使用范式</h5><p><img src="https://upload-images.jianshu.io/upload_images/15200008-1ebc9006d4c70f21.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="使用范式"><br>我们只需要关心在compute方法中任务的拆分以及任务的业务实现就可以了。</p>
+<h3 id="二、使用Fork-Join完成归并排序"><a href="#二、使用Fork-Join完成归并排序" class="headerlink" title="二、使用Fork/Join完成归并排序"></a>二、使用Fork/Join完成归并排序</h3><p>参考：<a target="_blank" rel="noopener" href="https://github.com/jinping-dev/concurrent/tree/master/src/main/java/cn/enjoyedu/ch04/forkjoin">forkjoin相关代码示例</a></p>
+<h3 id="三、常用的并发工具类"><a href="#三、常用的并发工具类" class="headerlink" title="三、常用的并发工具类"></a>三、常用的并发工具类</h3><h5 id="1-CountDownLatch"><a href="#1-CountDownLatch" class="headerlink" title="1.CountDownLatch"></a>1.CountDownLatch</h5><p>闭锁，CountDownLatch这个类能够使一个线程等待其他线程完成各自的工作后再执行。例如，应用程序的主线程希望在负责启动框架服务的线程已经启动所有的框架服务之后再执行。CountDownLatch是通过一个计数器来实现的，计数器的初始值为初始任务的数量。每当完成了一个任务后，计数器的值就会减1（CountDownLatch.countDown()方法）。当计数器值到达0时，它表示所有的已经完成了任务，然后在闭锁上等待CountDownLatch.await()方法的线程就可以恢复执行任务。实现最大的并行性：<strong>有时我们想同时启动多个线程，实现最大程度的并行性</strong>。例如，我们想测试一个单例类。如果我们创建一个初始计数为1的CountDownLatch，并让所有线程都在这个锁上等待，那么我们可以很轻松地完成测试。我们只需调用 一次countDown()方法就可以让所有的等待线程同时恢复执行。开始执行前等待n个线程完成各自任务：例如应用程序启动类要确保在处理用户请求前，所有N个外部系统已经启动和运行了，例如处理excel中多个表单。</p>
+<h5 id="2-CyclicBarrier"><a href="#2-CyclicBarrier" class="headerlink" title="2.CyclicBarrier"></a>2.CyclicBarrier</h5><p>CyclicBarrier的字面意思是可循环使用（Cyclic）的屏障（Barrier）。它要做的事情是，让一组线程到达一个屏障（也可以叫同步点）时被阻塞，直到最后一个线程到达屏障时，屏障才会开门，所有被屏障拦截的线程才会继续运行。CyclicBarrier默认的构造方法是CyclicBarrier（int parties），其参数表示屏障拦截的线程数量，每个线程调用await方法告诉CyclicBarrier我已经到达了屏障，然后当前线程被阻塞。<br>CyclicBarrier还提供一个更高级的构造函数CyclicBarrier（int parties，Runnable barrierAction），<strong>用于在线程到达屏障时，优先执行barrierAction，方便处理更复杂的业务场景。</strong><br><strong>CyclicBarrier可以用于多线程计算数据，最后合并计算结果的场景。</strong></p>
+<h5 id="3-CyclicBarrier和CountDownLatch的区别"><a href="#3-CyclicBarrier和CountDownLatch的区别" class="headerlink" title="3.CyclicBarrier和CountDownLatch的区别"></a>3.CyclicBarrier和CountDownLatch的区别</h5><p>CountDownLatch的计数器只能使用一次，而CyclicBarrier的计数器可以使用reset()方法重置，CountDownLatch.await一般阻塞主线程，所有的工作线程执行countDown，而CyclicBarrierton通过工作线程调用await从而阻塞工作线程，直到所有工作线程达到屏障。</p>
+<h5 id="4-控制并发线程数的Semaphore"><a href="#4-控制并发线程数的Semaphore" class="headerlink" title="4.控制并发线程数的Semaphore"></a>4.控制并发线程数的Semaphore</h5><p>Semaphore（信号量）是用来控制同时访问特定资源的线程数量，它通过协调各个线程，以保证合理的使用公共资源。应用场景Semaphore可以用于做流量控制，特别是公用资源有限的应用场景，比如数据库连接。假如有一个需求，几十个线程并发地存储到数据库中，而数据库的连接数只有10个，这时我们必须控制只有10个线程同时获取数据库连接保存数据，否则会报错无法获取数据库连接。这个时候，就可以使用Semaphore来做流量控制。。Semaphore的构造方法Semaphore（int permits）接受一个整型的数字，表示可用的许可证数量。Semaphore的用法也很简单，首先线程使用Semaphore的acquire()方法获取一个许可证，使用完之后调用release()方法归还许可证。还可以用tryAcquire()方法尝试获取许可证。<br>Semaphore还提供一些其他方法，具体如下。</p>
+<ul>
+<li>intavailablePermits()：返回此信号量中当前可用的许可证数。</li>
+<li>intgetQueueLength()：返回正在等待获取许可证的线程数。</li>
+<li>booleanhasQueuedThreads()：是否有线程正在等待获取许可证。</li>
+<li>void reducePermits（int reduction）：减少reduction个许可证，是个protected方法。</li>
+<li>Collection getQueuedThreads()：返回所有等待获取许可证的线程集合，是个protected方法。</li>
+</ul>
+<h5 id="5-Exchanger"><a href="#5-Exchanger" class="headerlink" title="5.Exchanger"></a>5.Exchanger</h5><p>Exchanger（交换者）是一个用于线程间协作的工具类。Exchanger用于进行线程间的数据交换。它提供一个同步点，在这个同步点，两个线程可以交换彼此的数据。这两个线程通过exchange方法交换数据，如果第一个线程先执行exchange()方法，它会一直等待第二个线程也执行exchange方法，当两个线程都到达同步点时，这两个线程就可以交换数据，将本线程生产出来的数据传递给对方。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    支持一下呗
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat1.png" alt="Jinping 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="Jinping 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>有问题随时找我，加我微信~</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/111.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">WeChat</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java%E5%9F%BA%E7%A1%80/" rel="tag"># Java基础</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2019/12/13/%E9%93%BE%E8%A1%A8/" rel="next" title="链表">
+      链表 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MjcwNy8yOTE4NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%8D%81%E5%A4%A7%E7%BB%8F%E5%85%B8%E7%AE%97%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">一、十大经典算法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A4%96%E9%83%A8%E6%8E%92%E5%BA%8F%EF%BC%9Ahttps-blog-csdn-net-zssapple-article-details-82770607"><span class="nav-number">1.0.1.</span> <span class="nav-text">外部排序：https:&#x2F;&#x2F;blog.csdn.net&#x2F;zssapple&#x2F;article&#x2F;details&#x2F;82770607</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Fork-Join"><span class="nav-number">1.1.</span> <span class="nav-text">二、Fork&#x2F;Join</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%EF%BC%9F"><span class="nav-number">1.1.1.</span> <span class="nav-text">如何使用？</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E8%8C%83%E5%BC%8F"><span class="nav-number">1.1.2.</span> <span class="nav-text">使用范式</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E4%BD%BF%E7%94%A8Fork-Join%E5%AE%8C%E6%88%90%E5%BD%92%E5%B9%B6%E6%8E%92%E5%BA%8F"><span class="nav-number">2.</span> <span class="nav-text">二、使用Fork&#x2F;Join完成归并排序</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%89%E3%80%81%E5%B8%B8%E7%94%A8%E7%9A%84%E5%B9%B6%E5%8F%91%E5%B7%A5%E5%85%B7%E7%B1%BB"><span class="nav-number">3.</span> <span class="nav-text">三、常用的并发工具类</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-CountDownLatch"><span class="nav-number">3.0.1.</span> <span class="nav-text">1.CountDownLatch</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-CyclicBarrier"><span class="nav-number">3.0.2.</span> <span class="nav-text">2.CyclicBarrier</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-CyclicBarrier%E5%92%8CCountDownLatch%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">3.0.3.</span> <span class="nav-text">3.CyclicBarrier和CountDownLatch的区别</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-%E6%8E%A7%E5%88%B6%E5%B9%B6%E5%8F%91%E7%BA%BF%E7%A8%8B%E6%95%B0%E7%9A%84Semaphore"><span class="nav-number">3.0.4.</span> <span class="nav-text">4.控制并发线程数的Semaphore</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-Exchanger"><span class="nav-number">3.0.5.</span> <span class="nav-text">5.Exchanger</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jinping"
+      src="/images/image.png">
+  <p class="site-author-name" itemprop="name">Jinping</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jinping-dev" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jinping-dev" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:jinping0982@163.com" title="E-Mail → mailto:jinping0982@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/9e1f045b3f8d" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;9e1f045b3f8d" rel="noopener" target="_blank"><i class="fa fa-heartbeat fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">©2018 by Jinping</span>
+</div>
+  <div class="powered-by">Erstellt mit  <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+  <div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>

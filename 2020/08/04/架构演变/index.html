@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jinping-dev.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="传统架构传统的架构，也就是为单点应用，也就是大家在早期所学习的JavaEE知识SSH或者SSM架构模式，会采用分层架构模式：数据库访问层、业务逻辑层、控制层，从前端到后台所有的代码都是一个开发者去完成。该架构模式没有对我们业务逻辑代码实现拆分，所有的代码都写入到同一个工程中里面，适合于小公司开发团队或者个人开发。这种架构模式最大的缺点，如果该系统一个模块出现不可用、会导致整个系统无法使用。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="架构演变">
+<meta property="og:url" content="https://jinping-dev.github.io/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/index.html">
+<meta property="og:site_name" content="靳平の博客">
+<meta property="og:description" content="传统架构传统的架构，也就是为单点应用，也就是大家在早期所学习的JavaEE知识SSH或者SSM架构模式，会采用分层架构模式：数据库访问层、业务逻辑层、控制层，从前端到后台所有的代码都是一个开发者去完成。该架构模式没有对我们业务逻辑代码实现拆分，所有的代码都写入到同一个工程中里面，适合于小公司开发团队或者个人开发。这种架构模式最大的缺点，如果该系统一个模块出现不可用、会导致整个系统无法使用。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%8D%95%E4%BD%93.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/soa.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%BE%AE%E6%9C%8D%E5%8A%A11.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%BE%AE%E6%9C%8D%E5%8A%A12.png">
+<meta property="og:image" content="https://jinping-dev.github.io/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%8C%BA%E5%88%AB.png">
+<meta property="article:published_time" content="2020-08-04T09:44:54.000Z">
+<meta property="article:modified_time" content="2021-07-05T07:47:23.124Z">
+<meta property="article:author" content="Jinping">
+<meta property="article:tag" content="Java高级">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://jinping-dev.github.io/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%8D%95%E4%BD%93.png">
+
+<link rel="canonical" href="https://jinping-dev.github.io/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>架构演变 | 靳平の博客</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?8963e74cb35315df308c698224929229";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">靳平の博客</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">51</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="靳平の博客">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          架构演变
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-04 17:44:54" itemprop="dateCreated datePublished" datetime="2020-08-04T17:44:54+08:00">2020-08-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-05 15:47:23" itemprop="dateModified" datetime="2021-07-05T15:47:23+08:00">2021-07-05</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java%E9%AB%98%E7%BA%A7/" itemprop="url" rel="index"><span itemprop="name">Java高级</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <meta name="referrer" content="no-referrer">
+
+
+<h3 id="传统架构"><a href="#传统架构" class="headerlink" title="传统架构"></a>传统架构</h3><p>传统的架构，也就是为单点应用，也就是大家在早期所学习的JavaEE知识SSH或者SSM架构模式，会采用分层架构模式：数据库访问层、业务逻辑层、控制层，从前端到后台所有的代码都是一个开发者去完成。<br>该架构模式没有对我们业务逻辑代码实现拆分，所有的代码都写入到同一个工程中里面，适合于小公司开发团队或者个人开发。<br>这种架构模式最大的缺点，如果该系统一个模块出现不可用、会导致整个系统无法使用。</p>
+<a id="more"></a>
+
+<p><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%8D%95%E4%BD%93.png" alt="单体架构"></p>
+<h3 id="分布式架构"><a href="#分布式架构" class="headerlink" title="分布式架构"></a>分布式架构</h3><p>分布式架构模式是基于传统的架构模式演变过来，将传统的单点项目根据业务模块实现拆分、会拆分为会员系统、订单系统、支付系统、秒杀系统等。 从而降低我们项目的耦合度，这种架构模式开始慢慢的适合于互联网公司开发团队。 </p>
+<h3 id="SOA面向服务架构"><a href="#SOA面向服务架构" class="headerlink" title="SOA面向服务架构"></a>SOA面向服务架构</h3><p>SOA面向服务架构就是基于我们的分布式架构演变过来的，俗称服务化，也就是面向于接口开发（服务开发）。<br>SOA架构模式也称作为：面向服务架构模式、俗称面向与接口开发，将共同存在的业务逻辑抽取成一个共同的服务，提供给其他的服务接口实现调用、服务与服务之间通讯采用rpc远程调用技术。</p>
+<p>SOA架构模式特点：</p>
+<ul>
+<li>SOA架构通讯中，采用XML方式实现通讯、在高并发下通讯过程中协议存在非常大冗余性，所以在最后微服务架构模式中使用JSON格式替代了XML。</li>
+<li>SOA架构模式实现方案为WebService或者是ESB企业服务总线 底层通讯协议SOAP协议（Http+XML）实现传输。<br><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/soa.png" alt="SOA架构"></li>
+</ul>
+<h3 id="ESB企业服务总线"><a href="#ESB企业服务总线" class="headerlink" title="ESB企业服务总线"></a>ESB企业服务总线</h3><p>解决多系统之间跨语言无法实现通讯的问题，数据协议的转换，提供可靠消息传输。</p>
+<h3 id="微服务架构"><a href="#微服务架构" class="headerlink" title="微服务架构"></a>微服务架构</h3><h5 id="微服务架构产生的原因"><a href="#微服务架构产生的原因" class="headerlink" title="微服务架构产生的原因"></a>微服务架构产生的原因</h5><p>微服务架构基于SOA架构演变过来的<br>在传统的WebService架构中有如下问题:</p>
+<ul>
+<li>依赖中心化服务发现机制</li>
+<li>使用Soap通讯协议，通常使用XML格式来序列化通讯数据，xml格式非常喜欢重，比较占宽带传输。</li>
+<li>服务化管理和治理设施不完善</li>
+<li>不适合前后端分离架构模式</li>
+</ul>
+<h5 id="微服务架构基本概念"><a href="#微服务架构基本概念" class="headerlink" title="微服务架构基本概念"></a>微服务架构基本概念</h5><p>微服务架构模式是从SOA架构模式演变过来， 比SOA架构模式粒度更加精细，让专业的人去做专业的事情（专注），目的是提高效率，每个服务与服务之间互不影响，微服务架构中：每个服务必须独立部署、互不影响，微服务架构模式体现轻巧、轻量级、适合于互联网公司开发模式。</p>
+<p>微服务架构倡导应用程序设计程多个独立、可配置、可运行和可微服务的子服务。<br>服务与服务通讯协议采用Http协议，使用restful风格API形式来进行通讯，数据交换格式轻量级json格式通讯，整个传输过程中，采用二进制，所以http协议可以跨语言平台，并且可以和其他不同的语言进行相互的通讯，所以很多开放平台都采用http协议接口。<br><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%BE%AE%E6%9C%8D%E5%8A%A11.png" alt="SOA架构"><br><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%BE%AE%E6%9C%8D%E5%8A%A12.png" alt="SOA架构"></p>
+<h5 id="微服务架构与SOA架构的不同"><a href="#微服务架构与SOA架构的不同" class="headerlink" title="微服务架构与SOA架构的不同"></a>微服务架构与SOA架构的不同</h5><p>1.微服务架构基于 SOA架构 演变过来，继承 SOA架构的优点，在微服务架构中去除 SOA 架构中SOAP协议和 ESB 企业服务总线，采用 http+json（restful）进行传输。<br>2.微服务架构比 SOA 架构粒度会更加精细，让专业的人去做专业的事情（专注），目的提高效率，每个服务于服务之间互不影响，微服务架构中，每个服务必须独立部署，微服务架构更加轻巧，轻量级。<br>3.SOA 架构中可能数据库存储会发生共享，微服务强调独每个服务都是单独数据库，保证每个服务于服务之间互不影响。<br>4.项目体现特征微服务架构比 SOA 架构更加适合与互联网公司敏捷开发、快速迭代版本，因为粒度非常精细。</p>
+<h5 id="微服务架构会产生那些问题"><a href="#微服务架构会产生那些问题" class="headerlink" title="微服务架构会产生那些问题"></a>微服务架构会产生那些问题</h5><p>分布式事务解决方案(rabbitmq/rocketmq/lcn(已经淘汰)/ Seata)<br>分布式任务调度平台(XXL-Job、阿里Scheduler)<br>分布式日志采集系统ELK+Kafka<br>分布式服务注册中心 eureka、Zookeeper、consule、nacos等。<br>分布式服务追踪与调用链Zipkin等。<br>分布式服务配置中心（springcloud config/携程阿波罗/nacos/disconfig）</p>
+<p>非常重要的概念：独立部署、可配置、动态化</p>
+<h5 id="为什么我们要使用SpringCloud"><a href="#为什么我们要使用SpringCloud" class="headerlink" title="为什么我们要使用SpringCloud"></a>为什么我们要使用SpringCloud</h5><p>SpringCloud并不是rpc远程调用框架，而是一套全家桶的微服务解决框架，理念就是解决我们在微服务架构中遇到的任何问题。</p>
+<h5 id="SpringCloud第一代与第二代的区别"><a href="#SpringCloud第一代与第二代的区别" class="headerlink" title="SpringCloud第一代与第二代的区别"></a>SpringCloud第一代与第二代的区别</h5><p><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%8C%BA%E5%88%AB.png" alt="SOA架构"><br><strong>SpringCloud第一代实际上都是用的Netflix开源的组件整合微服务解决方案。</strong></p>
+<ul>
+<li>SpringCloud Config 分布式配置中心</li>
+<li>SpringCloud Netflix 核心组件</li>
+<li>Eureka:服务治理 </li>
+<li>Hystrix:服务保护框架</li>
+<li>Ribbon:客户端负载均衡器</li>
+<li>Feign：基于ribbon和hystrix的声明式服务调用组件</li>
+<li>Zuul: 网关组件,提供智能路由、访问过滤等功能。</li>
+</ul>
+<p><strong>SpringCloud第二代（自己研发）和优秀的组件组合：</strong></p>
+<ul>
+<li>Spring Cloud Gateway 网关</li>
+<li>Spring Cloud Loadbalancer 客户端负载均衡器</li>
+<li>Spring Cloud r4j(Resilience4J) 服务保护</li>
+<li>Spring Cloud Alibaba Nacos 服务注册</li>
+<li>Spring Cloud Alibaba Nacos 分布式配置中心</li>
+<li>Spring Cloud Alibaba Sentinel服务保护 </li>
+<li>SpringCloud Alibaba Seata分布式事务解决框架</li>
+<li>Alibaba Cloud OSS 阿里云存储</li>
+<li>Alibaba Cloud SchedulerX 分布式任务调度平台</li>
+<li>Alibaba Cloud SMS 分布式短信系统</li>
+</ul>
+<h5 id="为什么Alibaba要推出SpringCloud组件"><a href="#为什么Alibaba要推出SpringCloud组件" class="headerlink" title="为什么Alibaba要推出SpringCloud组件"></a>为什么Alibaba要推出SpringCloud组件</h5><p>目的就是为了对阿里云的产品实现扩展。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    支持一下呗
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat1.png" alt="Jinping 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="Jinping 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>有问题随时找我，加我微信~</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/111.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">WeChat</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java%E9%AB%98%E7%BA%A7/" rel="tag"># Java高级</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/08/03/%E4%BD%9C%E4%B8%9A%E5%B8%AE%E9%9D%A2%E8%AF%95%E9%A2%98/" rel="prev" title="作业帮面试题">
+      <i class="fa fa-chevron-left"></i> 作业帮面试题
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/08/05/%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0nacos/" rel="next" title="服务注册与发现nacos">
+      服务注册与发现nacos <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MjcwNy8yOTE4NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9F%E6%9E%B6%E6%9E%84"><span class="nav-number">1.</span> <span class="nav-text">传统架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E6%9E%B6%E6%9E%84"><span class="nav-number">2.</span> <span class="nav-text">分布式架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SOA%E9%9D%A2%E5%90%91%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84"><span class="nav-number">3.</span> <span class="nav-text">SOA面向服务架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ESB%E4%BC%81%E4%B8%9A%E6%9C%8D%E5%8A%A1%E6%80%BB%E7%BA%BF"><span class="nav-number">4.</span> <span class="nav-text">ESB企业服务总线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84"><span class="nav-number">5.</span> <span class="nav-text">微服务架构</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E4%BA%A7%E7%94%9F%E7%9A%84%E5%8E%9F%E5%9B%A0"><span class="nav-number">5.0.1.</span> <span class="nav-text">微服务架构产生的原因</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E5%9F%BA%E6%9C%AC%E6%A6%82%E5%BF%B5"><span class="nav-number">5.0.2.</span> <span class="nav-text">微服务架构基本概念</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E4%B8%8ESOA%E6%9E%B6%E6%9E%84%E7%9A%84%E4%B8%8D%E5%90%8C"><span class="nav-number">5.0.3.</span> <span class="nav-text">微服务架构与SOA架构的不同</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E4%BC%9A%E4%BA%A7%E7%94%9F%E9%82%A3%E4%BA%9B%E9%97%AE%E9%A2%98"><span class="nav-number">5.0.4.</span> <span class="nav-text">微服务架构会产生那些问题</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E4%BB%AC%E8%A6%81%E4%BD%BF%E7%94%A8SpringCloud"><span class="nav-number">5.0.5.</span> <span class="nav-text">为什么我们要使用SpringCloud</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#SpringCloud%E7%AC%AC%E4%B8%80%E4%BB%A3%E4%B8%8E%E7%AC%AC%E4%BA%8C%E4%BB%A3%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">5.0.6.</span> <span class="nav-text">SpringCloud第一代与第二代的区别</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88Alibaba%E8%A6%81%E6%8E%A8%E5%87%BASpringCloud%E7%BB%84%E4%BB%B6"><span class="nav-number">5.0.7.</span> <span class="nav-text">为什么Alibaba要推出SpringCloud组件</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jinping"
+      src="/images/image.png">
+  <p class="site-author-name" itemprop="name">Jinping</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">51</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jinping-dev" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jinping-dev" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:jinping0982@163.com" title="E-Mail → mailto:jinping0982@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/9e1f045b3f8d" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;9e1f045b3f8d" rel="noopener" target="_blank"><i class="fa fa-heartbeat fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">©2018 by Jinping</span>
+</div>
+  <div class="powered-by">Erstellt mit  <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+  <div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
