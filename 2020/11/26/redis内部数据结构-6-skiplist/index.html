@@ -157,7 +157,7 @@
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">49</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">50</span></a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -595,7 +595,7 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Skip-List%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">Skip List数据结构简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skiplist%E7%9A%84%E7%AE%97%E6%B3%95%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">skiplist的算法性能分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skiplist%E4%B8%8E%E5%B9%B3%E8%A1%A1%E6%A0%91%E3%80%81%E5%93%88%E5%B8%8C%E8%A1%A8%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-number">3.</span> <span class="nav-text">skiplist与平衡树、哈希表的比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E4%B8%AD%E7%9A%84skiplist%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">Redis中的skiplist实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E4%B8%ADskiplist%E5%AE%9E%E7%8E%B0%E7%9A%84%E7%89%B9%E6%AE%8A%E6%80%A7"><span class="nav-number">5.</span> <span class="nav-text">Redis中skiplist实现的特殊性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skiplist%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%AE%9A%E4%B9%89"><span class="nav-number">6.</span> <span class="nav-text">skiplist的数据结构定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E4%B8%AD%E7%9A%84sorted-set"><span class="nav-number">7.</span> <span class="nav-text">Redis中的sorted set</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8skiplist%E8%80%8C%E4%B8%8D%E7%94%A8%E5%B9%B3%E8%A1%A1%E6%A0%91%EF%BC%9F"><span class="nav-number">8.</span> <span class="nav-text">Redis为什么用skiplist而不用平衡树？</span></a></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Skip-List%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E7%AE%80%E4%BB%8B"><span class="nav-text">Skip List数据结构简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skiplist%E7%9A%84%E7%AE%97%E6%B3%95%E6%80%A7%E8%83%BD%E5%88%86%E6%9E%90"><span class="nav-text">skiplist的算法性能分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skiplist%E4%B8%8E%E5%B9%B3%E8%A1%A1%E6%A0%91%E3%80%81%E5%93%88%E5%B8%8C%E8%A1%A8%E7%9A%84%E6%AF%94%E8%BE%83"><span class="nav-text">skiplist与平衡树、哈希表的比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E4%B8%AD%E7%9A%84skiplist%E5%AE%9E%E7%8E%B0"><span class="nav-text">Redis中的skiplist实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E4%B8%ADskiplist%E5%AE%9E%E7%8E%B0%E7%9A%84%E7%89%B9%E6%AE%8A%E6%80%A7"><span class="nav-text">Redis中skiplist实现的特殊性</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#skiplist%E7%9A%84%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%AE%9A%E4%B9%89"><span class="nav-text">skiplist的数据结构定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E4%B8%AD%E7%9A%84sorted-set"><span class="nav-text">Redis中的sorted set</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redis%E4%B8%BA%E4%BB%80%E4%B9%88%E7%94%A8skiplist%E8%80%8C%E4%B8%8D%E7%94%A8%E5%B9%B3%E8%A1%A1%E6%A0%91%EF%BC%9F"><span class="nav-text">Redis为什么用skiplist而不用平衡树？</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
@@ -611,7 +611,7 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">49</span>
+          <span class="site-state-item-count">50</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
