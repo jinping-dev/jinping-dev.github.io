@@ -1,42 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Docker(三)Image概述</title>
-    <url>/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-<h3 id="什么是Image"><a href="#什么是Image" class="headerlink" title="什么是Image"></a>什么是Image</h3><ul>
-<li>文件和meta data的集合（root filesystem）</li>
-<li>分层的，并且每一层都可以添加改变删除文件，成为一个新的image</li>
-<li>不同的image可以共享相同的layer</li>
-<li>Image本身是read-only的</li>
-</ul>
-<p><img src="/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/image.png" alt="image"></p>
-<a id="more"></a>
-
-<h3 id="Image的获取"><a href="#Image的获取" class="headerlink" title="Image的获取"></a>Image的获取</h3><ul>
-<li>通过Dockerfile构建</li>
-<li>从<a href="https://hub.docker.com/">docker Registry</a>获取</li>
-</ul>
-<h3 id="创建一个helloword-Image"><a href="#创建一个helloword-Image" class="headerlink" title="创建一个helloword-Image"></a>创建一个helloword-Image</h3><p>先安装编译C语言的相关环境，然后在当前目录下，创建helloWorld文件夹，然后新建<code>hello.c</code>文件</p>
-<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">sudo</span> <span class="string">yum install -y vim</span></span><br><span class="line"><span class="attr">sudo</span> <span class="string">yum install -y gcc</span></span><br><span class="line"><span class="attr">sudo</span> <span class="string">yum install glibc-static</span></span><br><span class="line"><span class="attr">vim</span> <span class="string">hello.c</span></span><br></pre></td></tr></table></figure>
-<p>然后在hello.c中，编写c语言程序</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">sudo yum install glib-<span class="keyword">static</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span>(;i&lt; <span class="number">10</span>; i ++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;hello-docker!\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>然后编译：<code>gcc -static hello.c -o hello</code>,，可以在当前目录下看到多了一个hello的可执行文件<br><img src="/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/1.png" alt="1"><br>之后编辑<code>Dockerfile</code>文件</p>
-<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line"><span class="keyword">FROM</span> scratch</span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> hello /</span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">&quot;/hello&quot;</span>]</span></span><br></pre></td></tr></table></figure>
-
-<p>然后进行build，运行</p>
-<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">sudo docker build -t tinner/hello-world .</span><br><span class="line">sudo docker <span class="keyword">run</span><span class="bash"> tinner/hello-world</span></span><br></pre></td></tr></table></figure>
-<p>即可看到输出：<br><img src="/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/2.png" alt="2"></p>
-]]></content>
-      <categories>
-        <category>运维</category>
-      </categories>
-      <tags>
-        <tag>Docker</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Docker(一)构建Docker</title>
     <url>/2020/12/02/Docker-%E4%B8%80-%E6%9E%84%E5%BB%BADocker/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -124,6 +88,42 @@
 <h3 id="四、彩蛋"><a href="#四、彩蛋" class="headerlink" title="四、彩蛋"></a>四、彩蛋</h3><p>在我们运行<code>vagrant init centos/7</code>之后，就可以看到在当前目录下生成了<code>Vagrantfile</code>文件</p>
 <p>我们可以在运行<code>vagrant up</code>的时候即可让虚拟机构建出一个Docker环境，需要修改<code>Vagrantfile</code>文件<br>如下：</p>
 <figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment"># -*- mode: ruby -*-</span></span><br><span class="line"><span class="comment"># vi: set ft=ruby :</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># All Vagrant configuration is done below. The &quot;2&quot; in Vagrant.configure</span></span><br><span class="line"><span class="comment"># configures the configuration version (we support older styles for</span></span><br><span class="line"><span class="comment"># backwards compatibility). Please don&#x27;t change it unless you know what</span></span><br><span class="line"><span class="comment"># you&#x27;re doing.</span></span><br><span class="line">Vagrant.configure(&quot;2&quot;) <span class="keyword">do</span> |config|</span><br><span class="line">  <span class="comment"># The most common configuration options are documented and commented below.</span></span><br><span class="line">  <span class="comment"># For a complete reference, please see the online documentation at</span></span><br><span class="line">  <span class="comment"># https://docs.vagrantup.com.</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Every Vagrant development environment requires a box. You can search for</span></span><br><span class="line">  <span class="comment"># boxes at https://vagrantcloud.com/search.</span></span><br><span class="line">  config.vm.box = <span class="string">&quot;centos/7&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Disable automatic box update checking. If you disable this, then</span></span><br><span class="line">  <span class="comment"># boxes will only be checked for updates when the user runs</span></span><br><span class="line">  <span class="comment"># `vagrant box outdated`. This is not recommended.</span></span><br><span class="line">  <span class="comment"># config.vm.box_check_update = false</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Create a forwarded port mapping which allows access to a specific port</span></span><br><span class="line">  <span class="comment"># within the machine from a port on the host machine. In the example below,</span></span><br><span class="line">  <span class="comment"># accessing &quot;localhost:8080&quot; will access port 80 on the guest machine.</span></span><br><span class="line">  <span class="comment"># <span class="doctag">NOTE:</span> This will enable public access to the opened port</span></span><br><span class="line">  <span class="comment"># config.vm.network &quot;forwarded_port&quot;, guest: 80, host: 8080</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Create a forwarded port mapping which allows access to a specific port</span></span><br><span class="line">  <span class="comment"># within the machine from a port on the host machine and only allow access</span></span><br><span class="line">  <span class="comment"># via 127.0.0.1 to disable public access</span></span><br><span class="line">  <span class="comment"># config.vm.network &quot;forwarded_port&quot;, guest: 80, host: 8080, host_ip: &quot;127.0.0.1&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Create a private network, which allows host-only access to the machine</span></span><br><span class="line">  <span class="comment"># using a specific IP.</span></span><br><span class="line">  <span class="comment"># config.vm.network &quot;private_network&quot;, ip: &quot;192.168.33.10&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Create a public network, which generally matched to bridged network.</span></span><br><span class="line">  <span class="comment"># Bridged networks make the machine appear as another physical device on</span></span><br><span class="line">  <span class="comment"># your network.</span></span><br><span class="line">  <span class="comment"># config.vm.network &quot;public_network&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Share an additional folder to the guest VM. The first argument is</span></span><br><span class="line">  <span class="comment"># the path on the host to the actual folder. The second argument is</span></span><br><span class="line">  <span class="comment"># the path on the guest to mount the folder. And the optional third</span></span><br><span class="line">  <span class="comment"># argument is a set of non-required options.</span></span><br><span class="line">  <span class="comment"># config.vm.synced_folder &quot;../data&quot;, &quot;/vagrant_data&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Provider-specific configuration so you can fine-tune various</span></span><br><span class="line">  <span class="comment"># backing providers for Vagrant. These expose provider-specific options.</span></span><br><span class="line">  <span class="comment"># Example for VirtualBox:</span></span><br><span class="line">  <span class="comment">#</span></span><br><span class="line">  <span class="comment"># config.vm.provider &quot;virtualbox&quot; do |vb|</span></span><br><span class="line">  <span class="comment">#   # Display the VirtualBox GUI when booting the machine</span></span><br><span class="line">  <span class="comment">#   vb.gui = true</span></span><br><span class="line">  <span class="comment">#</span></span><br><span class="line">  <span class="comment">#   # Customize the amount of memory on the VM:</span></span><br><span class="line">  <span class="comment">#   vb.memory = &quot;1024&quot;</span></span><br><span class="line">  <span class="comment"># end</span></span><br><span class="line">  <span class="comment">#</span></span><br><span class="line">  <span class="comment"># View the documentation for the provider you are using for more</span></span><br><span class="line">  <span class="comment"># information on available options.</span></span><br><span class="line"></span><br><span class="line">  <span class="comment"># Enable provisioning with a shell script. Additional provisioners such as</span></span><br><span class="line">  <span class="comment"># Ansible, Chef, Docker, Puppet and Salt are also available. Please see the</span></span><br><span class="line">  <span class="comment"># documentation for more information about their specific syntax and use.</span></span><br><span class="line">  <span class="comment"># config.vm.provision &quot;shell&quot;, inline: &lt;&lt;-SHELL</span></span><br><span class="line">  <span class="comment">#   apt-get update</span></span><br><span class="line">  <span class="comment">#   apt-get install -y apache2</span></span><br><span class="line"></span><br><span class="line">  config.vm.provision <span class="string">&quot;shell&quot;</span>, inline: &lt;&lt;-SHELL</span><br><span class="line">  sudo yum remove docker docker-<span class="keyword">client</span> docker-<span class="keyword">client</span>-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-<span class="keyword">engine</span></span><br><span class="line">  sudo yum <span class="keyword">install</span> -y yum-utils</span><br><span class="line">  sudo yum-config-manager -y <span class="comment">--add-repo https://download.docker.com/linux/centos/docker-ce.repo</span></span><br><span class="line">  sudo yum -y <span class="keyword">install</span> docker-ce docker-ce-cli containerd.io</span><br><span class="line">  sudo systemctl <span class="keyword">start</span> docker</span><br><span class="line">  SHELL</span><br><span class="line"><span class="keyword">end</span></span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>运维</category>
+      </categories>
+      <tags>
+        <tag>Docker</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Docker(三)Image概述</title>
+    <url>/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<h3 id="什么是Image"><a href="#什么是Image" class="headerlink" title="什么是Image"></a>什么是Image</h3><ul>
+<li>文件和meta data的集合（root filesystem）</li>
+<li>分层的，并且每一层都可以添加改变删除文件，成为一个新的image</li>
+<li>不同的image可以共享相同的layer</li>
+<li>Image本身是read-only的</li>
+</ul>
+<p><img src="/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/image.png" alt="image"></p>
+<a id="more"></a>
+
+<h3 id="Image的获取"><a href="#Image的获取" class="headerlink" title="Image的获取"></a>Image的获取</h3><ul>
+<li>通过Dockerfile构建</li>
+<li>从<a href="https://hub.docker.com/">docker Registry</a>获取</li>
+</ul>
+<h3 id="创建一个helloword-Image"><a href="#创建一个helloword-Image" class="headerlink" title="创建一个helloword-Image"></a>创建一个helloword-Image</h3><p>先安装编译C语言的相关环境，然后在当前目录下，创建helloWorld文件夹，然后新建<code>hello.c</code>文件</p>
+<figure class="highlight properties"><table><tr><td class="code"><pre><span class="line"><span class="attr">sudo</span> <span class="string">yum install -y vim</span></span><br><span class="line"><span class="attr">sudo</span> <span class="string">yum install -y gcc</span></span><br><span class="line"><span class="attr">sudo</span> <span class="string">yum install glibc-static</span></span><br><span class="line"><span class="attr">vim</span> <span class="string">hello.c</span></span><br></pre></td></tr></table></figure>
+<p>然后在hello.c中，编写c语言程序</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">sudo yum install glib-<span class="keyword">static</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="keyword">int</span> i = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">for</span>(;i&lt; <span class="number">10</span>; i ++)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;hello-docker!\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后编译：<code>gcc -static hello.c -o hello</code>,，可以在当前目录下看到多了一个hello的可执行文件<br><img src="/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/1.png" alt="1"><br>之后编辑<code>Dockerfile</code>文件</p>
+<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line"><span class="keyword">FROM</span> scratch</span><br><span class="line"><span class="keyword">ADD</span><span class="bash"> hello /</span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> [<span class="string">&quot;/hello&quot;</span>]</span></span><br></pre></td></tr></table></figure>
+
+<p>然后进行build，运行</p>
+<figure class="highlight dockerfile"><table><tr><td class="code"><pre><span class="line">sudo docker build -t tinner/hello-world .</span><br><span class="line">sudo docker <span class="keyword">run</span><span class="bash"> tinner/hello-world</span></span><br></pre></td></tr></table></figure>
+<p>即可看到输出：<br><img src="/2020/12/07/Docker-%E4%B8%89-Image%E6%A6%82%E8%BF%B0/2.png" alt="2"></p>
 ]]></content>
       <categories>
         <category>运维</category>
@@ -606,6 +606,31 @@
       </tags>
   </entry>
   <entry>
+    <title>Java中的hashcode和equals</title>
+    <url>/2020/12/24/Java%E4%B8%AD%E7%9A%84hashcode%E5%92%8Cequals/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<h2 id="关于hashcode"><a href="#关于hashcode" class="headerlink" title="关于hashcode"></a>关于hashcode</h2><p>1、hashcode的存在主要是用于查找的快捷性，如Hashtable、HashMap等，hashcode是用来在散列存储结构中确定对象的存储地址的。</p>
+<p>2、如果两个对象相同，就是适用于<code>equals(java.lang.Object)</code>方法，那么这两个对象的hashcode方法一定要相同。</p>
+<p>3、如果对象的equals方法被重写，那么对象的hashcode方法也尽量重写，并且产生hashcode使用的对象，一定要和equals方法中使用的一致，否则就会违反上面提到的第2点。</p>
+<p>4、两个对象的hashcode相同，并不一定表示两个对象就相同，也就是不一定适用于<code>equals(java.lang.Object)</code>方法，只能够说明这两个对象在散列存储结构中，如Hashtable，他们“存放在一个篮子中”。</p>
+<a id="more"></a>
+<p><strong>再次归纳一下就是hashCode是用于查找使用的，而equals是用于比较两个对象是否相等的</strong></p>
+<h2 id="关于equals"><a href="#关于equals" class="headerlink" title="关于equals"></a>关于equals</h2><p>1、equals和==</p>
+<ul>
+<li>==用于比较引用和比较基本数据类型时具有不同的功能：<br>  比较基本数据类型，如果两个值相同，则结果为true；<br>  而在比较引用时，如果引用指向内存中的同一对象，结果为true。</li>
+</ul>
+<p>2、equals作为方法，实现对象的比较。由于==运算符不允许我们进行覆盖，也就是说它限制了我们的表达，因此我们复写equals()方法，达到比较对象内容是否相同的目的。而这些通过==运算符是做不到的。</p>
+<p>3、Object类的equals()方法的比较规则为：如果两个对象的类型一致，并且内容一致，则返回true。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java基础</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Gateway详解</title>
     <url>/2020/08/20/Gateway%E8%AF%A6%E8%A7%A3/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -656,31 +681,6 @@
       </categories>
       <tags>
         <tag>SpringCloud</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java中的hashcode和equals</title>
-    <url>/2020/12/24/Java%E4%B8%AD%E7%9A%84hashcode%E5%92%8Cequals/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-<h2 id="关于hashcode"><a href="#关于hashcode" class="headerlink" title="关于hashcode"></a>关于hashcode</h2><p>1、hashcode的存在主要是用于查找的快捷性，如Hashtable、HashMap等，hashcode是用来在散列存储结构中确定对象的存储地址的。</p>
-<p>2、如果两个对象相同，就是适用于<code>equals(java.lang.Object)</code>方法，那么这两个对象的hashcode方法一定要相同。</p>
-<p>3、如果对象的equals方法被重写，那么对象的hashcode方法也尽量重写，并且产生hashcode使用的对象，一定要和equals方法中使用的一致，否则就会违反上面提到的第2点。</p>
-<p>4、两个对象的hashcode相同，并不一定表示两个对象就相同，也就是不一定适用于<code>equals(java.lang.Object)</code>方法，只能够说明这两个对象在散列存储结构中，如Hashtable，他们“存放在一个篮子中”。</p>
-<a id="more"></a>
-<p><strong>再次归纳一下就是hashCode是用于查找使用的，而equals是用于比较两个对象是否相等的</strong></p>
-<h2 id="关于equals"><a href="#关于equals" class="headerlink" title="关于equals"></a>关于equals</h2><p>1、equals和==</p>
-<ul>
-<li>==用于比较引用和比较基本数据类型时具有不同的功能：<br>  比较基本数据类型，如果两个值相同，则结果为true；<br>  而在比较引用时，如果引用指向内存中的同一对象，结果为true。</li>
-</ul>
-<p>2、equals作为方法，实现对象的比较。由于==运算符不允许我们进行覆盖，也就是说它限制了我们的表达，因此我们复写equals()方法，达到比较对象内容是否相同的目的。而这些通过==运算符是做不到的。</p>
-<p>3、Object类的equals()方法的比较规则为：如果两个对象的类型一致，并且内容一致，则返回true。</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>Java基础</tag>
       </tags>
   </entry>
   <entry>
@@ -1385,83 +1385,6 @@
       </tags>
   </entry>
   <entry>
-    <title>git操作</title>
-    <url>/2020/07/13/git%E6%93%8D%E4%BD%9C/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-基本操作就不说了，这里详细介绍其他中高级操作
-##### 1、查看日志
-<figure class="highlight 1c"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">log</span></span><br></pre></td></tr></table></figure>
-<a id="more"></a>
-这个命令对于提交少的项目比较友好，但是对于提交很多的项目，会输出一大长串，很不方便，于是有一个比较简便的命令：
-<figure class="highlight applescript"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">log</span> <span class="comment">--pretty=oneline</span></span><br></pre></td></tr></table></figure>
-输出：
-![git log](https://upload-images.jianshu.io/upload_images/15200008-45ddb710fbaa4feb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-
-<h5 id="2、撤销修改"><a href="#2、撤销修改" class="headerlink" title="2、撤销修改"></a>2、撤销修改</h5><p><strong>背景</strong><br>在一个文件中添加了一点代码，现在我<code>git add .</code>了但是没提交，现在我想撤销我修改的东西</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/15200008-ef3f18e06870f830.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="想要撤销修改"><br><strong>解决方案</strong><br>两个命令：</p>
-<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">git reset HEAD  src<span class="regexp">/main/</span>java<span class="regexp">/com/</span>tinner<span class="regexp">/demo03/</span>constant/RedisContant.java</span><br><span class="line">git checkout --  src<span class="regexp">/main/</span>java<span class="regexp">/com/</span>tinner<span class="regexp">/demo03/</span>constant/RedisContant.java</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p><strong>效果</strong><br><img src="https://upload-images.jianshu.io/upload_images/15200008-4f6a48f749025f40.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="效果"></p>
-<h5 id="3、创建分支"><a href="#3、创建分支" class="headerlink" title="3、创建分支"></a>3、创建分支</h5><p>两个命令：</p>
-<figure class="highlight llvm"><table><tr><td class="code"><pre><span class="line">git checkout -b dev</span><br><span class="line">git <span class="keyword">switch</span> -<span class="keyword">c</span> dev</span><br></pre></td></tr></table></figure>
-<h5 id="4、删除分支"><a href="#4、删除分支" class="headerlink" title="4、删除分支"></a>4、删除分支</h5><figure class="highlight applescript"><table><tr><td class="code"><pre><span class="line">git branch -d &lt;<span class="built_in">name</span>&gt;</span><br></pre></td></tr></table></figure>
-<p>如果要丢弃一个没有被合并过的分支，可以通过<code>git branch -D &lt;name&gt;</code>强行删除。</p>
-<h5 id="5、合并代码"><a href="#5、合并代码" class="headerlink" title="5、合并代码"></a>5、合并代码</h5><figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git</span> merge --<span class="literal">no</span>-ff -m <span class="string">&quot;注释。。。。&quot;</span> &lt;分支名&gt;</span><br></pre></td></tr></table></figure>
-<h5 id="6、stash"><a href="#6、stash" class="headerlink" title="6、stash"></a>6、stash</h5><p><strong>背景</strong><br>在一个新的需求开发过程中，我在dev分支开发了一些东西，但是并没有提交我也不想提交，这个时候来了一个bug，我必须将bug改完才能进行dev的开发，那么这个时候就需要用到<code>git stash</code>命令<br><strong>步骤</strong></p>
-<ul>
-<li>首先，我看看git仓库中的状态<br><img src="https://upload-images.jianshu.io/upload_images/15200008-a972ff6bedf30c71.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git状态"><br>可以看到，在dev分支，我创建了一个文件，修改了一个文件。</li>
-<li>然后，使用<code>git stash</code>命令，之后再来查看状态：<br><img src="https://upload-images.jianshu.io/upload_images/15200008-8e9e83fcd28a6c6e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="储藏代码"><br>此时工作区是干净的。然后我切换到master分支，创建一个issue分支，解决bug，合并到master，发版，之后再切换到dev分支，可以看到我的工作区还是干净的，那么之前的代码跑哪去了？</li>
-<li>使用<code>git stash list</code>可以查看储藏的代码列表<br><img src="https://upload-images.jianshu.io/upload_images/15200008-3b3f6b8f63f04ea9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git stash list"></li>
-<li>现在我们需要恢复之前的代码，有两个命令可以参考：<figure class="highlight maxima"><table><tr><td class="code"><pre><span class="line">git stash <span class="built_in">apply</span></span><br><span class="line">git stash <span class="built_in">pop</span></span><br></pre></td></tr></table></figure>
-<code>git stash apply</code>命令恢复后，stash内容并不删除，你需要用<code>git stash drop</code>来删除；<br><img src="https://upload-images.jianshu.io/upload_images/15200008-b8880068ad06e4c5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git stash apply"></li>
-</ul>
-<p>另一种方式是用<code>git stash pop</code>，恢复的同时把stash内容也删了</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/15200008-41d742ccc7ace756.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git stash pop"></p>
-<ul>
-<li>你可以多次stash，恢复的时候，先用<code>git stash list</code>查看，然后恢复指定的stash，用命令:<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">git stash apply <span class="symbol">stash@</span>&#123;<span class="number">0</span>&#125;</span><br></pre></td></tr></table></figure></li>
-</ul>
-<p><strong>扩展</strong><br>我们知道，master的bug修复之后，在现在的dev代码相关的bug并没有修复，所以，这个bug其实在当前dev分支上也存在。<br><em>如何快速修复？</em><br>同样的bug，要在dev上修复，我们只需要把<code>修复issuebug</code>这个提交所做的修改“复制”到dev分支。注意：我们只想复制<code>修复issuebug</code>这个提交所做的修改，并不是把整个master分支<code>merge</code>过来。</p>
-<p>为了方便操作，Git专门提供了一个<code>cherry-pick</code>命令，让我们能复制一个特定的提交到当前分支：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">git cherry-pick <span class="tag">&lt;<span class="name">版本号</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p><img src="https://upload-images.jianshu.io/upload_images/15200008-30ceb22e3d0b5e90.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="修复bug"><br><img src="https://upload-images.jianshu.io/upload_images/15200008-81c651ad31eed27d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
-<p>用<code>git cherry-pick</code>，我们就不需要在dev分支上手动再把修bug的过程重复一遍。</p>
-<h3 id="几个命令的区别"><a href="#几个命令的区别" class="headerlink" title="几个命令的区别"></a>几个命令的区别</h3><h5 id="merge和rebase的区别"><a href="#merge和rebase的区别" class="headerlink" title="merge和rebase的区别"></a>merge和rebase的区别</h5><p>merge和rebase都是用来合并分支的。</p>
-<ul>
-<li>采用merge和rebase后，git log的区别，<strong>merge命令不会保留merge的分支的commit</strong>：</li>
-</ul>
-<p><img src="//upload-images.jianshu.io/upload_images/6081878-f7c90a58674a5584.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/895" alt="merge和rebase"></p>
-<ul>
-<li>处理冲突的方式：<br><code>（一股脑）</code>使用merge命令合并分支，解决完冲突，执行git add .和git commit -m ‘fix conflict’。这个时候会产生一个commit。<br><code>（交互式）</code>使用rebase命令合并分支，解决完冲突，执行git add .和git rebase –continue，不会产生额外的commit。这样的好处是”干净”，分支上不会有无意义的解决分支的commit；坏处：如果合并的分支中存在多个commit，需要重复处理多次冲突。<h5 id="git-pull和git-pull-–rebase"><a href="#git-pull和git-pull-–rebase" class="headerlink" title="git pull和git pull –rebase"></a>git pull和git pull –rebase</h5><code>git pull</code>做了两个操作分别是<code>获取</code>和<code>合并</code>。所以加了<code>rebase</code>就是以<code>rebase</code>的方式进行合并分支，默认为<code>merge</code>。<h5 id="git-merge-和-git-merge-–no-ff的区别"><a href="#git-merge-和-git-merge-–no-ff的区别" class="headerlink" title="git merge 和 git merge –no-ff的区别"></a>git merge 和 git merge –no-ff的区别</h5><code>git merge –no-ff</code> 可以保存你之前的分支历史。能够更好的查看 merge历史，以及branch 状态。<br><code>git merge</code> 则不会显示 feature，只保留单条分支记录。<br><img src="https://upload-images.jianshu.io/upload_images/15200008-f7ea47cfb59ac349.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git merge 和 git merge --no-ff的区别"></li>
-</ul>
-<h3 id="tag相关"><a href="#tag相关" class="headerlink" title="tag相关"></a>tag相关</h3><p>在当前分支的最新commit上打tag</p>
-<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">tag</span> <span class="title">v1</span>.<span class="number">0</span></span><br></pre></td></tr></table></figure>
-<p>在f52c633版本的提交上打tag</p>
-<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git</span> tag v<span class="number">0</span>.<span class="number">9</span> f<span class="number">52</span>c<span class="number">633</span></span><br></pre></td></tr></table></figure>
-<p>查看所有的tag</p>
-<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">tag</span></span><br></pre></td></tr></table></figure>
-<p><em>注意，标签不是按时间顺序列出，而是按字母排序的</em></p>
-<p>还可以创建带有说明的标签，用-a指定标签名，-m指定说明文字：</p>
-<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git</span> tag -a v<span class="number">0</span>.<span class="number">1</span> -m <span class="string">&quot;文字说明&quot;</span> <span class="number">1094</span>adb</span><br></pre></td></tr></table></figure>
-<p>用命令<code>git show &lt;tagname&gt;</code>可以看到说明文字<br>提交v1.0标签</p>
-<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git</span> push origin v<span class="number">1</span>.<span class="number">0</span></span><br></pre></td></tr></table></figure>
-<p>提交所有的标签</p>
-<figure class="highlight maxima"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">push</span> <span class="built_in">origin</span> --tags</span><br></pre></td></tr></table></figure>
-<p><img src="https://upload-images.jianshu.io/upload_images/15200008-57c8edc0e40ec346.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="标签"><br><img src="https://upload-images.jianshu.io/upload_images/15200008-5e47e69158aed78a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="tag"><br>从本地删除tag：</p>
-<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">tag</span> <span class="title">-d</span> v0.<span class="number">9</span></span><br></pre></td></tr></table></figure>
-<p>删除远程tag：</p>
-<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line">git push origin <span class="symbol">:refs/tags/v0</span>.<span class="number">9</span></span><br></pre></td></tr></table></figure>
-<p><img src="https://upload-images.jianshu.io/upload_images/15200008-45ac44d2f7a193ff.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="tag删除"></p>
-<h3 id="Git-HEAD-与HEAD-的关系"><a href="#Git-HEAD-与HEAD-的关系" class="headerlink" title="Git HEAD^与HEAD~的关系"></a>Git HEAD^与HEAD~的关系</h3><p>一张图：<br><img src="https://upload-images.jianshu.io/upload_images/15200008-57f1b8f25ab5d35a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Git HEAD^与HEAD~的关系"></p>
-<h3 id="Git-reset后面跟的参数"><a href="#Git-reset后面跟的参数" class="headerlink" title="Git reset后面跟的参数"></a>Git reset后面跟的参数</h3><p>比如我在我的本地目录下面新建了一个文件c.txt，add到了我的暂存区（缓冲区），同时也commit提交到了本地仓库<br>默认：<code>git reset</code> = <code>git reset --mixed</code>，这个命令会跳转到指定版本、<strong>缓存区的文件还原、但是工作区（本地目录）下的文件不会还原</strong><br><code>git reset --hard</code>这个命令会跳转到指定版本、<strong>缓存区的文件还原、工作区（本地目录）下的文件也会被还原</strong><br><code>git reset --soft</code>这个命令会跳转到指定版本、<strong>缓存区的文件不会被还原、而且工作区（本地目录）下的文件也不会还原</strong></p>
-<h3 id="git-revert"><a href="#git-revert" class="headerlink" title="git revert"></a>git revert</h3><p><code>git revert</code>会产生一个commit，撤销某次操作，此次操作之前和之后的commit和history都会被保留，并且会把这次撤销作为一次最新的提交。</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>git</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>mongo分片集</title>
     <url>/2020/12/18/mongo%E5%88%86%E7%89%87%E9%9B%86/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -1575,6 +1498,83 @@
       </categories>
       <tags>
         <tag>MongoDB</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>git操作</title>
+    <url>/2020/07/13/git%E6%93%8D%E4%BD%9C/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+基本操作就不说了，这里详细介绍其他中高级操作
+##### 1、查看日志
+<figure class="highlight 1c"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">log</span></span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+这个命令对于提交少的项目比较友好，但是对于提交很多的项目，会输出一大长串，很不方便，于是有一个比较简便的命令：
+<figure class="highlight applescript"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">log</span> <span class="comment">--pretty=oneline</span></span><br></pre></td></tr></table></figure>
+输出：
+![git log](https://upload-images.jianshu.io/upload_images/15200008-45ddb710fbaa4feb.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+<h5 id="2、撤销修改"><a href="#2、撤销修改" class="headerlink" title="2、撤销修改"></a>2、撤销修改</h5><p><strong>背景</strong><br>在一个文件中添加了一点代码，现在我<code>git add .</code>了但是没提交，现在我想撤销我修改的东西</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-ef3f18e06870f830.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="想要撤销修改"><br><strong>解决方案</strong><br>两个命令：</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">git reset HEAD  src<span class="regexp">/main/</span>java<span class="regexp">/com/</span>tinner<span class="regexp">/demo03/</span>constant/RedisContant.java</span><br><span class="line">git checkout --  src<span class="regexp">/main/</span>java<span class="regexp">/com/</span>tinner<span class="regexp">/demo03/</span>constant/RedisContant.java</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p><strong>效果</strong><br><img src="https://upload-images.jianshu.io/upload_images/15200008-4f6a48f749025f40.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="效果"></p>
+<h5 id="3、创建分支"><a href="#3、创建分支" class="headerlink" title="3、创建分支"></a>3、创建分支</h5><p>两个命令：</p>
+<figure class="highlight llvm"><table><tr><td class="code"><pre><span class="line">git checkout -b dev</span><br><span class="line">git <span class="keyword">switch</span> -<span class="keyword">c</span> dev</span><br></pre></td></tr></table></figure>
+<h5 id="4、删除分支"><a href="#4、删除分支" class="headerlink" title="4、删除分支"></a>4、删除分支</h5><figure class="highlight applescript"><table><tr><td class="code"><pre><span class="line">git branch -d &lt;<span class="built_in">name</span>&gt;</span><br></pre></td></tr></table></figure>
+<p>如果要丢弃一个没有被合并过的分支，可以通过<code>git branch -D &lt;name&gt;</code>强行删除。</p>
+<h5 id="5、合并代码"><a href="#5、合并代码" class="headerlink" title="5、合并代码"></a>5、合并代码</h5><figure class="highlight nginx"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git</span> merge --<span class="literal">no</span>-ff -m <span class="string">&quot;注释。。。。&quot;</span> &lt;分支名&gt;</span><br></pre></td></tr></table></figure>
+<h5 id="6、stash"><a href="#6、stash" class="headerlink" title="6、stash"></a>6、stash</h5><p><strong>背景</strong><br>在一个新的需求开发过程中，我在dev分支开发了一些东西，但是并没有提交我也不想提交，这个时候来了一个bug，我必须将bug改完才能进行dev的开发，那么这个时候就需要用到<code>git stash</code>命令<br><strong>步骤</strong></p>
+<ul>
+<li>首先，我看看git仓库中的状态<br><img src="https://upload-images.jianshu.io/upload_images/15200008-a972ff6bedf30c71.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git状态"><br>可以看到，在dev分支，我创建了一个文件，修改了一个文件。</li>
+<li>然后，使用<code>git stash</code>命令，之后再来查看状态：<br><img src="https://upload-images.jianshu.io/upload_images/15200008-8e9e83fcd28a6c6e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="储藏代码"><br>此时工作区是干净的。然后我切换到master分支，创建一个issue分支，解决bug，合并到master，发版，之后再切换到dev分支，可以看到我的工作区还是干净的，那么之前的代码跑哪去了？</li>
+<li>使用<code>git stash list</code>可以查看储藏的代码列表<br><img src="https://upload-images.jianshu.io/upload_images/15200008-3b3f6b8f63f04ea9.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git stash list"></li>
+<li>现在我们需要恢复之前的代码，有两个命令可以参考：<figure class="highlight maxima"><table><tr><td class="code"><pre><span class="line">git stash <span class="built_in">apply</span></span><br><span class="line">git stash <span class="built_in">pop</span></span><br></pre></td></tr></table></figure>
+<code>git stash apply</code>命令恢复后，stash内容并不删除，你需要用<code>git stash drop</code>来删除；<br><img src="https://upload-images.jianshu.io/upload_images/15200008-b8880068ad06e4c5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git stash apply"></li>
+</ul>
+<p>另一种方式是用<code>git stash pop</code>，恢复的同时把stash内容也删了</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-41d742ccc7ace756.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git stash pop"></p>
+<ul>
+<li>你可以多次stash，恢复的时候，先用<code>git stash list</code>查看，然后恢复指定的stash，用命令:<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">git stash apply <span class="symbol">stash@</span>&#123;<span class="number">0</span>&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>扩展</strong><br>我们知道，master的bug修复之后，在现在的dev代码相关的bug并没有修复，所以，这个bug其实在当前dev分支上也存在。<br><em>如何快速修复？</em><br>同样的bug，要在dev上修复，我们只需要把<code>修复issuebug</code>这个提交所做的修改“复制”到dev分支。注意：我们只想复制<code>修复issuebug</code>这个提交所做的修改，并不是把整个master分支<code>merge</code>过来。</p>
+<p>为了方便操作，Git专门提供了一个<code>cherry-pick</code>命令，让我们能复制一个特定的提交到当前分支：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">git cherry-pick <span class="tag">&lt;<span class="name">版本号</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-30ceb22e3d0b5e90.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="修复bug"><br><img src="https://upload-images.jianshu.io/upload_images/15200008-81c651ad31eed27d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="image.png"></p>
+<p>用<code>git cherry-pick</code>，我们就不需要在dev分支上手动再把修bug的过程重复一遍。</p>
+<h3 id="几个命令的区别"><a href="#几个命令的区别" class="headerlink" title="几个命令的区别"></a>几个命令的区别</h3><h5 id="merge和rebase的区别"><a href="#merge和rebase的区别" class="headerlink" title="merge和rebase的区别"></a>merge和rebase的区别</h5><p>merge和rebase都是用来合并分支的。</p>
+<ul>
+<li>采用merge和rebase后，git log的区别，<strong>merge命令不会保留merge的分支的commit</strong>：</li>
+</ul>
+<p><img src="//upload-images.jianshu.io/upload_images/6081878-f7c90a58674a5584.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/895" alt="merge和rebase"></p>
+<ul>
+<li>处理冲突的方式：<br><code>（一股脑）</code>使用merge命令合并分支，解决完冲突，执行git add .和git commit -m ‘fix conflict’。这个时候会产生一个commit。<br><code>（交互式）</code>使用rebase命令合并分支，解决完冲突，执行git add .和git rebase –continue，不会产生额外的commit。这样的好处是”干净”，分支上不会有无意义的解决分支的commit；坏处：如果合并的分支中存在多个commit，需要重复处理多次冲突。<h5 id="git-pull和git-pull-–rebase"><a href="#git-pull和git-pull-–rebase" class="headerlink" title="git pull和git pull –rebase"></a>git pull和git pull –rebase</h5><code>git pull</code>做了两个操作分别是<code>获取</code>和<code>合并</code>。所以加了<code>rebase</code>就是以<code>rebase</code>的方式进行合并分支，默认为<code>merge</code>。<h5 id="git-merge-和-git-merge-–no-ff的区别"><a href="#git-merge-和-git-merge-–no-ff的区别" class="headerlink" title="git merge 和 git merge –no-ff的区别"></a>git merge 和 git merge –no-ff的区别</h5><code>git merge –no-ff</code> 可以保存你之前的分支历史。能够更好的查看 merge历史，以及branch 状态。<br><code>git merge</code> 则不会显示 feature，只保留单条分支记录。<br><img src="https://upload-images.jianshu.io/upload_images/15200008-f7ea47cfb59ac349.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git merge 和 git merge --no-ff的区别"></li>
+</ul>
+<h3 id="tag相关"><a href="#tag相关" class="headerlink" title="tag相关"></a>tag相关</h3><p>在当前分支的最新commit上打tag</p>
+<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">tag</span> <span class="title">v1</span>.<span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>在f52c633版本的提交上打tag</p>
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git</span> tag v<span class="number">0</span>.<span class="number">9</span> f<span class="number">52</span>c<span class="number">633</span></span><br></pre></td></tr></table></figure>
+<p>查看所有的tag</p>
+<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">tag</span></span><br></pre></td></tr></table></figure>
+<p><em>注意，标签不是按时间顺序列出，而是按字母排序的</em></p>
+<p>还可以创建带有说明的标签，用-a指定标签名，-m指定说明文字：</p>
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git</span> tag -a v<span class="number">0</span>.<span class="number">1</span> -m <span class="string">&quot;文字说明&quot;</span> <span class="number">1094</span>adb</span><br></pre></td></tr></table></figure>
+<p>用命令<code>git show &lt;tagname&gt;</code>可以看到说明文字<br>提交v1.0标签</p>
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="attribute">git</span> push origin v<span class="number">1</span>.<span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>提交所有的标签</p>
+<figure class="highlight maxima"><table><tr><td class="code"><pre><span class="line">git <span class="built_in">push</span> <span class="built_in">origin</span> --tags</span><br></pre></td></tr></table></figure>
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-57c8edc0e40ec346.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="标签"><br><img src="https://upload-images.jianshu.io/upload_images/15200008-5e47e69158aed78a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="tag"><br>从本地删除tag：</p>
+<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">git <span class="keyword">tag</span> <span class="title">-d</span> v0.<span class="number">9</span></span><br></pre></td></tr></table></figure>
+<p>删除远程tag：</p>
+<figure class="highlight elixir"><table><tr><td class="code"><pre><span class="line">git push origin <span class="symbol">:refs/tags/v0</span>.<span class="number">9</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-45ac44d2f7a193ff.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="tag删除"></p>
+<h3 id="Git-HEAD-与HEAD-的关系"><a href="#Git-HEAD-与HEAD-的关系" class="headerlink" title="Git HEAD^与HEAD~的关系"></a>Git HEAD^与HEAD~的关系</h3><p>一张图：<br><img src="https://upload-images.jianshu.io/upload_images/15200008-57f1b8f25ab5d35a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Git HEAD^与HEAD~的关系"></p>
+<h3 id="Git-reset后面跟的参数"><a href="#Git-reset后面跟的参数" class="headerlink" title="Git reset后面跟的参数"></a>Git reset后面跟的参数</h3><p>比如我在我的本地目录下面新建了一个文件c.txt，add到了我的暂存区（缓冲区），同时也commit提交到了本地仓库<br>默认：<code>git reset</code> = <code>git reset --mixed</code>，这个命令会跳转到指定版本、<strong>缓存区的文件还原、但是工作区（本地目录）下的文件不会还原</strong><br><code>git reset --hard</code>这个命令会跳转到指定版本、<strong>缓存区的文件还原、工作区（本地目录）下的文件也会被还原</strong><br><code>git reset --soft</code>这个命令会跳转到指定版本、<strong>缓存区的文件不会被还原、而且工作区（本地目录）下的文件也不会还原</strong></p>
+<h3 id="git-revert"><a href="#git-revert" class="headerlink" title="git revert"></a>git revert</h3><p><code>git revert</code>会产生一个commit，撤销某次操作，此次操作之前和之后的commit和history都会被保留，并且会把这次撤销作为一次最新的提交。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
       </tags>
   </entry>
   <entry>
@@ -1802,6 +1802,111 @@
       </tags>
   </entry>
   <entry>
+    <title>redis内部数据结构(3)--robj</title>
+    <url>/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-3-robj/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+从Redis的使用者的角度来看，一个Redis节点包含多个database（非cluster模式下默认是16个，cluster模式下只能是1个），而一个database维护了从key space到object space的映射关系。这个映射关系的key是string类型，而value可以是多种数据类型，比如：string, list, hash等。我们可以看到，key的类型固定是string，而value可能的类型是多个。
+
+<p>而从Redis内部实现的角度来看，在前面第一篇文章中，我们已经提到过，一个database内的这个映射关系是用一个dict来维护的。dict的key固定用一种数据结构来表达就够了，这就是动态字符串sds。而value则比较复杂，为了在同一个dict内能够存储不同类型的value，这就需要一个通用的数据结构，这个通用的数据结构就是robj（全名是redisObject）。举个例子：如果value是一个list，那么它的内部存储结构是一个quicklist；如果value是一个string，那么它的内部存储结构一般情况下是一个sds。当然实际情况更复杂一点，比如一个string类型的value，如果它的值是一个数字，那么Redis内部还会把它转成long型来存储，从而减小内存使用。而一个robj既能表示一个sds，也能表示一个quicklist，甚至还能表示一个long型。</p>
+<a id="more"></a>
+<h3 id="robj的数据结构定义"><a href="#robj的数据结构定义" class="headerlink" title="robj的数据结构定义"></a>robj的数据结构定义</h3><p>在server.h中我们找到跟robj定义相关的代码，如下（注意，本系列文章中的代码片段全部来源于Redis源码的3.2分支）：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* Object types */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_STRING 0</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_LIST 1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_SET 2</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ZSET 3</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_HASH 4</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* Objects encoding. Some kind of objects like Strings and Hashes can be</span></span><br><span class="line"><span class="comment"> * internally represented in multiple ways. The &#x27;encoding&#x27; field of the object</span></span><br><span class="line"><span class="comment"> * is set to one of this fields for this object. */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_RAW 0     <span class="comment">/* Raw representation */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_INT 1     <span class="comment">/* Encoded as integer */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_HT 2      <span class="comment">/* Encoded as hash table */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_ZIPMAP 3  <span class="comment">/* Encoded as zipmap */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_LINKEDLIST 4 <span class="comment">/* Encoded as regular linked list */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_ZIPLIST 5 <span class="comment">/* Encoded as ziplist */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_INTSET 6  <span class="comment">/* Encoded as intset */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_SKIPLIST 7  <span class="comment">/* Encoded as skiplist */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_EMBSTR 8  <span class="comment">/* Embedded sds string encoding */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_QUICKLIST 9 <span class="comment">/* Encoded as linked list of ziplists */</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LRU_BITS 24</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisObject</span> &#123;</span></span><br><span class="line">    <span class="keyword">unsigned</span> type:<span class="number">4</span>;</span><br><span class="line">    <span class="keyword">unsigned</span> encoding:<span class="number">4</span>;</span><br><span class="line">    <span class="keyword">unsigned</span> lru:LRU_BITS; <span class="comment">/* lru time (relative to server.lruclock) */</span></span><br><span class="line">    <span class="keyword">int</span> refcount;</span><br><span class="line">    <span class="keyword">void</span> *ptr;</span><br><span class="line">&#125; robj;</span><br></pre></td></tr></table></figure>
+<p>一个robj包含如下5个字段：</p>
+<ul>
+<li>type: 对象的数据类型。占4个bit。可能的取值有5种：OBJ_STRING, OBJ_LIST, OBJ_SET, OBJ_ZSET, OBJ_HASH，分别对应Redis对外暴露的5种数据结构（即我们在第一篇文章中提到的第一个层面的5种数据结构）。</li>
+<li>encoding: 对象的内部表示方式（也可以称为编码）。占4个bit。可能的取值有10种，即前面代码中的10个OBJ_ENCODING_XXX常量。</li>
+<li>lru: 做LRU替换算法用，占24个bit。这个不是我们这里讨论的重点，暂时忽略。</li>
+<li>refcount: 引用计数。它允许robj对象在某些情况下被共享。</li>
+<li>ptr: 数据指针。指向真正的数据。比如，一个代表string的robj，它的ptr可能指向一个sds结构；一个代表list的robj，它的ptr可能指向一个quicklist。</li>
+</ul>
+<p>这里特别需要仔细察看的是encoding字段。对于同一个type，还可能对应不同的encoding，这说明同样的一个数据类型，可能存在不同的内部表示方式。而不同的内部表示，在内存占用和查找性能上会有所不同。<br>比如，当type = OBJ_STRING的时候，表示这个robj存储的是一个string，这时encoding可以是下面3种中的一种：</p>
+<ul>
+<li>OBJ_ENCODING_RAW: string采用原生的表示方式，即用sds来表示。</li>
+<li>OBJ_ENCODING_INT: string采用数字的表示方式，实际上是一个long型。</li>
+<li>OBJ_ENCODING_EMBSTR: string采用一种特殊的嵌入式的sds来表示。</li>
+</ul>
+<p>再举一个例子：当type = OBJ_HASH的时候，表示这个robj存储的是一个hash，这时encoding可以是下面2种中的一种：</p>
+<ul>
+<li>OBJ_ENCODING_HT: hash采用一个dict来表示。</li>
+<li>OBJ_ENCODING_ZIPLIST: hash采用一个ziplist来表示（ziplist的具体实现我们放在后面的文章讨论）。</li>
+</ul>
+<p>本文剩余主要部分将针对表示string的robj对象，围绕它的3种不同的encoding来深入讨论。前面代码段中出现的所有10种encoding，在这里我们先简单解释一下，在这个系列后面的文章中，我们应该还有机会碰到它们。</p>
+<ul>
+<li>OBJ_ENCODING_RAW: 最原生的表示方式。其实只有string类型才会用这个encoding值（表示成sds）。</li>
+<li>OBJ_ENCODING_INT: 表示成数字。实际用long表示。</li>
+<li>OBJ_ENCODING_HT: 表示成dict。</li>
+<li>OBJ_ENCODING_ZIPMAP: 是个旧的表示方式，已不再用。在小于Redis 2.6的版本中才有。</li>
+<li>OBJ_ENCODING_LINKEDLIST: 也是个旧的表示方式，已不再用。</li>
+<li>OBJ_ENCODING_ZIPLIST: 表示成ziplist。</li>
+<li>OBJ_ENCODING_INTSET: 表示成intset。用于set数据结构。</li>
+<li>OBJ_ENCODING_SKIPLIST: 表示成skiplist。用于sorted set数据结构。</li>
+<li>OBJ_ENCODING_EMBSTR: 表示成一种特殊的嵌入式的sds。</li>
+<li>OBJ_ENCODING_QUICKLIST: 表示成quicklist。用于list数据结构。</li>
+</ul>
+<p><strong>robj的作用：</strong></p>
+<ul>
+<li>为多种数据类型提供一种统一的表示方式。</li>
+<li>允许同一类型的数据采用不同的内部表示，从而在某些情况下尽量节省内存。</li>
+<li>支持对象共享和引用计数。当对象被共享的时候，只占用一份内存拷贝，进一步节省内存。</li>
+</ul>
+<h3 id="string-robj的编码过程"><a href="#string-robj的编码过程" class="headerlink" title="string robj的编码过程"></a>string robj的编码过程</h3><p>当我们执行Redis的set命令的时候，Redis首先将接收到的value值（string类型）表示成一个type = OBJ_STRING并且encoding = OBJ_ENCODING_RAW的robj对象，然后在存入内部存储之前先执行一个编码过程，试图将它表示成另一种更节省内存的encoding方式。这一过程的核心代码，是object.c中的tryObjectEncoding函数。</p>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">robj *<span class="keyword">try</span><span class="constructor">ObjectEncoding(<span class="params">robj</span> <span class="operator">*</span><span class="params">o</span>)</span> &#123;</span><br><span class="line">    long value;</span><br><span class="line">    sds s = o-&gt;ptr;</span><br><span class="line">    size_t len;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Make sure this is a string object, the only type we encode</span></span><br><span class="line"><span class="comment">     * in this function. Other types use encoded memory efficient</span></span><br><span class="line"><span class="comment">     * representations but are handled by the commands implementing</span></span><br><span class="line"><span class="comment">     * the type. */</span></span><br><span class="line">    server<span class="constructor">AssertWithInfo(NULL,<span class="params">o</span>,<span class="params">o</span>-&gt;<span class="params">type</span> <span class="operator">==</span> OBJ_STRING)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* We try some specialized encoding only for objects that are</span></span><br><span class="line"><span class="comment">     * RAW or EMBSTR encoded, in other words objects that are still</span></span><br><span class="line"><span class="comment">     * in represented by an actually array of chars. */</span></span><br><span class="line">    <span class="keyword">if</span> (!sds<span class="constructor">EncodedObject(<span class="params">o</span>)</span>) return o;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* It&#x27;s not safe to encode shared objects: shared objects can be shared</span></span><br><span class="line"><span class="comment">     * everywhere in the &quot;object space&quot; of Redis and may end in places where</span></span><br><span class="line"><span class="comment">     * they are not handled. We handle them only as values in the keyspace. */</span></span><br><span class="line">     <span class="keyword">if</span> (o-&gt;refcount &gt; <span class="number">1</span>) return o;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Check if we can represent this string as a long integer.</span></span><br><span class="line"><span class="comment">     * Note that we are sure that a string larger than 21 chars is not</span></span><br><span class="line"><span class="comment">     * representable as a 32 nor 64 bit integer. */</span></span><br><span class="line">    len = sdslen(s);</span><br><span class="line">    <span class="keyword">if</span> (len &lt;= <span class="number">21</span><span class="operator"> &amp;&amp; </span>string2l(s,len,&amp;value)) &#123;</span><br><span class="line">        <span class="comment">/* This object is encodable as a long. Try to use a shared object.</span></span><br><span class="line"><span class="comment">         * Note that we avoid using shared integers when maxmemory is used</span></span><br><span class="line"><span class="comment">         * because every object needs to have a private LRU field for the LRU</span></span><br><span class="line"><span class="comment">         * algorithm to work well. */</span></span><br><span class="line">        <span class="keyword">if</span> ((server.maxmemory<span class="operator"> == </span><span class="number">0</span> <span class="pattern-match"><span class="operator">||</span></span></span><br><span class="line"><span class="pattern-match">             (server.maxmemory<span class="constructor">_policy</span> != <span class="constructor">MAXMEMORY_VOLATILE_LRU</span> <span class="operator">&amp;&amp;</span></span></span><br><span class="line"><span class="pattern-match">              server.maxmemory<span class="constructor">_policy</span> != <span class="constructor">MAXMEMORY_ALLKEYS_LRU</span>)) <span class="operator">&amp;&amp;</span></span></span><br><span class="line"><span class="pattern-match">            value &gt;= 0 <span class="operator">&amp;&amp;</span></span></span><br><span class="line"><span class="pattern-match">            value &lt; <span class="constructor">OBJ_SHARED_INTEGERS</span>)</span></span><br><span class="line"><span class="pattern-match">        &#123;</span></span><br><span class="line"><span class="pattern-match">            decr<span class="constructor">RefCount(<span class="params">o</span>)</span>;</span></span><br><span class="line"><span class="pattern-match">            incr<span class="constructor">RefCount(<span class="params">shared</span>.<span class="params">integers</span>[<span class="params">value</span>])</span>;</span></span><br><span class="line"><span class="pattern-match">            return shared.integers[value];</span></span><br><span class="line"><span class="pattern-match">        &#125; <span class="keyword">else</span> &#123;</span></span><br><span class="line"><span class="pattern-match">            <span class="keyword">if</span> (o-&gt;encoding <span class="operator">==</span> <span class="constructor">OBJ_ENCODING_RAW</span>) sdsfree(o-&gt;ptr);</span></span><br><span class="line"><span class="pattern-match">            o-&gt;encoding = <span class="constructor">OBJ_ENCODING_INT</span>;</span></span><br><span class="line"><span class="pattern-match">            o-&gt;ptr = (void<span class="operator">*</span>) value;</span></span><br><span class="line"><span class="pattern-match">            return o;</span></span><br><span class="line"><span class="pattern-match">        &#125;</span></span><br><span class="line"><span class="pattern-match">    &#125;</span></span><br><span class="line"><span class="pattern-match"></span></span><br><span class="line"><span class="pattern-match">    <span class="operator">/</span><span class="operator">*</span> <span class="constructor">If</span> the <span class="built_in">string</span> is small <span class="keyword">and</span> is still <span class="constructor">RAW</span> encoded,</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="keyword">try</span> the <span class="constructor">EMBSTR</span> encoding which is more efficient.</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="constructor">In</span> this representation the <span class="keyword">object</span> <span class="keyword">and</span> the <span class="constructor">SDS</span> <span class="built_in">string</span> are allocated</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="keyword">in</span> the same chunk <span class="keyword">of</span> memory <span class="keyword">to</span> save space <span class="keyword">and</span> cache misses. <span class="operator">*</span><span class="operator">/</span></span></span><br><span class="line"><span class="pattern-match">    <span class="keyword">if</span> (len &lt;= <span class="constructor">OBJ_ENCODING_EMBSTR_SIZE_LIMIT</span>) &#123;</span></span><br><span class="line"><span class="pattern-match">        robj <span class="operator">*</span>emb;</span></span><br><span class="line"><span class="pattern-match"></span></span><br><span class="line"><span class="pattern-match">        <span class="keyword">if</span> (o-&gt;encoding <span class="operator">==</span> <span class="constructor">OBJ_ENCODING_EMBSTR</span>) return o;</span></span><br><span class="line"><span class="pattern-match">        emb = create<span class="constructor">EmbeddedStringObject(<span class="params">s</span>,<span class="params">sdslen</span>(<span class="params">s</span>)</span>);</span></span><br><span class="line"><span class="pattern-match">        decr<span class="constructor">RefCount(<span class="params">o</span>)</span>;</span></span><br><span class="line"><span class="pattern-match">        return emb;</span></span><br><span class="line"><span class="pattern-match">    &#125;</span></span><br><span class="line"><span class="pattern-match"></span></span><br><span class="line"><span class="pattern-match">    <span class="operator">/</span><span class="operator">*</span> <span class="constructor">We</span> can&#x27;t encode the <span class="keyword">object</span><span class="operator">...</span></span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span></span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="constructor">Do</span> the last <span class="keyword">try</span>, <span class="keyword">and</span> at least optimize the <span class="constructor">SDS</span> <span class="built_in">string</span> inside</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> the <span class="built_in">string</span> <span class="keyword">object</span> <span class="keyword">to</span> require little space, <span class="keyword">in</span> case there</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> is more than 10% <span class="keyword">of</span> free space at the <span class="keyword">end</span> <span class="keyword">of</span> the <span class="constructor">SDS</span> <span class="built_in">string</span>.</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span></span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="constructor">We</span> <span class="keyword">do</span> that only <span class="keyword">for</span> relatively large strings <span class="keyword">as</span> this branch</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> is only entered <span class="keyword">if</span> the length <span class="keyword">of</span> the <span class="built_in">string</span> is greater than</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="constructor">OBJ_ENCODING_EMBSTR_SIZE_LIMIT</span>. <span class="operator">*</span><span class="operator">/</span></span></span><br><span class="line"><span class="pattern-match">    <span class="keyword">if</span> (o-&gt;encoding <span class="operator">==</span> <span class="constructor">OBJ_ENCODING_RAW</span> <span class="operator">&amp;&amp;</span></span></span><br><span class="line"><span class="pattern-match">        sdsavail(s) &gt; len<span class="operator">/</span>10)</span></span><br><span class="line"><span class="pattern-match">    &#123;</span></span><br><span class="line"><span class="pattern-match">        o-&gt;ptr = sds<span class="constructor">RemoveFreeSpace(<span class="params">o</span>-&gt;<span class="params">ptr</span>)</span>;</span></span><br><span class="line"><span class="pattern-match">    &#125;</span></span><br><span class="line"><span class="pattern-match"></span></span><br><span class="line"><span class="pattern-match">    <span class="operator">/</span><span class="operator">*</span> <span class="constructor">Return</span> the original <span class="keyword">object</span>. <span class="operator">*</span><span class="operator">/</span></span></span><br><span class="line"><span class="pattern-match">    return o;</span></span><br><span class="line"><span class="pattern-match">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>这段代码执行的操作比较复杂，我们有必要仔细看一下每一步的操作：</p>
+<ul>
+<li>第1步检查，检查type。确保只对string类型的对象进行操作。</li>
+<li>第2步检查，检查encoding。sdsEncodedObject是定义在server.h中的一个宏，确保只对OBJ_ENCODING_RAW和OBJ_ENCODING_EMBSTR编码的string对象进行操作。这两种编码的string都采用sds来存储，可以尝试进一步编码处理。</li>
+<li>第3步检查，检查refcount。引用计数大于1的共享对象，在多处被引用。由于编码过程结束后robj的对象指针可能会变化（我们在前一篇介绍sdscatlen函数的时候提到过类似这种接口使用模式），这样对于引用计数大于1的对象，就需要更新所有地方的引用，这不容易做到。因此，对于计数大于1的对象不做编码处理。</li>
+<li>试图将字符串转成64位的long。64位的long所能表达的数据范围是-2^63到2^63-1，用十进制表达出来最长是20位数（包括负号）。这里判断小于等于21，似乎是写多了，实际判断小于等于20就够了（如果我算错了请一定告诉我哦）。string2l如果将字符串转成long转成功了，那么会返回1并且将转好的long存到value变量里。</li>
+<li>在转成long成功时，又分为两种情况。<br>  第一种情况：如果Redis的配置不要求运行LRU替换算法，且转成的long型数字的值又比较小（小于OBJ_SHARED_INTEGERS，在目前的实现中这个值是10000），那么会使用共享数字对象来表示。之所以这里的判断跟LRU有关，是因为LRU算法要求每个robj有不同的lru字段值，所以用了LRU就不能共享robj。shared.integers是一个长度为10000的数组，里面预存了10000个小的数字对象。这些小数字对象都是encoding = OBJ_ENCODING_INT的string robj对象。<br>  第二种情况：如果前一步不能使用共享小对象来表示，那么将原来的robj编码成encoding = OBJ_ENCODING_INT，这时ptr字段直接存成这个long型的值。注意ptr字段本来是一个void *指针（即存储的是内存地址），因此在64位机器上有64位宽度，正好能存储一个64位的long型值。这样，除了robj本身之外，它就不再需要额外的内存空间来存储字符串值。</li>
+<li>接下来是对于那些不能转成64位long的字符串进行处理。最后再做两步处理：<br>  如果字符串长度足够小（小于等于OBJ_ENCODING_EMBSTR_SIZE_LIMIT，定义为44），那么调用createEmbeddedStringObject编码成encoding = OBJ_ENCODING_EMBSTR；<br>  如果前面所有的编码尝试都没有成功（仍然是OBJ_ENCODING_RAW），且sds里空余字节过多，那么做最后一次努力，调用sds的sdsRemoveFreeSpace接口来释放空余字节。</li>
+</ul>
+<p>其中调用的createEmbeddedStringObject，我们有必要看一下它的代码：</p>
+<figure class="highlight xl"><table><tr><td class="code"><pre><span class="line">robj *createEmbeddedStringObject(const char *ptr, size_t len) &#123;</span><br><span class="line">    robj *o = zmalloc(sizeof(robj)+sizeof(struct sdshdr8)+len+<span class="number">1</span>);</span><br><span class="line">    struct sdshdr8 *sh = (void*)(o+<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="title">o</span>-&gt;</span>type = OBJ_STRING;</span><br><span class="line">    <span class="function"><span class="title">o</span>-&gt;</span>encoding = OBJ_ENCODING_EMBSTR;</span><br><span class="line">    <span class="function"><span class="title">o</span>-&gt;</span>ptr = sh+<span class="number">1</span>;</span><br><span class="line">    <span class="function"><span class="title">o</span>-&gt;</span>refcount = <span class="number">1</span>;</span><br><span class="line">    <span class="function"><span class="title">o</span>-&gt;</span>lru = LRU_CLOCK();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="title">sh</span>-&gt;</span>len = len;</span><br><span class="line">    <span class="function"><span class="title">sh</span>-&gt;</span>alloc = len;</span><br><span class="line">    <span class="function"><span class="title">sh</span>-&gt;</span>flags = SDS_TYPE_8;</span><br><span class="line">    <span class="keyword">if</span> (ptr) &#123;</span><br><span class="line">        <span class="function"><span class="title">memcpy</span>(sh-&gt;</span>buf,ptr,len);</span><br><span class="line">        <span class="function"><span class="title">sh</span>-&gt;</span>buf[len] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="function"><span class="title">memset</span>(sh-&gt;</span>buf,<span class="number">0</span>,len+<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    return o;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>createEmbeddedStringObject对sds重新分配内存，将robj和sds放在一个连续的内存块中分配，这样对于短字符串的存储有利于减少内存碎片。这个连续的内存块包含如下几部分：</p>
+<ul>
+<li>16个字节的robj结构。</li>
+<li>3个字节的sdshdr8头。</li>
+<li>最多44个字节的sds字符数组。</li>
+<li>1个NULL结束符。</li>
+</ul>
+<p>加起来一共不超过64字节（16+3+44+1），因此这样的一个短字符串可以完全分配在一个64字节长度的内存块中。</p>
+<h3 id="string-robj的解码过程"><a href="#string-robj的解码过程" class="headerlink" title="string robj的解码过程"></a>string robj的解码过程</h3><p>当我们需要获取字符串的值，比如执行get命令的时候，我们需要执行与前面讲的编码过程相反的操作——解码。</p>
+<p>这一解码过程的核心代码，是object.c中的getDecodedObject函数。</p>
+<figure class="highlight lisp"><table><tr><td class="code"><pre><span class="line">robj *getDecodedObject(<span class="name">robj</span> *o) &#123;</span><br><span class="line">    robj *dec<span class="comment">;</span></span><br><span class="line"></span><br><span class="line">    if (<span class="name">sdsEncodedObject</span>(<span class="name">o</span>)) &#123;</span><br><span class="line">        incrRefCount(<span class="name">o</span>)<span class="comment">;</span></span><br><span class="line">        return o<span class="comment">;</span></span><br><span class="line">    &#125;</span><br><span class="line">    if (<span class="name">o-&gt;type</span> == OBJ_STRING <span class="symbol">&amp;&amp;</span> o-&gt;encoding == OBJ_ENCODING_INT) &#123;</span><br><span class="line">        char buf[<span class="number">32</span>]<span class="comment">;</span></span><br><span class="line"></span><br><span class="line">        ll2string(<span class="name">buf</span>,<span class="number">32</span>,(<span class="name">long</span>)o-&gt;ptr)<span class="comment">;</span></span><br><span class="line">        dec = createStringObject(<span class="name">buf</span>,strlen(<span class="name">buf</span>))<span class="comment">;</span></span><br><span class="line">        return dec<span class="comment">;</span></span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        serverPanic(<span class="string">&quot;Unknown encoding type&quot;</span>)<span class="comment">;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个过程比较简单，需要我们注意的点有：</p>
+<ul>
+<li>编码为OBJ_ENCODING_RAW和OBJ_ENCODING_EMBSTR的字符串robj对象，不做变化，原封不动返回。站在使用者的角度，这两种编码没有什么区别，内部都是封装的sds。</li>
+<li>编码为数字的字符串robj对象，将long重新转为十进制字符串的形式，然后调用createStringObject转为sds的表示。注意：这里由long转成的sds字符串长度肯定不超过20，而根据createStringObject的实现，它们肯定会被编码成OBJ_ENCODING_EMBSTR的对象。createStringObject的代码如下：<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">robj *create<span class="constructor">StringObject(<span class="params">const</span> <span class="params">char</span> <span class="operator">*</span><span class="params">ptr</span>, <span class="params">size_t</span> <span class="params">len</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (len &lt;= OBJ_ENCODING_EMBSTR_SIZE_LIMIT)</span><br><span class="line">        return create<span class="constructor">EmbeddedStringObject(<span class="params">ptr</span>,<span class="params">len</span>)</span>;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        return create<span class="constructor">RawStringObject(<span class="params">ptr</span>,<span class="params">len</span>)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="再谈sds与string的关系"><a href="#再谈sds与string的关系" class="headerlink" title="再谈sds与string的关系"></a>再谈sds与string的关系</h3><p>在上一篇文章中，我们简单地提到了sds与string的关系；在本文介绍了robj的概念之后，我们重新总结一下sds与string的关系。</p>
+<ul>
+<li>确切地说，string在Redis中是用一个robj来表示的。</li>
+<li>用来表示string的robj可能编码成3种内部表示：OBJ_ENCODING_RAW, OBJ_ENCODING_EMBSTR, OBJ_ENCODING_INT。其中前两种编码使用的是sds来存储，最后一种OBJ_ENCODING_INT编码直接把string存成了long型。</li>
+<li>在对string进行incr, decr等操作的时候，如果它内部是OBJ_ENCODING_INT编码，那么可以直接进行加减操作；如果它内部是OBJ_ENCODING_RAW或OBJ_ENCODING_EMBSTR编码，那么Redis会先试图把sds存储的字符串转成long型，如果能转成功，再进行加减操作。</li>
+<li>对一个内部表示成long型的string执行append, setbit, getrange这些命令，针对的仍然是string的值（即十进制表示的字符串），而不是针对内部表示的long型进行操作。比如字符串”32”，如果按照字符数组来解释，它包含两个字符，它们的ASCII码分别是0x33和0x32。当我们执行命令setbit key 7 0的时候，相当于把字符0x33变成了0x32，这样字符串的值就变成了”22”。而如果将字符串”32”按照内部的64位long型来解释，那么它是0x0000000000000020，在这个基础上执行setbit位操作，结果就完全不对了。因此，在这些命令的实现中，会把long型先转成字符串再进行相应的操作。由于篇幅原因，这三个命令的实现代码这里就不详细介绍了，有兴趣的读者可以参考Redis源码：<br>  t_string.c中的appendCommand函数；<br>  biops.c中的setbitCommand函数；<br>  t_string.c中的getrangeCommand函数。</li>
+</ul>
+<p>值得一提的是，append和setbit命令的实现中，都会最终调用到db.c中的dbUnshareStringValue函数，将string对象的内部编码转成OBJ_ENCODING_RAW的（只有这种编码的robj对象，其内部的sds 才能在后面自由追加新的内容），并解除可能存在的对象共享状态。这里面调用了前面提到的getDecodedObject。</p>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">robj *db<span class="constructor">UnshareStringValue(<span class="params">redisDb</span> <span class="operator">*</span><span class="params">db</span>, <span class="params">robj</span> <span class="operator">*</span><span class="params">key</span>, <span class="params">robj</span> <span class="operator">*</span><span class="params">o</span>)</span> &#123;</span><br><span class="line">    server<span class="constructor">Assert(<span class="params">o</span>-&gt;<span class="params">type</span> <span class="operator">==</span> OBJ_STRING)</span>;</span><br><span class="line">    <span class="keyword">if</span> (o-&gt;refcount != <span class="number">1</span><span class="operator"> || </span>o-&gt;encoding != OBJ_ENCODING_RAW) &#123;</span><br><span class="line">        robj *decoded = get<span class="constructor">DecodedObject(<span class="params">o</span>)</span>;</span><br><span class="line">        o = create<span class="constructor">RawStringObject(<span class="params">decoded</span>-&gt;<span class="params">ptr</span>, <span class="params">sdslen</span>(<span class="params">decoded</span>-&gt;<span class="params">ptr</span>)</span>);</span><br><span class="line">        decr<span class="constructor">RefCount(<span class="params">decoded</span>)</span>;</span><br><span class="line">        db<span class="constructor">Overwrite(<span class="params">db</span>,<span class="params">key</span>,<span class="params">o</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    return o;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="robj的引用计数操作"><a href="#robj的引用计数操作" class="headerlink" title="robj的引用计数操作"></a>robj的引用计数操作</h3><p>将robj的引用计数加1和减1的操作，定义在object.c中：</p>
+<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">void</span> incrRefCount(robj *o) &#123;</span><br><span class="line">    o-&gt;refcount++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> decrRefCount(robj *o) &#123;</span><br><span class="line">    <span class="keyword">if</span> (o-&gt;refcount &lt;= <span class="number">0</span>) serverPanic(<span class="string">&quot;decrRefCount against refcount &lt;= 0&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (o-&gt;refcount == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">switch</span>(o-&gt;type) &#123;</span><br><span class="line">        <span class="keyword">case</span> OBJ_STRING: freeStringObject(o); <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OBJ_LIST: freeListObject(o); <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OBJ_SET: freeSetObject(o); <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OBJ_ZSET: freeZsetObject(o); <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OBJ_HASH: freeHashObject(o); <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>: serverPanic(<span class="string">&quot;Unknown object type&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        zfree(o);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        o-&gt;refcount--;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们特别关注一下将引用计数减1的操作decrRefCount。如果只剩下最后一个引用了（refcount已经是1了），那么在decrRefCount被调用后，整个robj将被释放。</p>
+<p>注意：Redis的del命令就依赖<code>decrRefCount</code>操作将value释放掉。</p>
+<hr>
+<p>经过了本文的讨论，我们很容易看出，robj所表示的就是Redis对外暴露的第一层面的数据结构：string, list, hash, set, sorted set，而每一种数据结构的底层实现所对应的是哪个（或哪些）第二层面的数据结构（dict, sds, ziplist, quicklist, skiplist, 等），则通过不同的encoding来区分。可以说，robj是联结两个层面的数据结构的桥梁。</p>
+<p>本文详细介绍了OBJ_STRING类型的字符串对象的底层实现，其编码和解码过程在Redis里非常重要，应用广泛，我们在后面的讨论中可能还会遇到。现在有了robj的概念基础，我们下一篇会讨论ziplist，以及它与hash的关系。</p>
+]]></content>
+      <categories>
+        <category>中间件</category>
+      </categories>
+      <tags>
+        <tag>redis</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>redis内部数据结构(2)--sds</title>
     <url>/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-2-sds/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -1917,111 +2022,6 @@
 <li>setbit和getrange都是先根据key取到整个sds字符串，然后再从字符串选取或修改指定的部分。由于sds就是一个字符数组，所以对它的某一部分进行操作似乎都比较简单。</li>
 </ul>
 <p>但是，string除了支持这些操作之外，当它存储的值是个数字的时候，它还支持incr、decr等操作。那么，当string存储数字值的时候，它的内部存储还是sds吗？实际上，不是了。而且，这种情况下，setbit和getrange的实现也会有所不同。这些细节，我们放在下一篇介绍robj的时候再进行系统地讨论。</p>
-]]></content>
-      <categories>
-        <category>中间件</category>
-      </categories>
-      <tags>
-        <tag>redis</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>redis内部数据结构(3)--robj</title>
-    <url>/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-3-robj/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-从Redis的使用者的角度来看，一个Redis节点包含多个database（非cluster模式下默认是16个，cluster模式下只能是1个），而一个database维护了从key space到object space的映射关系。这个映射关系的key是string类型，而value可以是多种数据类型，比如：string, list, hash等。我们可以看到，key的类型固定是string，而value可能的类型是多个。
-
-<p>而从Redis内部实现的角度来看，在前面第一篇文章中，我们已经提到过，一个database内的这个映射关系是用一个dict来维护的。dict的key固定用一种数据结构来表达就够了，这就是动态字符串sds。而value则比较复杂，为了在同一个dict内能够存储不同类型的value，这就需要一个通用的数据结构，这个通用的数据结构就是robj（全名是redisObject）。举个例子：如果value是一个list，那么它的内部存储结构是一个quicklist；如果value是一个string，那么它的内部存储结构一般情况下是一个sds。当然实际情况更复杂一点，比如一个string类型的value，如果它的值是一个数字，那么Redis内部还会把它转成long型来存储，从而减小内存使用。而一个robj既能表示一个sds，也能表示一个quicklist，甚至还能表示一个long型。</p>
-<a id="more"></a>
-<h3 id="robj的数据结构定义"><a href="#robj的数据结构定义" class="headerlink" title="robj的数据结构定义"></a>robj的数据结构定义</h3><p>在server.h中我们找到跟robj定义相关的代码，如下（注意，本系列文章中的代码片段全部来源于Redis源码的3.2分支）：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* Object types */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_STRING 0</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_LIST 1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_SET 2</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ZSET 3</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_HASH 4</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* Objects encoding. Some kind of objects like Strings and Hashes can be</span></span><br><span class="line"><span class="comment"> * internally represented in multiple ways. The &#x27;encoding&#x27; field of the object</span></span><br><span class="line"><span class="comment"> * is set to one of this fields for this object. */</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_RAW 0     <span class="comment">/* Raw representation */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_INT 1     <span class="comment">/* Encoded as integer */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_HT 2      <span class="comment">/* Encoded as hash table */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_ZIPMAP 3  <span class="comment">/* Encoded as zipmap */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_LINKEDLIST 4 <span class="comment">/* Encoded as regular linked list */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_ZIPLIST 5 <span class="comment">/* Encoded as ziplist */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_INTSET 6  <span class="comment">/* Encoded as intset */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_SKIPLIST 7  <span class="comment">/* Encoded as skiplist */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_EMBSTR 8  <span class="comment">/* Embedded sds string encoding */</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> OBJ_ENCODING_QUICKLIST 9 <span class="comment">/* Encoded as linked list of ziplists */</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> LRU_BITS 24</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">redisObject</span> &#123;</span></span><br><span class="line">    <span class="keyword">unsigned</span> type:<span class="number">4</span>;</span><br><span class="line">    <span class="keyword">unsigned</span> encoding:<span class="number">4</span>;</span><br><span class="line">    <span class="keyword">unsigned</span> lru:LRU_BITS; <span class="comment">/* lru time (relative to server.lruclock) */</span></span><br><span class="line">    <span class="keyword">int</span> refcount;</span><br><span class="line">    <span class="keyword">void</span> *ptr;</span><br><span class="line">&#125; robj;</span><br></pre></td></tr></table></figure>
-<p>一个robj包含如下5个字段：</p>
-<ul>
-<li>type: 对象的数据类型。占4个bit。可能的取值有5种：OBJ_STRING, OBJ_LIST, OBJ_SET, OBJ_ZSET, OBJ_HASH，分别对应Redis对外暴露的5种数据结构（即我们在第一篇文章中提到的第一个层面的5种数据结构）。</li>
-<li>encoding: 对象的内部表示方式（也可以称为编码）。占4个bit。可能的取值有10种，即前面代码中的10个OBJ_ENCODING_XXX常量。</li>
-<li>lru: 做LRU替换算法用，占24个bit。这个不是我们这里讨论的重点，暂时忽略。</li>
-<li>refcount: 引用计数。它允许robj对象在某些情况下被共享。</li>
-<li>ptr: 数据指针。指向真正的数据。比如，一个代表string的robj，它的ptr可能指向一个sds结构；一个代表list的robj，它的ptr可能指向一个quicklist。</li>
-</ul>
-<p>这里特别需要仔细察看的是encoding字段。对于同一个type，还可能对应不同的encoding，这说明同样的一个数据类型，可能存在不同的内部表示方式。而不同的内部表示，在内存占用和查找性能上会有所不同。<br>比如，当type = OBJ_STRING的时候，表示这个robj存储的是一个string，这时encoding可以是下面3种中的一种：</p>
-<ul>
-<li>OBJ_ENCODING_RAW: string采用原生的表示方式，即用sds来表示。</li>
-<li>OBJ_ENCODING_INT: string采用数字的表示方式，实际上是一个long型。</li>
-<li>OBJ_ENCODING_EMBSTR: string采用一种特殊的嵌入式的sds来表示。</li>
-</ul>
-<p>再举一个例子：当type = OBJ_HASH的时候，表示这个robj存储的是一个hash，这时encoding可以是下面2种中的一种：</p>
-<ul>
-<li>OBJ_ENCODING_HT: hash采用一个dict来表示。</li>
-<li>OBJ_ENCODING_ZIPLIST: hash采用一个ziplist来表示（ziplist的具体实现我们放在后面的文章讨论）。</li>
-</ul>
-<p>本文剩余主要部分将针对表示string的robj对象，围绕它的3种不同的encoding来深入讨论。前面代码段中出现的所有10种encoding，在这里我们先简单解释一下，在这个系列后面的文章中，我们应该还有机会碰到它们。</p>
-<ul>
-<li>OBJ_ENCODING_RAW: 最原生的表示方式。其实只有string类型才会用这个encoding值（表示成sds）。</li>
-<li>OBJ_ENCODING_INT: 表示成数字。实际用long表示。</li>
-<li>OBJ_ENCODING_HT: 表示成dict。</li>
-<li>OBJ_ENCODING_ZIPMAP: 是个旧的表示方式，已不再用。在小于Redis 2.6的版本中才有。</li>
-<li>OBJ_ENCODING_LINKEDLIST: 也是个旧的表示方式，已不再用。</li>
-<li>OBJ_ENCODING_ZIPLIST: 表示成ziplist。</li>
-<li>OBJ_ENCODING_INTSET: 表示成intset。用于set数据结构。</li>
-<li>OBJ_ENCODING_SKIPLIST: 表示成skiplist。用于sorted set数据结构。</li>
-<li>OBJ_ENCODING_EMBSTR: 表示成一种特殊的嵌入式的sds。</li>
-<li>OBJ_ENCODING_QUICKLIST: 表示成quicklist。用于list数据结构。</li>
-</ul>
-<p><strong>robj的作用：</strong></p>
-<ul>
-<li>为多种数据类型提供一种统一的表示方式。</li>
-<li>允许同一类型的数据采用不同的内部表示，从而在某些情况下尽量节省内存。</li>
-<li>支持对象共享和引用计数。当对象被共享的时候，只占用一份内存拷贝，进一步节省内存。</li>
-</ul>
-<h3 id="string-robj的编码过程"><a href="#string-robj的编码过程" class="headerlink" title="string robj的编码过程"></a>string robj的编码过程</h3><p>当我们执行Redis的set命令的时候，Redis首先将接收到的value值（string类型）表示成一个type = OBJ_STRING并且encoding = OBJ_ENCODING_RAW的robj对象，然后在存入内部存储之前先执行一个编码过程，试图将它表示成另一种更节省内存的encoding方式。这一过程的核心代码，是object.c中的tryObjectEncoding函数。</p>
-<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">robj *<span class="keyword">try</span><span class="constructor">ObjectEncoding(<span class="params">robj</span> <span class="operator">*</span><span class="params">o</span>)</span> &#123;</span><br><span class="line">    long value;</span><br><span class="line">    sds s = o-&gt;ptr;</span><br><span class="line">    size_t len;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Make sure this is a string object, the only type we encode</span></span><br><span class="line"><span class="comment">     * in this function. Other types use encoded memory efficient</span></span><br><span class="line"><span class="comment">     * representations but are handled by the commands implementing</span></span><br><span class="line"><span class="comment">     * the type. */</span></span><br><span class="line">    server<span class="constructor">AssertWithInfo(NULL,<span class="params">o</span>,<span class="params">o</span>-&gt;<span class="params">type</span> <span class="operator">==</span> OBJ_STRING)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* We try some specialized encoding only for objects that are</span></span><br><span class="line"><span class="comment">     * RAW or EMBSTR encoded, in other words objects that are still</span></span><br><span class="line"><span class="comment">     * in represented by an actually array of chars. */</span></span><br><span class="line">    <span class="keyword">if</span> (!sds<span class="constructor">EncodedObject(<span class="params">o</span>)</span>) return o;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* It&#x27;s not safe to encode shared objects: shared objects can be shared</span></span><br><span class="line"><span class="comment">     * everywhere in the &quot;object space&quot; of Redis and may end in places where</span></span><br><span class="line"><span class="comment">     * they are not handled. We handle them only as values in the keyspace. */</span></span><br><span class="line">     <span class="keyword">if</span> (o-&gt;refcount &gt; <span class="number">1</span>) return o;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Check if we can represent this string as a long integer.</span></span><br><span class="line"><span class="comment">     * Note that we are sure that a string larger than 21 chars is not</span></span><br><span class="line"><span class="comment">     * representable as a 32 nor 64 bit integer. */</span></span><br><span class="line">    len = sdslen(s);</span><br><span class="line">    <span class="keyword">if</span> (len &lt;= <span class="number">21</span><span class="operator"> &amp;&amp; </span>string2l(s,len,&amp;value)) &#123;</span><br><span class="line">        <span class="comment">/* This object is encodable as a long. Try to use a shared object.</span></span><br><span class="line"><span class="comment">         * Note that we avoid using shared integers when maxmemory is used</span></span><br><span class="line"><span class="comment">         * because every object needs to have a private LRU field for the LRU</span></span><br><span class="line"><span class="comment">         * algorithm to work well. */</span></span><br><span class="line">        <span class="keyword">if</span> ((server.maxmemory<span class="operator"> == </span><span class="number">0</span> <span class="pattern-match"><span class="operator">||</span></span></span><br><span class="line"><span class="pattern-match">             (server.maxmemory<span class="constructor">_policy</span> != <span class="constructor">MAXMEMORY_VOLATILE_LRU</span> <span class="operator">&amp;&amp;</span></span></span><br><span class="line"><span class="pattern-match">              server.maxmemory<span class="constructor">_policy</span> != <span class="constructor">MAXMEMORY_ALLKEYS_LRU</span>)) <span class="operator">&amp;&amp;</span></span></span><br><span class="line"><span class="pattern-match">            value &gt;= 0 <span class="operator">&amp;&amp;</span></span></span><br><span class="line"><span class="pattern-match">            value &lt; <span class="constructor">OBJ_SHARED_INTEGERS</span>)</span></span><br><span class="line"><span class="pattern-match">        &#123;</span></span><br><span class="line"><span class="pattern-match">            decr<span class="constructor">RefCount(<span class="params">o</span>)</span>;</span></span><br><span class="line"><span class="pattern-match">            incr<span class="constructor">RefCount(<span class="params">shared</span>.<span class="params">integers</span>[<span class="params">value</span>])</span>;</span></span><br><span class="line"><span class="pattern-match">            return shared.integers[value];</span></span><br><span class="line"><span class="pattern-match">        &#125; <span class="keyword">else</span> &#123;</span></span><br><span class="line"><span class="pattern-match">            <span class="keyword">if</span> (o-&gt;encoding <span class="operator">==</span> <span class="constructor">OBJ_ENCODING_RAW</span>) sdsfree(o-&gt;ptr);</span></span><br><span class="line"><span class="pattern-match">            o-&gt;encoding = <span class="constructor">OBJ_ENCODING_INT</span>;</span></span><br><span class="line"><span class="pattern-match">            o-&gt;ptr = (void<span class="operator">*</span>) value;</span></span><br><span class="line"><span class="pattern-match">            return o;</span></span><br><span class="line"><span class="pattern-match">        &#125;</span></span><br><span class="line"><span class="pattern-match">    &#125;</span></span><br><span class="line"><span class="pattern-match"></span></span><br><span class="line"><span class="pattern-match">    <span class="operator">/</span><span class="operator">*</span> <span class="constructor">If</span> the <span class="built_in">string</span> is small <span class="keyword">and</span> is still <span class="constructor">RAW</span> encoded,</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="keyword">try</span> the <span class="constructor">EMBSTR</span> encoding which is more efficient.</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="constructor">In</span> this representation the <span class="keyword">object</span> <span class="keyword">and</span> the <span class="constructor">SDS</span> <span class="built_in">string</span> are allocated</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="keyword">in</span> the same chunk <span class="keyword">of</span> memory <span class="keyword">to</span> save space <span class="keyword">and</span> cache misses. <span class="operator">*</span><span class="operator">/</span></span></span><br><span class="line"><span class="pattern-match">    <span class="keyword">if</span> (len &lt;= <span class="constructor">OBJ_ENCODING_EMBSTR_SIZE_LIMIT</span>) &#123;</span></span><br><span class="line"><span class="pattern-match">        robj <span class="operator">*</span>emb;</span></span><br><span class="line"><span class="pattern-match"></span></span><br><span class="line"><span class="pattern-match">        <span class="keyword">if</span> (o-&gt;encoding <span class="operator">==</span> <span class="constructor">OBJ_ENCODING_EMBSTR</span>) return o;</span></span><br><span class="line"><span class="pattern-match">        emb = create<span class="constructor">EmbeddedStringObject(<span class="params">s</span>,<span class="params">sdslen</span>(<span class="params">s</span>)</span>);</span></span><br><span class="line"><span class="pattern-match">        decr<span class="constructor">RefCount(<span class="params">o</span>)</span>;</span></span><br><span class="line"><span class="pattern-match">        return emb;</span></span><br><span class="line"><span class="pattern-match">    &#125;</span></span><br><span class="line"><span class="pattern-match"></span></span><br><span class="line"><span class="pattern-match">    <span class="operator">/</span><span class="operator">*</span> <span class="constructor">We</span> can&#x27;t encode the <span class="keyword">object</span><span class="operator">...</span></span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span></span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="constructor">Do</span> the last <span class="keyword">try</span>, <span class="keyword">and</span> at least optimize the <span class="constructor">SDS</span> <span class="built_in">string</span> inside</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> the <span class="built_in">string</span> <span class="keyword">object</span> <span class="keyword">to</span> require little space, <span class="keyword">in</span> case there</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> is more than 10% <span class="keyword">of</span> free space at the <span class="keyword">end</span> <span class="keyword">of</span> the <span class="constructor">SDS</span> <span class="built_in">string</span>.</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span></span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="constructor">We</span> <span class="keyword">do</span> that only <span class="keyword">for</span> relatively large strings <span class="keyword">as</span> this branch</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> is only entered <span class="keyword">if</span> the length <span class="keyword">of</span> the <span class="built_in">string</span> is greater than</span></span><br><span class="line"><span class="pattern-match">     <span class="operator">*</span> <span class="constructor">OBJ_ENCODING_EMBSTR_SIZE_LIMIT</span>. <span class="operator">*</span><span class="operator">/</span></span></span><br><span class="line"><span class="pattern-match">    <span class="keyword">if</span> (o-&gt;encoding <span class="operator">==</span> <span class="constructor">OBJ_ENCODING_RAW</span> <span class="operator">&amp;&amp;</span></span></span><br><span class="line"><span class="pattern-match">        sdsavail(s) &gt; len<span class="operator">/</span>10)</span></span><br><span class="line"><span class="pattern-match">    &#123;</span></span><br><span class="line"><span class="pattern-match">        o-&gt;ptr = sds<span class="constructor">RemoveFreeSpace(<span class="params">o</span>-&gt;<span class="params">ptr</span>)</span>;</span></span><br><span class="line"><span class="pattern-match">    &#125;</span></span><br><span class="line"><span class="pattern-match"></span></span><br><span class="line"><span class="pattern-match">    <span class="operator">/</span><span class="operator">*</span> <span class="constructor">Return</span> the original <span class="keyword">object</span>. <span class="operator">*</span><span class="operator">/</span></span></span><br><span class="line"><span class="pattern-match">    return o;</span></span><br><span class="line"><span class="pattern-match">&#125;</span></span><br></pre></td></tr></table></figure>
-
-<p>这段代码执行的操作比较复杂，我们有必要仔细看一下每一步的操作：</p>
-<ul>
-<li>第1步检查，检查type。确保只对string类型的对象进行操作。</li>
-<li>第2步检查，检查encoding。sdsEncodedObject是定义在server.h中的一个宏，确保只对OBJ_ENCODING_RAW和OBJ_ENCODING_EMBSTR编码的string对象进行操作。这两种编码的string都采用sds来存储，可以尝试进一步编码处理。</li>
-<li>第3步检查，检查refcount。引用计数大于1的共享对象，在多处被引用。由于编码过程结束后robj的对象指针可能会变化（我们在前一篇介绍sdscatlen函数的时候提到过类似这种接口使用模式），这样对于引用计数大于1的对象，就需要更新所有地方的引用，这不容易做到。因此，对于计数大于1的对象不做编码处理。</li>
-<li>试图将字符串转成64位的long。64位的long所能表达的数据范围是-2^63到2^63-1，用十进制表达出来最长是20位数（包括负号）。这里判断小于等于21，似乎是写多了，实际判断小于等于20就够了（如果我算错了请一定告诉我哦）。string2l如果将字符串转成long转成功了，那么会返回1并且将转好的long存到value变量里。</li>
-<li>在转成long成功时，又分为两种情况。<br>  第一种情况：如果Redis的配置不要求运行LRU替换算法，且转成的long型数字的值又比较小（小于OBJ_SHARED_INTEGERS，在目前的实现中这个值是10000），那么会使用共享数字对象来表示。之所以这里的判断跟LRU有关，是因为LRU算法要求每个robj有不同的lru字段值，所以用了LRU就不能共享robj。shared.integers是一个长度为10000的数组，里面预存了10000个小的数字对象。这些小数字对象都是encoding = OBJ_ENCODING_INT的string robj对象。<br>  第二种情况：如果前一步不能使用共享小对象来表示，那么将原来的robj编码成encoding = OBJ_ENCODING_INT，这时ptr字段直接存成这个long型的值。注意ptr字段本来是一个void *指针（即存储的是内存地址），因此在64位机器上有64位宽度，正好能存储一个64位的long型值。这样，除了robj本身之外，它就不再需要额外的内存空间来存储字符串值。</li>
-<li>接下来是对于那些不能转成64位long的字符串进行处理。最后再做两步处理：<br>  如果字符串长度足够小（小于等于OBJ_ENCODING_EMBSTR_SIZE_LIMIT，定义为44），那么调用createEmbeddedStringObject编码成encoding = OBJ_ENCODING_EMBSTR；<br>  如果前面所有的编码尝试都没有成功（仍然是OBJ_ENCODING_RAW），且sds里空余字节过多，那么做最后一次努力，调用sds的sdsRemoveFreeSpace接口来释放空余字节。</li>
-</ul>
-<p>其中调用的createEmbeddedStringObject，我们有必要看一下它的代码：</p>
-<figure class="highlight xl"><table><tr><td class="code"><pre><span class="line">robj *createEmbeddedStringObject(const char *ptr, size_t len) &#123;</span><br><span class="line">    robj *o = zmalloc(sizeof(robj)+sizeof(struct sdshdr8)+len+<span class="number">1</span>);</span><br><span class="line">    struct sdshdr8 *sh = (void*)(o+<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="title">o</span>-&gt;</span>type = OBJ_STRING;</span><br><span class="line">    <span class="function"><span class="title">o</span>-&gt;</span>encoding = OBJ_ENCODING_EMBSTR;</span><br><span class="line">    <span class="function"><span class="title">o</span>-&gt;</span>ptr = sh+<span class="number">1</span>;</span><br><span class="line">    <span class="function"><span class="title">o</span>-&gt;</span>refcount = <span class="number">1</span>;</span><br><span class="line">    <span class="function"><span class="title">o</span>-&gt;</span>lru = LRU_CLOCK();</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="title">sh</span>-&gt;</span>len = len;</span><br><span class="line">    <span class="function"><span class="title">sh</span>-&gt;</span>alloc = len;</span><br><span class="line">    <span class="function"><span class="title">sh</span>-&gt;</span>flags = SDS_TYPE_8;</span><br><span class="line">    <span class="keyword">if</span> (ptr) &#123;</span><br><span class="line">        <span class="function"><span class="title">memcpy</span>(sh-&gt;</span>buf,ptr,len);</span><br><span class="line">        <span class="function"><span class="title">sh</span>-&gt;</span>buf[len] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="function"><span class="title">memset</span>(sh-&gt;</span>buf,<span class="number">0</span>,len+<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    return o;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>createEmbeddedStringObject对sds重新分配内存，将robj和sds放在一个连续的内存块中分配，这样对于短字符串的存储有利于减少内存碎片。这个连续的内存块包含如下几部分：</p>
-<ul>
-<li>16个字节的robj结构。</li>
-<li>3个字节的sdshdr8头。</li>
-<li>最多44个字节的sds字符数组。</li>
-<li>1个NULL结束符。</li>
-</ul>
-<p>加起来一共不超过64字节（16+3+44+1），因此这样的一个短字符串可以完全分配在一个64字节长度的内存块中。</p>
-<h3 id="string-robj的解码过程"><a href="#string-robj的解码过程" class="headerlink" title="string robj的解码过程"></a>string robj的解码过程</h3><p>当我们需要获取字符串的值，比如执行get命令的时候，我们需要执行与前面讲的编码过程相反的操作——解码。</p>
-<p>这一解码过程的核心代码，是object.c中的getDecodedObject函数。</p>
-<figure class="highlight lisp"><table><tr><td class="code"><pre><span class="line">robj *getDecodedObject(<span class="name">robj</span> *o) &#123;</span><br><span class="line">    robj *dec<span class="comment">;</span></span><br><span class="line"></span><br><span class="line">    if (<span class="name">sdsEncodedObject</span>(<span class="name">o</span>)) &#123;</span><br><span class="line">        incrRefCount(<span class="name">o</span>)<span class="comment">;</span></span><br><span class="line">        return o<span class="comment">;</span></span><br><span class="line">    &#125;</span><br><span class="line">    if (<span class="name">o-&gt;type</span> == OBJ_STRING <span class="symbol">&amp;&amp;</span> o-&gt;encoding == OBJ_ENCODING_INT) &#123;</span><br><span class="line">        char buf[<span class="number">32</span>]<span class="comment">;</span></span><br><span class="line"></span><br><span class="line">        ll2string(<span class="name">buf</span>,<span class="number">32</span>,(<span class="name">long</span>)o-&gt;ptr)<span class="comment">;</span></span><br><span class="line">        dec = createStringObject(<span class="name">buf</span>,strlen(<span class="name">buf</span>))<span class="comment">;</span></span><br><span class="line">        return dec<span class="comment">;</span></span><br><span class="line">    &#125; else &#123;</span><br><span class="line">        serverPanic(<span class="string">&quot;Unknown encoding type&quot;</span>)<span class="comment">;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这个过程比较简单，需要我们注意的点有：</p>
-<ul>
-<li>编码为OBJ_ENCODING_RAW和OBJ_ENCODING_EMBSTR的字符串robj对象，不做变化，原封不动返回。站在使用者的角度，这两种编码没有什么区别，内部都是封装的sds。</li>
-<li>编码为数字的字符串robj对象，将long重新转为十进制字符串的形式，然后调用createStringObject转为sds的表示。注意：这里由long转成的sds字符串长度肯定不超过20，而根据createStringObject的实现，它们肯定会被编码成OBJ_ENCODING_EMBSTR的对象。createStringObject的代码如下：<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">robj *create<span class="constructor">StringObject(<span class="params">const</span> <span class="params">char</span> <span class="operator">*</span><span class="params">ptr</span>, <span class="params">size_t</span> <span class="params">len</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (len &lt;= OBJ_ENCODING_EMBSTR_SIZE_LIMIT)</span><br><span class="line">        return create<span class="constructor">EmbeddedStringObject(<span class="params">ptr</span>,<span class="params">len</span>)</span>;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        return create<span class="constructor">RawStringObject(<span class="params">ptr</span>,<span class="params">len</span>)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h3 id="再谈sds与string的关系"><a href="#再谈sds与string的关系" class="headerlink" title="再谈sds与string的关系"></a>再谈sds与string的关系</h3><p>在上一篇文章中，我们简单地提到了sds与string的关系；在本文介绍了robj的概念之后，我们重新总结一下sds与string的关系。</p>
-<ul>
-<li>确切地说，string在Redis中是用一个robj来表示的。</li>
-<li>用来表示string的robj可能编码成3种内部表示：OBJ_ENCODING_RAW, OBJ_ENCODING_EMBSTR, OBJ_ENCODING_INT。其中前两种编码使用的是sds来存储，最后一种OBJ_ENCODING_INT编码直接把string存成了long型。</li>
-<li>在对string进行incr, decr等操作的时候，如果它内部是OBJ_ENCODING_INT编码，那么可以直接进行加减操作；如果它内部是OBJ_ENCODING_RAW或OBJ_ENCODING_EMBSTR编码，那么Redis会先试图把sds存储的字符串转成long型，如果能转成功，再进行加减操作。</li>
-<li>对一个内部表示成long型的string执行append, setbit, getrange这些命令，针对的仍然是string的值（即十进制表示的字符串），而不是针对内部表示的long型进行操作。比如字符串”32”，如果按照字符数组来解释，它包含两个字符，它们的ASCII码分别是0x33和0x32。当我们执行命令setbit key 7 0的时候，相当于把字符0x33变成了0x32，这样字符串的值就变成了”22”。而如果将字符串”32”按照内部的64位long型来解释，那么它是0x0000000000000020，在这个基础上执行setbit位操作，结果就完全不对了。因此，在这些命令的实现中，会把long型先转成字符串再进行相应的操作。由于篇幅原因，这三个命令的实现代码这里就不详细介绍了，有兴趣的读者可以参考Redis源码：<br>  t_string.c中的appendCommand函数；<br>  biops.c中的setbitCommand函数；<br>  t_string.c中的getrangeCommand函数。</li>
-</ul>
-<p>值得一提的是，append和setbit命令的实现中，都会最终调用到db.c中的dbUnshareStringValue函数，将string对象的内部编码转成OBJ_ENCODING_RAW的（只有这种编码的robj对象，其内部的sds 才能在后面自由追加新的内容），并解除可能存在的对象共享状态。这里面调用了前面提到的getDecodedObject。</p>
-<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">robj *db<span class="constructor">UnshareStringValue(<span class="params">redisDb</span> <span class="operator">*</span><span class="params">db</span>, <span class="params">robj</span> <span class="operator">*</span><span class="params">key</span>, <span class="params">robj</span> <span class="operator">*</span><span class="params">o</span>)</span> &#123;</span><br><span class="line">    server<span class="constructor">Assert(<span class="params">o</span>-&gt;<span class="params">type</span> <span class="operator">==</span> OBJ_STRING)</span>;</span><br><span class="line">    <span class="keyword">if</span> (o-&gt;refcount != <span class="number">1</span><span class="operator"> || </span>o-&gt;encoding != OBJ_ENCODING_RAW) &#123;</span><br><span class="line">        robj *decoded = get<span class="constructor">DecodedObject(<span class="params">o</span>)</span>;</span><br><span class="line">        o = create<span class="constructor">RawStringObject(<span class="params">decoded</span>-&gt;<span class="params">ptr</span>, <span class="params">sdslen</span>(<span class="params">decoded</span>-&gt;<span class="params">ptr</span>)</span>);</span><br><span class="line">        decr<span class="constructor">RefCount(<span class="params">decoded</span>)</span>;</span><br><span class="line">        db<span class="constructor">Overwrite(<span class="params">db</span>,<span class="params">key</span>,<span class="params">o</span>)</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    return o;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3 id="robj的引用计数操作"><a href="#robj的引用计数操作" class="headerlink" title="robj的引用计数操作"></a>robj的引用计数操作</h3><p>将robj的引用计数加1和减1的操作，定义在object.c中：</p>
-<figure class="highlight php"><table><tr><td class="code"><pre><span class="line"><span class="keyword">void</span> incrRefCount(robj *o) &#123;</span><br><span class="line">    o-&gt;refcount++;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> decrRefCount(robj *o) &#123;</span><br><span class="line">    <span class="keyword">if</span> (o-&gt;refcount &lt;= <span class="number">0</span>) serverPanic(<span class="string">&quot;decrRefCount against refcount &lt;= 0&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (o-&gt;refcount == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">switch</span>(o-&gt;type) &#123;</span><br><span class="line">        <span class="keyword">case</span> OBJ_STRING: freeStringObject(o); <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OBJ_LIST: freeListObject(o); <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OBJ_SET: freeSetObject(o); <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OBJ_ZSET: freeZsetObject(o); <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">case</span> OBJ_HASH: freeHashObject(o); <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">default</span>: serverPanic(<span class="string">&quot;Unknown object type&quot;</span>); <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        zfree(o);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        o-&gt;refcount--;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>我们特别关注一下将引用计数减1的操作decrRefCount。如果只剩下最后一个引用了（refcount已经是1了），那么在decrRefCount被调用后，整个robj将被释放。</p>
-<p>注意：Redis的del命令就依赖<code>decrRefCount</code>操作将value释放掉。</p>
-<hr>
-<p>经过了本文的讨论，我们很容易看出，robj所表示的就是Redis对外暴露的第一层面的数据结构：string, list, hash, set, sorted set，而每一种数据结构的底层实现所对应的是哪个（或哪些）第二层面的数据结构（dict, sds, ziplist, quicklist, skiplist, 等），则通过不同的encoding来区分。可以说，robj是联结两个层面的数据结构的桥梁。</p>
-<p>本文详细介绍了OBJ_STRING类型的字符串对象的底层实现，其编码和解码过程在Redis里非常重要，应用广泛，我们在后面的讨论中可能还会遇到。现在有了robj的概念基础，我们下一篇会讨论ziplist，以及它与hash的关系。</p>
 ]]></content>
       <categories>
         <category>中间件</category>

@@ -24,7 +24,7 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="redis内部数据结构(5)-quicklist">
 <meta property="og:url" content="https://jinping-dev.github.io/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-5-quicklist/index.html">
-<meta property="og:site_name" content="靳平の博客">
+<meta property="og:site_name" content="Jinping&#39;s Blog">
 <meta property="og:description" content="Redis对外暴露的list数据类型，它底层实现所依赖的内部数据结构就是&#96;quicklist&#96;。  我们在讨论中还会涉及到两个Redis配置（在redis.conf中的ADVANCED CONFIG部分）： 12list-max-ziplist-size -2list-compress-depth 0">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://jinping-dev.github.io/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-5-quicklist/redis_quicklist_structure.png">
@@ -48,7 +48,7 @@
   };
 </script>
 
-  <title>redis内部数据结构(5)-quicklist | 靳平の博客</title>
+  <title>redis内部数据结构(5)-quicklist | Jinping's Blog</title>
   
 
 
@@ -108,9 +108,10 @@
 
     <a href="/" class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">靳平の博客</h1>
+      <h1 class="site-title">Jinping's Blog</h1>
       <span class="logo-line-after"><i></i></span>
     </a>
+      <p class="site-subtitle" itemprop="description">程序员要常思考</p>
   </div>
 
   <div class="site-nav-right">
@@ -210,11 +211,11 @@
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/image.png">
       <meta itemprop="name" content="Jinping">
-      <meta itemprop="description" content="">
+      <meta itemprop="description" content="程序员要常思考">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="靳平の博客">
+      <meta itemprop="name" content="Jinping's Blog">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -431,7 +432,7 @@ Redis对外暴露的list数据类型，它底层实现所依赖的内部数据�
 
       <footer class="post-footer">
           <div class="post-tags">
-              <a href="/tags/redis/" rel="tag"># redis</a>
+              <a href="/tags/redis/" rel="tag"><i class="fa fa-tag"></i> redis</a>
           </div>
 
         
@@ -519,7 +520,7 @@ Redis对外暴露的list数据类型，它底层实现所依赖的内部数据�
     <img class="site-author-image" itemprop="image" alt="Jinping"
       src="/images/image.png">
   <p class="site-author-name" itemprop="name">Jinping</p>
-  <div class="site-description" itemprop="description"></div>
+  <div class="site-description" itemprop="description">程序员要常思考</div>
 </div>
 <div class="site-state-wrap motion-element">
   <nav class="site-state">
@@ -583,7 +584,7 @@ Redis对外暴露的list数据类型，它底层实现所依赖的内部数据�
   </span>
   <span class="author" itemprop="copyrightHolder">©2018 by Jinping</span>
 </div>
-  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  <div class="powered-by">Erstellt mit  <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
   </div>
   <div class="powered-by">
 <i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
