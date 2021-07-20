@@ -162,6 +162,92 @@
       </tags>
   </entry>
   <entry>
+    <title>Docker(六)DockerCompose</title>
+    <url>/2021/02/15/Docker-%E5%85%AD-DockerCompose/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<h3 id="前言：构建一个wordpress"><a href="#前言：构建一个wordpress" class="headerlink" title="前言：构建一个wordpress"></a>前言：构建一个wordpress</h3><h4 id="1-创建MySQL的container"><a href="#1-创建MySQL的container" class="headerlink" title="1.创建MySQL的container"></a>1.创建MySQL的container</h4><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">docker <span class="builtin-name">run</span> -d --name mysql -v mysql-data:/var/lib/mysql -e <span class="attribute">MYSQL_ROOT_PASSWORD</span>=root -e <span class="attribute">MYSQL_DATABASE</span>=wordpress mysql</span><br></pre></td></tr></table></figure>
+<p>声明了我的root用户密码为root，同时创建了一个wordpress的数据库，因为我的mysql是在内部使用的不用对提供服务他们使用的是同一个网络，所以不用做端口映射</p>
+<h4 id="2-创建wordpress"><a href="#2-创建wordpress" class="headerlink" title="2.创建wordpress"></a>2.创建wordpress</h4><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">docker <span class="builtin-name">run</span> -d -e <span class="attribute">WORDPRESS_DB_HOST</span>=mysql:3306 --link mysql -p 8080:80 wordpress</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>-e 需要去指定我们的数据库的host，指定我刚刚启动的mysql的容器，</li>
+<li>–link 就是link到我们的mysql里面</li>
+<li>-p就是将容器中的80端口映射到我们本地的8080端口</li>
+</ul>
+<p>这个过程就比较复杂，像有些应用有好多个模块我们可能就需要构建好多个container，对它的创建、管理、启动、停止等操作比较繁琐。我们希望可以将多个容器定义成一个组，对这个组进行统一的管理，于是DockerCompose就出现了，DockerCompose就是为了解决这一问题而诞生的。</p>
+<a id="more"></a>
+
+<h3 id="DockerCompose"><a href="#DockerCompose" class="headerlink" title="DockerCompose"></a>DockerCompose</h3><ul>
+<li>DockerCompose建议用于本地开发去部署</li>
+<li>DockerCompose是一个工具</li>
+<li>这个工具可以通过一个yml文件定义多容器的docker应用</li>
+<li>通过一条命令就可以根据yml文件的定义去创建或管理这多个容器</li>
+</ul>
+<p><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/1.png" alt="1"></p>
+<p>现在有三个版本，推荐使用version3，不同的版本文件格式是不一样的，2跟3的区别不是很大，但是2跟3最大的区别就是version2只能用于单机，version3可以用于多机<br><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/2.png" alt="2"></p>
+<h4 id="service"><a href="#service" class="headerlink" title="service"></a>service</h4><p>一个service代表一个container，这个container可以从dockerhub的image来创建，或者从本地的<code>Dockerfile</code>build出来的image来创建</p>
+<p>service的启动类似<code>docker run</code>，我们可以给其指定network和volume，所以可以给service指定network和volume的引用</p>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><figure class="highlight"><table><tr><td class="code"><pre><span class="line"><span class="attribute">version</span>: &#x27;3&#x27;</span><br><span class="line"></span><br><span class="line"><span class="attribute">services:</span></span><br><span class="line"><span class="attribute"></span></span><br><span class="line">  wordpress:</span><br><span class="line">    image: wordpress</span><br><span class="line">    ports:</span><br><span class="line">      - 8080:80</span><br><span class="line">    environment:</span><br><span class="line">      WORDPRESS_DB_HOST: mysql</span><br><span class="line">      WORDPRESS_DB_PASSWORD: root</span><br><span class="line">    networks:</span><br><span class="line">      - my-bridge</span><br><span class="line"></span><br><span class="line">  mysql:</span><br><span class="line">    image: mysql</span><br><span class="line">    environment:</span><br><span class="line">      MYSQL_ROOT_PASSWORD: root</span><br><span class="line">      MYSQL_DATABASE: wordpress</span><br><span class="line">    volumes:</span><br><span class="line">      - mysql-data:/var/lib/mysql</span><br><span class="line">    networks:</span><br><span class="line">      - my-bridge</span><br><span class="line"></span><br><span class="line"><span class="attribute">volumes:</span></span><br><span class="line">  mysql-data:</span><br><span class="line"></span><br><span class="line"><span class="attribute">networks:</span></span><br><span class="line">  my-bridge:</span><br><span class="line">    driver: bridge</span><br></pre></td></tr></table></figure>
+
+<h4 id="解释"><a href="#解释" class="headerlink" title="解释"></a>解释</h4><ul>
+<li>第一行声明version的版本是3</li>
+<li>在service中定义了两个服务，一个WordPress，一个mysql</li>
+<li>image属性定义了我们的image</li>
+<li>port做了端口映射</li>
+<li>environment声明了两个环境变量</li>
+<li>networks指定了我们连接的网络是下面自定义的bridge，</li>
+<li>在mysql服务中我引用了自定义mysql-data的volume</li>
+</ul>
+<h3 id="Dockercompose的安装"><a href="#Dockercompose的安装" class="headerlink" title="Dockercompose的安装"></a>Dockercompose的安装</h3><p>如果使用mac或者windows系统，在安装完docker会默认安装上DockerCompose，但是如果是linux系统就需要独立安装</p>
+<p><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/3.png" alt="3"></p>
+<p>下载dockercompose的可执行文件然到/usr/local/bin/docker-compose目录下面，命名为docker-compose</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">sudo curl -L <span class="string">&quot;https://github.com/docker/compose/releases/download/1.28.2/docker-compose-$(uname -s)-$(uname -m)&quot;</span> -o <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>docker-compose</span><br></pre></td></tr></table></figure>
+
+<p>下载完之后给它一个可执行的权限</p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">sudo chmod +x <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>docker-compose</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/4.png" alt="4"></p>
+<p>下载完成之后就可以根据默认docker-compose命名的yml文件去进行构建了</p>
+<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">docker-compose up</span></span><br></pre></td></tr></table></figure>
+
+<p>如果文件不是按照docker-compose.yml命名的，也可以指定yml文件的名称</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">docker-compose <span class="tag">&lt;<span class="name">yml文件名</span>&gt;</span> up</span><br></pre></td></tr></table></figure>
+
+<p>查看服务ps，可以看到有两个服务在运行中<br><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/5.png" alt="5"></p>
+<p>停止服务：</p>
+<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line">docker-compose <span class="built_in">stop</span></span><br></pre></td></tr></table></figure>
+<p>也可以进行start启动服务</p>
+<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">docker-compose <span class="literal">start</span></span><br></pre></td></tr></table></figure>
+<p>如果用<code>down</code>命令，则不仅会停止服务，<em>而且会删除里面的所有container</em><br><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/6.png" alt="6"></p>
+<p>当我们启动的时候，也可以指定参数-d让其后台启动，不会输出大量的log</p>
+<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">docker-compose up -d</span></span><br></pre></td></tr></table></figure>
+
+<p>列举我们compose所定义的image</p>
+<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">docker-compose images</span></span><br></pre></td></tr></table></figure>
+
+<p>先build再up，<code>docker-compose build</code>命令可以预先根据dockerfile进行构建，并不会启动，但<code>docker-compose up</code>会在启动之前先构建，构建完成再启动</p>
+<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">docker-compose build</span></span><br></pre></td></tr></table></figure>
+<p>进入container的bash中</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker-compose <span class="built_in">exec</span> mysql bash</span><br></pre></td></tr></table></figure>
+
+<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><p>我们根据docker-compose所创建出来的服务只有一个，我们可以通过scale去进行扩展，比我们可以通过scale可以将对应的服务从一个扩展成三个。</p>
+<figure class="highlight vim"><table><tr><td class="code"><pre><span class="line">docker-compose <span class="keyword">up</span> --<span class="keyword">help</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/7.png" alt="7"></p>
+<p>对应的命令为：（web应用就是通过redis统计pv访问量的）</p>
+<figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">docker-compose up --scale <span class="attribute">web</span>=3 -d</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/8.png" alt="8"></p>
+<p>当我们访问的时候，会进行轮询，内部是通过lb进行负载均衡的，有兴趣的可以看看<strong>HAProxy</strong><br><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/9.png" alt="9"><br>scale不仅可以支持扩容，还支持缩容， 我们可以控制scale的数量对其进行控制服务实例的数量。</p>
+]]></content>
+      <categories>
+        <category>运维</category>
+      </categories>
+      <tags>
+        <tag>Docker</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Docker(五)-Docker的文件存储和数据共享</title>
     <url>/2021/02/12/Docker-%E4%BA%94-Docker%E7%9A%84%E6%96%87%E4%BB%B6%E5%AD%98%E5%82%A8%E5%92%8C%E6%95%B0%E6%8D%AE%E5%85%B1%E4%BA%AB/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -249,92 +335,6 @@
 <p>在倒数第三行，进行了文件的映射，将本地的labs文件夹映射到了我构建出来的虚拟机的”/home/vagrant/labs”目录下，同时，在虚拟机中构建nginx容器的时候，也指定了文件映射，这三处地方实现了映射，进而实现了数据的存储</p>
 <figure class="highlight mipsasm"><table><tr><td class="code"><pre><span class="line"><span class="built_in">config</span>.vm.<span class="keyword">synced_folder </span><span class="string">&quot;./labs&quot;</span>, <span class="string">&quot;/home/vagrant/labs&quot;</span></span><br></pre></td></tr></table></figure>
 <p>同时，用这种方式可以实现在我们开发过程中同步查看一些改动</p>
-]]></content>
-      <categories>
-        <category>运维</category>
-      </categories>
-      <tags>
-        <tag>Docker</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Docker(六)DockerCompose</title>
-    <url>/2021/02/15/Docker-%E5%85%AD-DockerCompose/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-<h3 id="前言：构建一个wordpress"><a href="#前言：构建一个wordpress" class="headerlink" title="前言：构建一个wordpress"></a>前言：构建一个wordpress</h3><h4 id="1-创建MySQL的container"><a href="#1-创建MySQL的container" class="headerlink" title="1.创建MySQL的container"></a>1.创建MySQL的container</h4><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">docker <span class="builtin-name">run</span> -d --name mysql -v mysql-data:/var/lib/mysql -e <span class="attribute">MYSQL_ROOT_PASSWORD</span>=root -e <span class="attribute">MYSQL_DATABASE</span>=wordpress mysql</span><br></pre></td></tr></table></figure>
-<p>声明了我的root用户密码为root，同时创建了一个wordpress的数据库，因为我的mysql是在内部使用的不用对提供服务他们使用的是同一个网络，所以不用做端口映射</p>
-<h4 id="2-创建wordpress"><a href="#2-创建wordpress" class="headerlink" title="2.创建wordpress"></a>2.创建wordpress</h4><figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">docker <span class="builtin-name">run</span> -d -e <span class="attribute">WORDPRESS_DB_HOST</span>=mysql:3306 --link mysql -p 8080:80 wordpress</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li>-e 需要去指定我们的数据库的host，指定我刚刚启动的mysql的容器，</li>
-<li>–link 就是link到我们的mysql里面</li>
-<li>-p就是将容器中的80端口映射到我们本地的8080端口</li>
-</ul>
-<p>这个过程就比较复杂，像有些应用有好多个模块我们可能就需要构建好多个container，对它的创建、管理、启动、停止等操作比较繁琐。我们希望可以将多个容器定义成一个组，对这个组进行统一的管理，于是DockerCompose就出现了，DockerCompose就是为了解决这一问题而诞生的。</p>
-<a id="more"></a>
-
-<h3 id="DockerCompose"><a href="#DockerCompose" class="headerlink" title="DockerCompose"></a>DockerCompose</h3><ul>
-<li>DockerCompose建议用于本地开发去部署</li>
-<li>DockerCompose是一个工具</li>
-<li>这个工具可以通过一个yml文件定义多容器的docker应用</li>
-<li>通过一条命令就可以根据yml文件的定义去创建或管理这多个容器</li>
-</ul>
-<p><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/1.png" alt="1"></p>
-<p>现在有三个版本，推荐使用version3，不同的版本文件格式是不一样的，2跟3的区别不是很大，但是2跟3最大的区别就是version2只能用于单机，version3可以用于多机<br><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/2.png" alt="2"></p>
-<h4 id="service"><a href="#service" class="headerlink" title="service"></a>service</h4><p>一个service代表一个container，这个container可以从dockerhub的image来创建，或者从本地的<code>Dockerfile</code>build出来的image来创建</p>
-<p>service的启动类似<code>docker run</code>，我们可以给其指定network和volume，所以可以给service指定network和volume的引用</p>
-<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><figure class="highlight"><table><tr><td class="code"><pre><span class="line"><span class="attribute">version</span>: &#x27;3&#x27;</span><br><span class="line"></span><br><span class="line"><span class="attribute">services:</span></span><br><span class="line"><span class="attribute"></span></span><br><span class="line">  wordpress:</span><br><span class="line">    image: wordpress</span><br><span class="line">    ports:</span><br><span class="line">      - 8080:80</span><br><span class="line">    environment:</span><br><span class="line">      WORDPRESS_DB_HOST: mysql</span><br><span class="line">      WORDPRESS_DB_PASSWORD: root</span><br><span class="line">    networks:</span><br><span class="line">      - my-bridge</span><br><span class="line"></span><br><span class="line">  mysql:</span><br><span class="line">    image: mysql</span><br><span class="line">    environment:</span><br><span class="line">      MYSQL_ROOT_PASSWORD: root</span><br><span class="line">      MYSQL_DATABASE: wordpress</span><br><span class="line">    volumes:</span><br><span class="line">      - mysql-data:/var/lib/mysql</span><br><span class="line">    networks:</span><br><span class="line">      - my-bridge</span><br><span class="line"></span><br><span class="line"><span class="attribute">volumes:</span></span><br><span class="line">  mysql-data:</span><br><span class="line"></span><br><span class="line"><span class="attribute">networks:</span></span><br><span class="line">  my-bridge:</span><br><span class="line">    driver: bridge</span><br></pre></td></tr></table></figure>
-
-<h4 id="解释"><a href="#解释" class="headerlink" title="解释"></a>解释</h4><ul>
-<li>第一行声明version的版本是3</li>
-<li>在service中定义了两个服务，一个WordPress，一个mysql</li>
-<li>image属性定义了我们的image</li>
-<li>port做了端口映射</li>
-<li>environment声明了两个环境变量</li>
-<li>networks指定了我们连接的网络是下面自定义的bridge，</li>
-<li>在mysql服务中我引用了自定义mysql-data的volume</li>
-</ul>
-<h3 id="Dockercompose的安装"><a href="#Dockercompose的安装" class="headerlink" title="Dockercompose的安装"></a>Dockercompose的安装</h3><p>如果使用mac或者windows系统，在安装完docker会默认安装上DockerCompose，但是如果是linux系统就需要独立安装</p>
-<p><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/3.png" alt="3"></p>
-<p>下载dockercompose的可执行文件然到/usr/local/bin/docker-compose目录下面，命名为docker-compose</p>
-<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">sudo curl -L <span class="string">&quot;https://github.com/docker/compose/releases/download/1.28.2/docker-compose-$(uname -s)-$(uname -m)&quot;</span> -o <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>docker-compose</span><br></pre></td></tr></table></figure>
-
-<p>下载完之后给它一个可执行的权限</p>
-<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line">sudo chmod +x <span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>docker-compose</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/4.png" alt="4"></p>
-<p>下载完成之后就可以根据默认docker-compose命名的yml文件去进行构建了</p>
-<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">docker-compose up</span></span><br></pre></td></tr></table></figure>
-
-<p>如果文件不是按照docker-compose.yml命名的，也可以指定yml文件的名称</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">docker-compose <span class="tag">&lt;<span class="name">yml文件名</span>&gt;</span> up</span><br></pre></td></tr></table></figure>
-
-<p>查看服务ps，可以看到有两个服务在运行中<br><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/5.png" alt="5"></p>
-<p>停止服务：</p>
-<figure class="highlight arduino"><table><tr><td class="code"><pre><span class="line">docker-compose <span class="built_in">stop</span></span><br></pre></td></tr></table></figure>
-<p>也可以进行start启动服务</p>
-<figure class="highlight crmsh"><table><tr><td class="code"><pre><span class="line">docker-compose <span class="literal">start</span></span><br></pre></td></tr></table></figure>
-<p>如果用<code>down</code>命令，则不仅会停止服务，<em>而且会删除里面的所有container</em><br><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/6.png" alt="6"></p>
-<p>当我们启动的时候，也可以指定参数-d让其后台启动，不会输出大量的log</p>
-<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">docker-compose up -d</span></span><br></pre></td></tr></table></figure>
-
-<p>列举我们compose所定义的image</p>
-<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">docker-compose images</span></span><br></pre></td></tr></table></figure>
-
-<p>先build再up，<code>docker-compose build</code>命令可以预先根据dockerfile进行构建，并不会启动，但<code>docker-compose up</code>会在启动之前先构建，构建完成再启动</p>
-<figure class="highlight ebnf"><table><tr><td class="code"><pre><span class="line"><span class="attribute">docker-compose build</span></span><br></pre></td></tr></table></figure>
-<p>进入container的bash中</p>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">docker-compose <span class="built_in">exec</span> mysql bash</span><br></pre></td></tr></table></figure>
-
-<h3 id="扩展"><a href="#扩展" class="headerlink" title="扩展"></a>扩展</h3><p>我们根据docker-compose所创建出来的服务只有一个，我们可以通过scale去进行扩展，比我们可以通过scale可以将对应的服务从一个扩展成三个。</p>
-<figure class="highlight vim"><table><tr><td class="code"><pre><span class="line">docker-compose <span class="keyword">up</span> --<span class="keyword">help</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/7.png" alt="7"></p>
-<p>对应的命令为：（web应用就是通过redis统计pv访问量的）</p>
-<figure class="highlight routeros"><table><tr><td class="code"><pre><span class="line">docker-compose up --scale <span class="attribute">web</span>=3 -d</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/8.png" alt="8"></p>
-<p>当我们访问的时候，会进行轮询，内部是通过lb进行负载均衡的，有兴趣的可以看看<strong>HAProxy</strong><br><img src="/2021/02/15/Docker-%E5%85%AD-DockerCompose/9.png" alt="9"><br>scale不仅可以支持扩容，还支持缩容， 我们可以控制scale的数量对其进行控制服务实例的数量。</p>
 ]]></content>
       <categories>
         <category>运维</category>
@@ -659,6 +659,64 @@
       </tags>
   </entry>
   <entry>
+    <title>HopSpot虚拟机对象</title>
+    <url>/2021/07/20/HopSpot%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AF%B9%E8%B1%A1/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<hr>
+<h1 id="一-对象的创建"><a href="#一-对象的创建" class="headerlink" title="一.对象的创建"></a>一.对象的创建</h1><p>虚拟机遇到new指令，先检查这个指令的参数是否能在常量池中定位到这个类的符号引用，并检查这个符号引用代表的类是否已经被加载、解析和初始化过。如果没有，那必须先执行相应的<a href="/2021/07/20/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" title="类加载">类加载</a>过程。</p>
+<h2 id="1-分配内存"><a href="#1-分配内存" class="headerlink" title="1.分配内存"></a>1.分配内存</h2><p>类加载检查通过后，接下来虚拟机将为新生对象分配内存。对象所需内存的大小在类加载完成后便可以完全确定。</p>
+<a id="more"></a>
+
+<h2 id="2-内存分配方式"><a href="#2-内存分配方式" class="headerlink" title="2.内存分配方式"></a>2.内存分配方式</h2><ul>
+<li>指针碰撞：如果Java堆中的内存规整，用过的内存放在一边，空闲的放在另外一边，中间放一个指针作为分界点的指示器。分配内存就是把指针向空闲空间挪动一段与对象大小相等的距离。</li>
+<li>空闲列表：如果Java堆中的内存不规整，无法使用指针碰撞的方法，需要维护一个表，记录哪些内存块是可用的，在分配时从列表中找到一块足够大的内存块来划分给对象实例，然后更新列表记录。选择哪种分配方式由Java堆是否规整决定，而<strong>Java堆是否规整由所采用的垃圾收集器是否带有压缩整理功能决定。</strong></li>
+</ul>
+<h2 id="3-并发问题"><a href="#3-并发问题" class="headerlink" title="3.并发问题"></a>3.并发问题</h2><p>创建对象是很频繁的行为，虚拟机采用如下两种方式来保证线程安全：</p>
+<ul>
+<li>CAS配上失败重试：CAS是乐观锁的一种实现方式。所谓乐观锁就是，每次不加锁而是假设没有冲突而去完成某项操作，如果因为冲突失败就重试，直到成功为止。虚拟机采用 CAS 配上失败重试的方式保证更新操作的原子性。</li>
+<li>TLAB： 将内存分配安排在每个线程独有的空间进行，每个线程首先在堆内存中分配一小块内存，称为本地分配缓存(TLAB : Thread Local Allocation Buffer)。分配内存时，只需要在自己的分配缓存中分配即可，由于这个内存区域是线程私有的，所以不会出现并发问题。当对象大于TLAB中的剩余内存或TLAB的内存已用尽时，再采用上述的CAS进行内存分配。虚拟机是否使用TLAB，可以通过<code>-XX:+/-UseTLAB</code>参数来设定。</li>
+</ul>
+<h2 id="4-初始化零值"><a href="#4-初始化零值" class="headerlink" title="4.初始化零值"></a>4.初始化零值</h2><p>内存分配完成后，虚拟机将分配到的内存空间初始化为零值（不包括对象头），这一步保证了对象的实例字段在Java代码中可以不赋初始值就使用。</p>
+<h2 id="5-对象头设置"><a href="#5-对象头设置" class="headerlink" title="5.对象头设置"></a>5.对象头设置</h2><p>初始化零值完成之后，虚拟机要对对象进行必要的设置，例如这个对象是那个类的实例、如何才能找到类的元数据信息、对象的哈希吗、对象的 GC 分代年龄等信息。 这些信息存放在对象头中。</p>
+<p>另外，根据虚拟机当前运行状态的不同，如是否启用偏向锁等，对象头会有不同的设置方式。</p>
+<h2 id="6-执行init方法"><a href="#6-执行init方法" class="headerlink" title="6.执行init方法"></a>6.执行init方法</h2><p>从虚拟机的视角来看，一个新的对象已经产生了，但从 Java 程序的视角来看，对象创建才刚开始，init 方法还没有执行，所有的字段都还为零。所以一般来说，执行 new 指令之后会接着执行 init 方法，把对象按照程序员的意愿进行初始化，这样一个真正可用的对象才算完全产生出来。</p>
+<hr>
+<h1 id="二-对象的内存布局"><a href="#二-对象的内存布局" class="headerlink" title="二.对象的内存布局"></a>二.对象的内存布局</h1><p>在 Hotspot 虚拟机中，对象在内存中的布局可以分为3块区域：</p>
+<ul>
+<li>对象头</li>
+<li>实例数据</li>
+<li>对齐填充</li>
+</ul>
+<p>Hotspot虚拟机的对象头包括两部分信息</p>
+<ul>
+<li>第一部分用于存储对象自身的自身运行时数据（哈希码、GC分代年龄、锁状态标志等等）</li>
+<li>另一部分是类型指针，即对象指向它的类元数据的指针，虚拟机通过这个指针来确定这个对象是那个类的实例。</li>
+</ul>
+<p>实例数据部分是对象真正存储的有效信息，也是在程序中所定义的各种类型的字段内容。包括父类继承的内容和子类中定义的内容。</p>
+<p>对齐填充部分不是必然存在的，也没有什么特别的含义，仅仅起占位作用。如果对象实例数据部分没有对齐的话，就需要通过对齐填充来补全。</p>
+<hr>
+<h1 id="三-对象的访问定位"><a href="#三-对象的访问定位" class="headerlink" title="三.对象的访问定位"></a>三.对象的访问定位</h1><p>Java程序通过栈上的reference数据操作堆上的具体对象。主流的访问方式由使用句柄和直接指针两种。</p>
+<ul>
+<li>句柄：如果使用句柄的话，那么Java堆中将会划分出一块内存来作为句柄池，reference 中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与类型数据各自的具体地址信息。</li>
+<li>直接指针： 如果使用直接指针访问，那么 Java 堆对象的布局中就必须考虑如何放置访问类型数据的相关信息，而reference 中存储的直接就是对象的地址。</li>
+</ul>
+<p>这两种对象访问方式各有优势：</p>
+<ul>
+<li>使用句柄来访问的最大好处是 reference 中存储的是稳定的句柄地址，在对象被移动时只会改变句柄中的实例数据指针，而 reference 本身不需要修改</li>
+<li>使用直接指针访问方式最大的好处就是速度快，它节省了一次指针定位的时间开销。（大部分是使用第二种方法来访问的）</li>
+</ul>
+<p><strong>HotSpot使用直接指针的方式进行对象访问。</strong></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
+        <tag>JVM</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Java中的hashcode和equals</title>
     <url>/2020/12/24/Java%E4%B8%AD%E7%9A%84hashcode%E5%92%8Cequals/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -681,6 +739,33 @@
       </categories>
       <tags>
         <tag>Java基础</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java内存模型与线程</title>
+    <url>/2021/04/04/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<h3 id="一、物理机中的效率与一致性"><a href="#一、物理机中的效率与一致性" class="headerlink" title="一、物理机中的效率与一致性"></a>一、物理机中的效率与一致性</h3><h4 id="1-高速缓存（Cache）的引入"><a href="#1-高速缓存（Cache）的引入" class="headerlink" title="1. 高速缓存（Cache）的引入"></a>1. 高速缓存（Cache）的引入</h4><p>“让计算机并发执行若干个运算任务”与“更充分地利用计算机处理器的性能”之间的因果关系，看起来利索当然，实际上他们之间的关系并没有想象中那么简单，其中一个重要的复杂性的来源是绝大多数的运算任务都不可能只靠处理器“计算”就能完成。</p>
+<p>处理器只要要与内存交互，如读取运算数据、存储计算结果等，这个IO操作就是很难消除的（无法仅靠寄存器来完成所有运算任务）。</p>
+<p>由于计算机的存储设备与处理器的运算速度有着几个数量级的差距，所以现代计算机系统都不得不加入一层或多层读写速度尽可能接近处理器运算速度的<code>高速缓存（Cache）</code>来作为内存与处理器之间的缓冲：</p>
+<blockquote>
+<p>将运算需要使用的数据复制到内存中，让运算能快速进行，当运算结束后再从缓存同步到内存之中，这样就无需等待缓慢的内存读写了。</p>
+</blockquote>
+<a id="more"></a>
+
+<h4 id="2-缓存一致性问题"><a href="#2-缓存一致性问题" class="headerlink" title="2. 缓存一致性问题"></a>2. 缓存一致性问题</h4><p>在多路处理器系统中，每个处理器都有自己的高速缓存，而他们又共享同一主内存（Main Memory），这种系统称为<code>共享内存多核系统</code>。当多个处理器的运算任务都涉及同一块主内存区域时，将可能导致各自的缓存数据不一致。</p>
+<p>为了解决缓存数据一致性的问题，需要各个处理器访问缓存时都遵循一些协议，在读写时要根据协议来操作。比如：MSI、MESI、MOSI等。</p>
+<h4 id="3-乱序执行优化"><a href="#3-乱序执行优化" class="headerlink" title="3.乱序执行优化"></a>3.乱序执行优化</h4><p>除了增加高速缓存之外，为了使处理器内部的运算单元能尽量被充分利用，处理器可能会对输入代码进行乱序执行（Out-Of-Order Execution）优化，处理器会在计算之后将乱序执行的结果重组，保证该结果与顺序执行的结果是一致的，但并不保证程序中各个语句计算的先后顺序与输入代码中的顺序一致。</p>
+<p>与处理器的乱序执行优化类似，Java虚拟机的即使编译器中也有指令重排序优化。</p>
+<h3 id="二、Java内存模型"><a href="#二、Java内存模型" class="headerlink" title="二、Java内存模型"></a>二、Java内存模型</h3><h4 id="1-主内存与工作内存"><a href="#1-主内存与工作内存" class="headerlink" title="1.主内存与工作内存"></a>1.主内存与工作内存</h4>]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>JVM</tag>
+        <tag>多线程</tag>
+        <tag>内存模型</tag>
       </tags>
   </entry>
   <entry>
@@ -727,33 +812,6 @@
       <tags>
         <tag>Java</tag>
         <tag>JVM</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Java内存模型与线程</title>
-    <url>/2021/04/04/Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E4%B8%8E%E7%BA%BF%E7%A8%8B/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-<h3 id="一、物理机中的效率与一致性"><a href="#一、物理机中的效率与一致性" class="headerlink" title="一、物理机中的效率与一致性"></a>一、物理机中的效率与一致性</h3><h4 id="1-高速缓存（Cache）的引入"><a href="#1-高速缓存（Cache）的引入" class="headerlink" title="1. 高速缓存（Cache）的引入"></a>1. 高速缓存（Cache）的引入</h4><p>“让计算机并发执行若干个运算任务”与“更充分地利用计算机处理器的性能”之间的因果关系，看起来利索当然，实际上他们之间的关系并没有想象中那么简单，其中一个重要的复杂性的来源是绝大多数的运算任务都不可能只靠处理器“计算”就能完成。</p>
-<p>处理器只要要与内存交互，如读取运算数据、存储计算结果等，这个IO操作就是很难消除的（无法仅靠寄存器来完成所有运算任务）。</p>
-<p>由于计算机的存储设备与处理器的运算速度有着几个数量级的差距，所以现代计算机系统都不得不加入一层或多层读写速度尽可能接近处理器运算速度的<code>高速缓存（Cache）</code>来作为内存与处理器之间的缓冲：</p>
-<blockquote>
-<p>将运算需要使用的数据复制到内存中，让运算能快速进行，当运算结束后再从缓存同步到内存之中，这样就无需等待缓慢的内存读写了。</p>
-</blockquote>
-<a id="more"></a>
-
-<h4 id="2-缓存一致性问题"><a href="#2-缓存一致性问题" class="headerlink" title="2. 缓存一致性问题"></a>2. 缓存一致性问题</h4><p>在多路处理器系统中，每个处理器都有自己的高速缓存，而他们又共享同一主内存（Main Memory），这种系统称为<code>共享内存多核系统</code>。当多个处理器的运算任务都涉及同一块主内存区域时，将可能导致各自的缓存数据不一致。</p>
-<p>为了解决缓存数据一致性的问题，需要各个处理器访问缓存时都遵循一些协议，在读写时要根据协议来操作。比如：MSI、MESI、MOSI等。</p>
-<h4 id="3-乱序执行优化"><a href="#3-乱序执行优化" class="headerlink" title="3.乱序执行优化"></a>3.乱序执行优化</h4><p>除了增加高速缓存之外，为了使处理器内部的运算单元能尽量被充分利用，处理器可能会对输入代码进行乱序执行（Out-Of-Order Execution）优化，处理器会在计算之后将乱序执行的结果重组，保证该结果与顺序执行的结果是一致的，但并不保证程序中各个语句计算的先后顺序与输入代码中的顺序一致。</p>
-<p>与处理器的乱序执行优化类似，Java虚拟机的即使编译器中也有指令重排序优化。</p>
-<h3 id="二、Java内存模型"><a href="#二、Java内存模型" class="headerlink" title="二、Java内存模型"></a>二、Java内存模型</h3><h4 id="1-主内存与工作内存"><a href="#1-主内存与工作内存" class="headerlink" title="1.主内存与工作内存"></a>1.主内存与工作内存</h4>]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>JVM</tag>
-        <tag>多线程</tag>
-        <tag>内存模型</tag>
       </tags>
   </entry>
   <entry>
@@ -819,6 +877,109 @@
         <category>Java</category>
       </categories>
       <tags>
+        <tag>JVM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Java类加载机制</title>
+    <url>/2021/07/20/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<hr>
+<h1 id="一-对象的创建"><a href="#一-对象的创建" class="headerlink" title="一.对象的创建"></a>一.对象的创建</h1><p>当Java虚拟机遇到一条字节码new指令的时候，首先将去检查这个指令的参数是否能在常量池中定位到一个类的符号引用，并且检查这个符号引用代表的类是否已被加载、解析和初始化过。如果没有，那必须先执行相应的类加载过程。</p>
+<a id="more"></a>
+<hr>
+<h1 id="二-类加载的时机"><a href="#二-类加载的时机" class="headerlink" title="二.类加载的时机"></a>二.类加载的时机</h1><p>一个类型从被加载到虚拟机内存中开始，到卸载出内存为止，它的整个生命周期将会经历<code>加载（loading）</code>、<code>验证（Verfication）</code>、<code>准备（Preparation）</code>、<code>解析（Resolution）</code>、<code>初始化（Initialization）</code>、<code>使用（Using）</code>、<code>卸载（Unloading）</code>七个阶段，其中<em>验证、准备、解析三个部分统称为连接（Linking）</em>。</p>
+<p><img src="/2021/07/20/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/1.png" alt="Java类加载机制"></p>
+<p>加载、验证、准备、初始化和卸载这五个阶段的顺序是确定的，类型加载过程必须按照这种顺序按部就班地开始，而解析阶段则不一定：它在某些情况下可以在初始化阶段之后再开始，这是为了支持Java语言的运行时绑定特性（也称为动态绑定或晚期绑定）。这些阶段通常都是互相交叉地混合进行的，会在一个阶段执行的过程中调用、激活另一个阶段。</p>
+<p><strong>对于初始化阶段，有且只有六种情况必须立即对类进行“初始化”（而加载、验证、准备自然需要在此之前开始）：</strong></p>
+<ol>
+<li><p>遇到new、getstatic、putstatic或invokestatic这四条字节码指令时，如果类型没有进行过初始化，则需要先触发其初始化阶段。能够生成这四条指令的典型Java代码有：</p>
+<ul>
+<li>使用new关键字实例化对象的时候</li>
+<li>读取或设置一个类型的静态字段（被final修饰、已在编译期把结果放入常量池的静态字段除外）的时候</li>
+<li>调用一个类型的静态方法的时候</li>
+</ul>
+</li>
+<li><p>使用java.lang.reflect包的方法对类型进行反射调用的时候，如果类型没有进行过初始化，则需要先触发其初始化</p>
+</li>
+<li><p>当初始化类的时候，如果发现其父类还没有进行过初始化，则需要先触发其父类的初始化</p>
+</li>
+<li><p>当虚拟机启动时，用户需要制定一个要执行的主类（包含main()方法的那个类），虚拟机会先初始化这个主类</p>
+</li>
+<li><p>当使用JDK7新加入的动态语言支持时，如果一个java.lang.invoke.MethodHandle实例最后的解析结果为REF_getStatic、REF_putStatic、REF_invokeStatic、REF_newInvokeSpecial四种类型的方法句柄，并且这个方法句柄对应的类没有进行过初始化，则需要先触发其初始化</p>
+</li>
+<li><p>当一个接口中定义JDK8新加入的默认方法（被default关键字修饰的接口方法）时，如果有这个接口的实现类发生了初始化，那该接口要在其之前被初始化</p>
+</li>
+</ol>
+<p>对于这六种会触发类型进行初始化的场景，这六种场景的行为称为对一个类型进行<strong>主动引用</strong>。除此之外，所有引用类型的方式都不会触发初始化，被称为<strong>被动引用</strong>。</p>
+<h2 id="接口与类的区别"><a href="#接口与类的区别" class="headerlink" title="接口与类的区别"></a>接口与类的区别</h2><p>接口与类真正有所区别的是前面讲述的六种“有且仅有”需要触发初始化场景中的第三种：<br>当一个类在初始化时，要求其父类全部都已经初始化过了，但是一个接口在初始化时，并不要求其父接口全部都完成了初始化，只有在真正使用到父接口（如引用接口中定义的常量）的时候才会初始化。</p>
+<hr>
+<h1 id="三-类加载的过程"><a href="#三-类加载的过程" class="headerlink" title="三.类加载的过程"></a>三.类加载的过程</h1><h2 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h2><p>在加载阶段，Java虚拟机需要完成以下三件事情：</p>
+<ol>
+<li>通过一个类的全限定名来获取定义此类的二进制字节流</li>
+<li>将这个字节流所代表的静态存储结构转化为方法区的运行时数据结构</li>
+<li>在内存中生成一个代表这个类的java.lang.Class对象，作为方法区这个类的各种数据的访问入口</li>
+</ol>
+<p>对于数组类而言，情况有所不同，数组类本身不通过类加载器创建，它是由Java虚拟机直接在内存中动态构造出来的。一个数组类（下面简称为C）创建过程中遵循以下规则：</p>
+<ul>
+<li>如果数组的组件类型（Component Type，指的是数组去掉一个纬度的类型）是引用类型，那就递归采用默认的加载过程去加载这个组件类型，数组C将被标识在加载该组件类型的类加载器的类名称空间上（一个类型必须与类加载器一起确定唯一性）。</li>
+<li>如果数组的组件类型不是引用类型，Java虚拟机将会把数组C标记为与引导类加载器关联。</li>
+<li>数组类的可访问性与它的组件类型的可访问性一致，如果组件类型不是引用类型，它的数组类的可访问性将默认为public，可被所有的类和接口访问</li>
+</ul>
+<p>加载阶段与连接阶段的部分动作（如一部分字节码文件格式验证动作）是交叉进行的，加载阶段尚未完成，连接阶段可能已经开始，但这些夹在加载阶段之中进行的动作，仍然属于连接阶段的一部分，这两个阶段的开始时间仍然保持着固定的先后顺序。</p>
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p>验证是连接阶段的第一步，这一阶段的目的是确保Class文件的字节流中包含的信息符合《Java虚拟机规范》的全部约束要求，保证这些信息被当作代码运行后不会危害虚拟机自身的安全。</p>
+<p>验证阶段主要包括：</p>
+<ul>
+<li>文件格式验证，验证字节流是否符合Class文件格式的规范，并且能被当前版本的虚拟机处理</li>
+<li>元数据验证，对字节码描述的信息进行语义分析</li>
+<li>字节码验证，通过数据流分析和控制流分析，确定程序语义是合法的、符合逻辑的。</li>
+<li>符号引用验证，最后一个阶段的校验行为发生在虚拟机将符号引用转化为直接引用的时候，这个转化动作将在<strong>解析</strong>阶段中发生。</li>
+</ul>
+<blockquote>
+<p>在生产环境的实施阶段可以考虑使用-Xverify:none参数来关闭大部分的类验证措施，以缩短虚拟机类加载的时间</p>
+</blockquote>
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>准备阶段是正式为类中定义的变量（即静态变量，被static修饰的变量）分配内存并设置类变量初始值的阶段。</p>
+<ul>
+<li>这个阶段仅对类变量，不包括实例变量，实例变量将会在对象实例化时随着对象一起分配在Java堆中。</li>
+<li>初始值都是各种基础数据类型的默认值，而非程序员声明时的赋值。</li>
+</ul>
+<h2 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h2><p>解析阶段是Java虚拟机将常量池内的符号引用替换为直接引用的过程</p>
+<ul>
+<li>类或接口的解析</li>
+<li>字段解析</li>
+<li>方法解析</li>
+</ul>
+<h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><p>类的初始化阶段是类加载过程的最后一个步骤。</p>
+<p>在准备阶段时，变量已经赋过一次系统要求的初始零值，而在初始化阶段，则会根据程序员通过程序编码制定的主观计划去初始化类变量和其他资源。</p>
+<hr>
+<h1 id="4-类加载器"><a href="#4-类加载器" class="headerlink" title="4.类加载器"></a>4.类加载器</h1><h2 id="类与类加载器"><a href="#类与类加载器" class="headerlink" title="类与类加载器"></a>类与类加载器</h2><p>类加载器虽然只用于实现类的加载动作，但是它在Java程序中起到的作用却远超类加载阶段。对于任意一个类，都必须由加载它的类加载器和这个类本身一起共同确立其在Java虚拟机中的唯一性，每一个类加载器，都有一个唯一独立的类名称空间。比较两个类是否“相等”，只有在这两个类是由同一个类加载器加载的前提下才有意义，否则，即使这两个类来源于同一个Class文件，被同一个Java虚拟机加载，只要加载它们的类加载器不同，那么这两个类就必不相等。</p>
+<h2 id="双亲委派模型"><a href="#双亲委派模型" class="headerlink" title="双亲委派模型"></a>双亲委派模型</h2><p>站在Java虚拟机的角度来看，只存在两种不同的类加载器：</p>
+<ol>
+<li>启动类加载器（Bootstrap ClassLoader），这个类加载器使用C++语言实现，是虚拟机自身的一部分</li>
+<li>其他所有的类加载器，这些类加载器都由Java语言实现，独立存在于虚拟机外部，并且全部继承于抽象类java.lang.ClassLoader</li>
+</ol>
+<p>绝大多数的Java程序都会使用以下三个系统提供的类加载器来进行加载：</p>
+<ol>
+<li>启动类加载器（Bootstrap ClassLoader）：这个类加载器负责加载存放在<JAVA_HOME>/lib目录，或者被-Xbootclasspath参数所指定的路径中存放的，而且是Java虚拟机能够识别的（按照文件名识别，如rt.jar、tools.jar，名字不符合的类库即使放在lib目录中也不会被加载）类库加载到虚拟机的内存中。启动类加载器无法被Java程序直接引用，用户在编写自定义类加载器时，如果需要把加载请求委派给引导类加载器去处理，那直接使用null替代即可。</JAVA_HOME></li>
+<li>扩展类加载器（Extension Class Loader）:这个类加载器是在类sun.misc.Launcher$ExtClassLoader中以Java代码的形式实现的。它负责加载<JAVA_HOME>/lib/ext目录中，或者被java.ext.dirs系统变量所指定的路径中所有的类库。这是一种Java系统类库的扩展机制。</JAVA_HOME></li>
+<li>应用程序类加载器（Application Class Loader）：这个类加载器由sun.misc.Launcher$AppClassLoader来实现。由于应用程序类加载器是ClassLoader类中的getSystemClassLoader()方法的返回值，所以有些场合中也称它为“系统类加载器”。它负责加载用户类路径（ClassPath）上所有的类库，开发者同样可以直接在代码中使用这个类加载器。</li>
+</ol>
+<p><img src="/2021/07/20/Java%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/2.png" alt="双亲委派模型"></p>
+<p>双亲委派模型要求除了顶层的启动类加载器外，其余的类加载器都应该有自己的父类加载器。不过这里类加载器之间的父子关系一般不是以继承的关系来实现的，而是通常使用组合关系来复用父加载器的代码。</p>
+<h3 id="双亲委派模型的工作过程"><a href="#双亲委派模型的工作过程" class="headerlink" title="双亲委派模型的工作过程"></a>双亲委派模型的工作过程</h3><p>如果一个类加载器收到了类加载器的请求，它首先不会自己去尝试加载这个类，而是把这个请求委派给父类加载器去完成，每一个层次的类加载器都是如此，因此所有的加载请求最终都应该传送到最顶层的启动类加载器中，只有当父类加载器反馈自己无法完成这个加载请求时，子加载器才会尝试自己去完成加载。</p>
+<p>精确到代码：</p>
+<blockquote>
+<p>先检查请求加载的类型是否已被加载过，若没有则调用父加载器的loadClass()当法，若父加载器为空则默认使用启动类加载器作为父加载器。假如父加载器加载失败，抛出ClassNotFoundException异常的话，才调用自己的findClass()方法尝试进行加载。</p>
+</blockquote>
+<h3 id="双亲委派模型的好处"><a href="#双亲委派模型的好处" class="headerlink" title="双亲委派模型的好处"></a>双亲委派模型的好处</h3><p>一个显而易见的好处就是Java中的类随着它的类加载器一起具备了一种带有优先级的层次关系。例如类Object，被存放在rt.jar中，无论哪一个类加载器要加载这个类，最终都是委派给处于模型最顶端的启动类加载器进行加载，因此Object类在程序的各种类加载器环境中都能够保证是同一个类。</p>
+<p>双亲委派模型对于保证Java程序的稳定运作极为重要。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>Java</tag>
         <tag>JVM</tag>
       </tags>
   </entry>
@@ -1294,6 +1455,40 @@
       </tags>
   </entry>
   <entry>
+    <title>gitFlow工作流</title>
+    <url>/2020/07/01/gitFlow%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-742c050e94084a3a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git工作流"><br>Gitflow工作流通过为功能开发、发布准备和维护（bug修复）分配独立的分支，让发布迭代过程更流畅。严格的分支模型也为大型项目提供了一些非常必要的结构。<br><img src="https://upload-images.jianshu.io/upload_images/15200008-5dcea875b5e3537f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git工作流"><br>虽然有这么优秀的版本管理工具，但是我们面对版本管理的时候，依然有非常大得挑战，我们都知道大家工作在同一个仓库上，那么彼此的代码协作必然带来很多问题和挑战，如下：</p>
+<a id="more"></a>
+<ul>
+<li>如何开始一个Feature的开发，而不影响别的Feature？</li>
+<li>由于很容易创建新分支，分支多了如何管理，时间久了，如何知道每个分支是干什么的？<br>哪些分支已经合并回了主干？</li>
+<li>如何进行Release的管理？开始一个Release的时候如何冻结Feature, 如何在Prepare Release的时候，开发人员可以继续开发新的功能？</li>
+<li>线上代码出Bug了，如何快速修复？而且修复的代码要包含到开发人员的分支以及下一个Release?</li>
+<li>大部分开发人员现在使用Git就只是用三个甚至两个分支，一个是Master, 一个是Develop, 还有一个是基于Develop打得各种分支。这个在小项目规模的时候还勉强可以支撑，因为很多人做项目就只有一个Release, 但是人员一多，而且项目周期一长就会出现各种问题。</li>
+</ul>
+<h1 id="一、Git-Flow常用的分支"><a href="#一、Git-Flow常用的分支" class="headerlink" title="一、Git Flow常用的分支"></a>一、Git Flow常用的分支</h1><p><strong>Master 分支</strong><br>这个分支最近发布到生产环境的代码，最近发布的Release， 这个分支只能从其他分支合并，不能在这个分支直接修改<br><strong>Dev 分支</strong><br>这个分支是我们是我们的主开发分支，包含所有要发布到下一个Release的代码，这个主要合并与其他分支，比如Feature分支<br><strong>Feature 分支</strong><br>这个分支主要是用来开发一个新的功能，一旦开发完成，我们合并回Develop分支进入下一个Release<br><strong>Release分支</strong><br>当你需要一个发布一个新Release的时候，我们基于Develop分支创建一个Release分支，完成Release后，我们合并到Master和Develop分支<br><strong>Hotfix分支</strong><br>当我们在Master发现新的Bug时候，我们需要创建一个Hotfix, 完成Hotfix后，我们合并回Master和Dev分支，所以Hotfix的改动会进入下一个Release</p>
+<h1 id="二、Git-Flow如何工作"><a href="#二、Git-Flow如何工作" class="headerlink" title="二、Git Flow如何工作"></a>二、Git Flow如何工作</h1><h2 id="1-Master分支"><a href="#1-Master分支" class="headerlink" title="1. Master分支"></a>1. Master分支</h2><p>所有在Master分支上的Commit应该Tag<br><img src="https://upload-images.jianshu.io/upload_images/15200008-58d45fc3dd13f764.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="master分支"></p>
+<h2 id="2-Feature-分支"><a href="#2-Feature-分支" class="headerlink" title="2. Feature 分支"></a>2. Feature 分支</h2><p>Feature分支做完后，必须合并回Develop分支, 合并完分支后一般会删点这个Feature分支，但是我们也可以保留</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/15200008-80e1a93d016f969a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Feature分支"></p>
+<p>每个新功能位于一个自己的分支，这样可以push到中央仓库以备份和协作。 但功能分支不是从master分支上拉出新分支，而是使用develop分支作为父分支。当新功能完成时，合并回develop分支。 新功能提交应该从不直接与master分支交互。</p>
+<h2 id="3-Release分支"><a href="#3-Release分支" class="headerlink" title="3. Release分支"></a>3. Release分支</h2><p>Release分支基于Develop分支创建，打完Release分之后，我们可以在这个Release分支上测试，修改Bug等。同时，其它开发人员可以基于开发新的Feature (记住：一旦打了Release分支之后不要从Develop分支上合并新的改动到Release分支)</p>
+<p>发布Release分支时，合并Release到Master和Develop， 同时在Master分支上打个Tag记住Release版本号，然后可以删除Release分支了。</p>
+<p>一旦develop分支上有了做一次发布（或者说快到了既定的发布日）的足够功能，就从develop分支上checkout一个发布分支。 新建的分支用于开始发布循环，所以从这个时间点开始之后新的功能不能再加到这个分支上—— 这个分支只应该做Bug修复、文档生成和其它面向发布任务。 一旦对外发布的工作都完成了，发布分支合并到master分支并分配一个版本号打好Tag。 另外，这些从新建发布分支以来的做的修改要合并回develop分支。</p>
+<p>使用一个用于发布准备的专门分支，使得一个团队可以在完善当前的发布版本的同时，另一个团队可以继续开发下个版本的功能。 这也打造定义良好的开发阶段（比如，可以很轻松地说，『这周我们要做准备发布版本4.0』，并且在仓库的目录结构中可以实际看到）。<br><img src="https://upload-images.jianshu.io/upload_images/15200008-15c5b67abe8ead6f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="release分支"></p>
+<h2 id="4-Hotfix分支"><a href="#4-Hotfix分支" class="headerlink" title="4. Hotfix分支"></a>4. Hotfix分支</h2><p>hotfix分支基于Master分支创建，开发完后需要合并回Master和Develop分支，同时在Master上打一个tag<br><img src="https://upload-images.jianshu.io/upload_images/15200008-c4a6e09f61baf2dc.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Hotfix分支"><br>该分支用于生成快速给产品发布版本（production releases）打补丁，这是唯一可以直接从master分支fork出来的分支。 修复完成，修改应该马上合并回master分支和develop分支（当前的发布分支），master分支应该用新的版本号打好Tag。</p>
+<p>为Bug修复使用专门分支，让团队可以处理掉问题而不用打断其它工作或是等待下一个发布循环。 你可以把维护分支想成是一个直接在master分支上处理的临时发布。</p>
+<h1 id="三、如何进行测试"><a href="#三、如何进行测试" class="headerlink" title="三、如何进行测试"></a>三、如何进行测试</h1><p><strong>Testing On Feature Branch</strong><br>开发人员在功能分支开发完成后，提测给对应测试人员，标明其对应的功能分支，测试人员发现bug，开发人员仍在该分支修改bug，修改完交给测试人员测试，当测试通过后，开发人员发起一个pull request合并会develop分支，然后从develop检出release，测试人员在预发环境部署并快速回归测试，发现bug，开发人员直接在release分支进行修正，测试通过后，将release合回develop并合并到master准备上线。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>git</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Spring初探</title>
     <url>/2020/11/22/Spring%E5%88%9D%E6%8E%A2/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -1394,40 +1589,6 @@
       <tags>
         <tag>Java</tag>
         <tag>Spring</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>gitFlow工作流.md</title>
-    <url>/2020/07/01/gitFlow%E5%B7%A5%E4%BD%9C%E6%B5%81/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-<p><img src="https://upload-images.jianshu.io/upload_images/15200008-742c050e94084a3a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git工作流"><br>Gitflow工作流通过为功能开发、发布准备和维护（bug修复）分配独立的分支，让发布迭代过程更流畅。严格的分支模型也为大型项目提供了一些非常必要的结构。<br><img src="https://upload-images.jianshu.io/upload_images/15200008-5dcea875b5e3537f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="git工作流"><br>虽然有这么优秀的版本管理工具，但是我们面对版本管理的时候，依然有非常大得挑战，我们都知道大家工作在同一个仓库上，那么彼此的代码协作必然带来很多问题和挑战，如下：</p>
-<a id="more"></a>
-<ul>
-<li>如何开始一个Feature的开发，而不影响别的Feature？</li>
-<li>由于很容易创建新分支，分支多了如何管理，时间久了，如何知道每个分支是干什么的？<br>哪些分支已经合并回了主干？</li>
-<li>如何进行Release的管理？开始一个Release的时候如何冻结Feature, 如何在Prepare Release的时候，开发人员可以继续开发新的功能？</li>
-<li>线上代码出Bug了，如何快速修复？而且修复的代码要包含到开发人员的分支以及下一个Release?</li>
-<li>大部分开发人员现在使用Git就只是用三个甚至两个分支，一个是Master, 一个是Develop, 还有一个是基于Develop打得各种分支。这个在小项目规模的时候还勉强可以支撑，因为很多人做项目就只有一个Release, 但是人员一多，而且项目周期一长就会出现各种问题。<h3 id="一、Git-Flow常用的分支"><a href="#一、Git-Flow常用的分支" class="headerlink" title="一、Git Flow常用的分支"></a>一、Git Flow常用的分支</h3></li>
-</ul>
-<p><strong>Master 分支</strong><br>这个分支最近发布到生产环境的代码，最近发布的Release， 这个分支只能从其他分支合并，不能在这个分支直接修改<br><strong>Dev 分支</strong><br>这个分支是我们是我们的主开发分支，包含所有要发布到下一个Release的代码，这个主要合并与其他分支，比如Feature分支<br><strong>Feature 分支</strong><br>这个分支主要是用来开发一个新的功能，一旦开发完成，我们合并回Develop分支进入下一个Release<br><strong>Release分支</strong><br>当你需要一个发布一个新Release的时候，我们基于Develop分支创建一个Release分支，完成Release后，我们合并到Master和Develop分支<br><strong>Hotfix分支</strong><br>当我们在Master发现新的Bug时候，我们需要创建一个Hotfix, 完成Hotfix后，我们合并回Master和Dev分支，所以Hotfix的改动会进入下一个Release</p>
-<h3 id="二、Git-Flow如何工作"><a href="#二、Git-Flow如何工作" class="headerlink" title="二、Git Flow如何工作"></a>二、Git Flow如何工作</h3><h5 id="1-Master分支"><a href="#1-Master分支" class="headerlink" title="1. Master分支"></a>1. Master分支</h5><p>所有在Master分支上的Commit应该Tag<br><img src="https://upload-images.jianshu.io/upload_images/15200008-58d45fc3dd13f764.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="master分支"></p>
-<h5 id="2-Feature-分支"><a href="#2-Feature-分支" class="headerlink" title="2. Feature 分支"></a>2. Feature 分支</h5><p>Feature分支做完后，必须合并回Develop分支, 合并完分支后一般会删点这个Feature分支，但是我们也可以保留</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/15200008-80e1a93d016f969a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Feature分支"></p>
-<p>每个新功能位于一个自己的分支，这样可以push到中央仓库以备份和协作。 但功能分支不是从master分支上拉出新分支，而是使用develop分支作为父分支。当新功能完成时，合并回develop分支。 新功能提交应该从不直接与master分支交互。</p>
-<h5 id="3-Release分支"><a href="#3-Release分支" class="headerlink" title="3. Release分支"></a>3. Release分支</h5><p>Release分支基于Develop分支创建，打完Release分之后，我们可以在这个Release分支上测试，修改Bug等。同时，其它开发人员可以基于开发新的Feature (记住：一旦打了Release分支之后不要从Develop分支上合并新的改动到Release分支)</p>
-<p>发布Release分支时，合并Release到Master和Develop， 同时在Master分支上打个Tag记住Release版本号，然后可以删除Release分支了。</p>
-<p>一旦develop分支上有了做一次发布（或者说快到了既定的发布日）的足够功能，就从develop分支上checkout一个发布分支。 新建的分支用于开始发布循环，所以从这个时间点开始之后新的功能不能再加到这个分支上—— 这个分支只应该做Bug修复、文档生成和其它面向发布任务。 一旦对外发布的工作都完成了，发布分支合并到master分支并分配一个版本号打好Tag。 另外，这些从新建发布分支以来的做的修改要合并回develop分支。</p>
-<p>使用一个用于发布准备的专门分支，使得一个团队可以在完善当前的发布版本的同时，另一个团队可以继续开发下个版本的功能。 这也打造定义良好的开发阶段（比如，可以很轻松地说，『这周我们要做准备发布版本4.0』，并且在仓库的目录结构中可以实际看到）。<br><img src="https://upload-images.jianshu.io/upload_images/15200008-15c5b67abe8ead6f.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="release分支"></p>
-<h5 id="4-Hotfix分支"><a href="#4-Hotfix分支" class="headerlink" title="4. Hotfix分支"></a>4. Hotfix分支</h5><p>hotfix分支基于Master分支创建，开发完后需要合并回Master和Develop分支，同时在Master上打一个tag<br><img src="https://upload-images.jianshu.io/upload_images/15200008-c4a6e09f61baf2dc.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Hotfix分支"><br>该分支用于生成快速给产品发布版本（production releases）打补丁，这是唯一可以直接从master分支fork出来的分支。 修复完成，修改应该马上合并回master分支和develop分支（当前的发布分支），master分支应该用新的版本号打好Tag。</p>
-<p>为Bug修复使用专门分支，让团队可以处理掉问题而不用打断其它工作或是等待下一个发布循环。 你可以把维护分支想成是一个直接在master分支上处理的临时发布。</p>
-<h3 id="三、如何进行测试"><a href="#三、如何进行测试" class="headerlink" title="三、如何进行测试"></a>三、如何进行测试</h3><p><strong>Testing On Feature Branch</strong><br>开发人员在功能分支开发完成后，提测给对应测试人员，标明其对应的功能分支，测试人员发现bug，开发人员仍在该分支修改bug，修改完交给测试人员测试，当测试通过后，开发人员发起一个pull request合并会develop分支，然后从develop检出release，测试人员在预发环境部署并快速回归测试，发现bug，开发人员直接在release分支进行修正，测试通过后，将release合回develop并合并到master准备上线。</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>git</tag>
       </tags>
   </entry>
   <entry>
@@ -2077,124 +2238,6 @@
       </tags>
   </entry>
   <entry>
-    <title>redis内部数据结构(4)-ziplist</title>
-    <url>/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-4-ziplist/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-<p>在本文中，我们首先介绍一个新的Redis内部数据结构——ziplist，然后在文章后半部分我们会讨论一下在robj, dict和ziplist的基础上，Redis对外暴露的hash结构是怎样构建起来的。</p>
-<p>我们在讨论中还会涉及到两个Redis配置（在redis.conf中的ADVANCED CONFIG部分）：</p>
-<figure class="highlight excel"><table><tr><td class="code"><pre><span class="line">hash-<span class="built_in">max</span>-ziplist-entries <span class="number">512</span></span><br><span class="line">hash-<span class="built_in">max</span>-ziplist-<span class="built_in">value</span> <span class="number">64</span></span><br></pre></td></tr></table></figure>
-<a id="more"></a>
-<h3 id="什么是ziplist"><a href="#什么是ziplist" class="headerlink" title="什么是ziplist"></a>什么是ziplist</h3><p>Redis官方对于ziplist的定义是（出自ziplist.c的文件头部注释）：</p>
-<blockquote>
-<p>The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers instead of a series of characters. It allows push and pop operations on either side of the list in O(1) time.</p>
-</blockquote>
-<p>翻译一下就是说：<code>ziplist是一个经过特殊编码的双向链表，它的设计目标就是为了提高存储效率。ziplist可以用于存储字符串或整数，其中整数是按真正的二进制表示进行编码的，而不是编码成字符串序列。它能以O(1)的时间复杂度在表的两端提供push和pop操作。</code></p>
-<p>实际上，ziplist充分体现了Redis对于存储效率的追求。一个普通的双向链表，链表中每一项都占用独立的一块内存，各项之间用地址指针（或引用）连接起来。这种方式会带来大量的内存碎片，而且地址指针也会占用额外的内存。而ziplist却是将表中每一项存放在前后连续的地址空间内，一个ziplist整体占用一大块内存。它是一个表（list），但其实不是一个链表（linked list）。</p>
-<p>另外，ziplist为了在细节上节省内存，对于值的存储采用了变长的编码方式，大概意思是说，对于大的整数，就多用一些字节来存储，而对于小的整数，就少用一些字节来存储。</p>
-<h3 id="ziplist的数据结构定义"><a href="#ziplist的数据结构定义" class="headerlink" title="ziplist的数据结构定义"></a>ziplist的数据结构定义</h3><p>从宏观上看，ziplist的内存结构如下：</p>
-<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">zlbytes</span>&gt;</span><span class="tag">&lt;<span class="name">zltail</span>&gt;</span><span class="tag">&lt;<span class="name">zllen</span>&gt;</span><span class="tag">&lt;<span class="name">entry</span>&gt;</span>...<span class="tag">&lt;<span class="name">entry</span>&gt;</span><span class="tag">&lt;<span class="name">zlend</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<p>各个部分在内存上是前后相邻的，它们分别的含义如下：</p>
-<ul>
-<li><code>&lt;zlbytes&gt;</code>: 32bit，表示ziplist占用的字节总数（也包括<code>&lt;zlbytes&gt;</code>本身占用的4个字节）。</li>
-<li><code>&lt;zltail&gt;</code>: 32bit，表示ziplist表中最后一项（entry）在ziplist中的偏移字节数。<code>&lt;zltail&gt;</code>的存在，使得我们可以很方便地找到最后一项（不用遍历整个ziplist），从而可以在ziplist尾端快速地执行push或pop操作。</li>
-<li><code>&lt;zllen&gt;</code>: 16bit， 表示ziplist中数据项（entry）的个数。zllen字段因为只有16bit，所以可以表达的最大值为2^16-1。这里需要特别注意的是，如果ziplist中数据项个数超过了16bit能表达的最大值，ziplist仍然可以来表示。那怎么表示呢？这里做了这样的规定：如果<code>&lt;zllen&gt;</code>小于等于2^16-2（也就是不等于2^16-1），那么<code>&lt;zllen&gt;</code>就表示ziplist中数据项的个数；否则，也就是<code>&lt;zllen&gt;</code>等于16bit全为1的情况，那么<code>&lt;zllen&gt;</code>就不表示数据项个数了，这时候要想知道ziplist中数据项总数，那么必须对ziplist从头到尾遍历各个数据项，才能计数出来。</li>
-<li><code>&lt;entry&gt;</code>: 表示真正存放数据的数据项，长度不定。一个数据项（entry）也有它自己的内部结构，这个稍后再解释。</li>
-<li><code>&lt;zlend&gt;</code>: ziplist最后1个字节，是一个结束标记，值固定等于255。<br>上面的定义中还值得注意的一点是：<code>&lt;zlbytes&gt;</code>, <code>&lt;zltail&gt;</code>, <code>&lt;zllen&gt;</code>既然占据多个字节，那么在存储的时候就有大端（big endian）和小端（little endian）的区别。ziplist采取的是小端模式来存储，这在下面我们介绍具体例子的时候还会再详细解释。</li>
-</ul>
-<p>我们再来看一下每一个数据项<code>&lt;entry&gt;</code>的构成：</p>
-<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="section">&lt;prevrawlen&gt;</span><span class="section">&lt;len&gt;</span><span class="section">&lt;data&gt;</span></span><br></pre></td></tr></table></figure>
-<p>我们看到在真正的数据（<code>&lt;data&gt;</code>）前面，还有两个字段：</p>
-<ul>
-<li><code>&lt;prevrawlen&gt;</code>: 表示前一个数据项占用的总字节数。这个字段的用处是为了让ziplist能够从后向前遍历（从后一项的位置，只需向前偏移prevrawlen个字节，就找到了前一项）。这个字段采用变长编码。</li>
-<li><code>&lt;len&gt;</code>: 表示当前数据项的数据长度（即<code>&lt;data&gt;</code>部分的长度）。也采用变长编码。</li>
-</ul>
-<h3 id="那么-lt-prevrawlen-gt-和-lt-len-gt-是怎么进行变长编码的呢？"><a href="#那么-lt-prevrawlen-gt-和-lt-len-gt-是怎么进行变长编码的呢？" class="headerlink" title="那么&lt;prevrawlen&gt;和&lt;len&gt;是怎么进行变长编码的呢？"></a>那么<code>&lt;prevrawlen&gt;</code>和<code>&lt;len&gt;</code>是怎么进行变长编码的呢？</h3><p>先说<code>&lt;prevrawlen&gt;</code>。它有两种可能，或者是1个字节，或者是5个字节：</p>
-<ul>
-<li>如果前一个数据项占用字节数小于254，那么<code>&lt;prevrawlen&gt;</code>就只用一个字节来表示，这个字节的值就是前一个数据项的占用字节数。</li>
-<li>如果前一个数据项占用字节数大于等于254，那么<code>&lt;prevrawlen&gt;</code>就用5个字节来表示，其中第1个字节的值是254（作为这种情况的一个标记），而后面4个字节组成一个整型值，来真正存储前一个数据项的占用字节数。</li>
-</ul>
-<p><strong>为什么没有255的情况呢？</strong><br>这是因为：255已经定义为ziplist结束标记<code>&lt;zlend&gt;</code>的值了。在ziplist的很多操作的实现中，都会根据数据项的第1个字节是不是255来判断当前是不是到达ziplist的结尾了，因此一个正常的数据的第1个字节（也就是<code>&lt;prevrawlen&gt;</code>的第1个字节）是不能够取255这个值的，否则就冲突了。</p>
-<p>而<len>字段就更加复杂了，它根据第1个字节的不同，总共分为9种情况（下面的表示法是按二进制表示）：</len></p>
-<ol>
-<li>|00pppppp| - 1 byte。第1个字节最高两个bit是00，那么<len>字段只有1个字节，剩余的6个bit用来表示长度值，最高可以表示63 (2^6-1)。</len></li>
-<li>|01pppppp|qqqqqqqq| - 2 bytes。第1个字节最高两个bit是01，那么<len>字段占2个字节，总共有14个bit用来表示长度值，最高可以表示16383 (2^14-1)。</len></li>
-<li>|10__|qqqqqqqq|rrrrrrrr|ssssssss|tttttttt| - 5 bytes。第1个字节最高两个bit是10，那么len字段占5个字节，总共使用32个bit来表示长度值（6个bit舍弃不用），最高可以表示2^32-1。需要注意的是：在前三种情况下，<data>都是按字符串来存储的；从下面第4种情况开始，<data>开始变为按整数来存储了。</data></data></li>
-<li>|11000000| - 1 byte。<len>字段占用1个字节，值为0xC0，后面的数据<data>存储为2个字节的int16_t类型。</data></len></li>
-<li>|11010000| - 1 byte。<len>字段占用1个字节，值为0xD0，后面的数据<data>存储为4个字节的int32_t类型。</data></len></li>
-<li>|11100000| - 1 byte。<len>字段占用1个字节，值为0xE0，后面的数据<data>存储为8个字节的int64_t类型。</data></len></li>
-<li>|11110000| - 1 byte。<len>字段占用1个字节，值为0xF0，后面的数据<data>存储为3个字节长的整数。</data></len></li>
-<li>|11111110| - 1 byte。<len>字段占用1个字节，值为0xFE，后面的数据<data>存储为1个字节的整数。</data></len></li>
-<li>|1111xxxx| - - (xxxx的值在0001和1101之间)。这是一种特殊情况，xxxx从1到13一共13个值，这时就用这13个值来表示真正的数据。注意，这里是表示真正的数据，而不是数据长度了。也就是说，在这种情况下，后面不再需要一个单独的<data>字段来表示真正的数据了，而是<len>和<data>合二为一了。另外，由于xxxx只能取0001和1101这13个值了（其它可能的值和其它情况冲突了，比如0000和1110分别同前面第7种第8种情况冲突，1111跟结束标记冲突），而小数值应该从0开始，因此这13个值分别表示0到12，即xxxx的值减去1才是它所要表示的那个整数数据的值。</data></len></data></li>
-</ol>
-<p>好了，ziplist的数据结构定义，我们介绍完了，现在我们看一个具体的例子。<br><img src="/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-4-ziplist/redis_ziplist_sample.png" alt="sample"></p>
-<p>上图是一份真实的ziplist数据。我们逐项解读一下：</p>
-<ul>
-<li>这个ziplist一共包含33个字节。字节编号从byte[0]到byte[32]。图中每个字节的值使用16进制表示。</li>
-<li>头4个字节（0x21000000）是按小端（little endian）模式存储的<code>&lt;zlbytes&gt;</code>字段。什么是小端呢？就是指数据的低字节保存在内存的低地址中（参见维基百科词条Endianness）。因此，这里<code>&lt;zlbytes&gt;</code>的值应该解析成0x00000021，用十进制表示正好就是33。</li>
-<li>接下来4个字节（byte[4..7]）是<code>&lt;zltail&gt;</code>，用小端存储模式来解释，它的值是0x0000001D（值为29），表示最后一个数据项在byte[29]的位置（那个数据项为0x05FE14）。</li>
-<li>再接下来2个字节（byte[8..9]），值为0x0004，表示这个ziplist里一共存有4项数据。</li>
-<li>接下来6个字节（byte[10..15]）是第1个数据项。其中，prevrawlen=0，因为它前面没有数据项；len=4，相当于前面定义的9种情况中的第1种，表示后面4个字节按字符串存储数据，数据的值为”name”。</li>
-<li>接下来8个字节（byte[16..23]）是第2个数据项，与前面数据项存储格式类似，存储1个字符串”tielei”。</li>
-<li>接下来5个字节（byte[24..28]）是第3个数据项，与前面数据项存储格式类似，存储1个字符串”age”。</li>
-<li>接下来3个字节（byte[29..31]）是最后一个数据项，它的格式与前面的数据项存储格式不太一样。其中，第1个字节prevrawlen=5，表示前一个数据项占用5个字节；第2个字节=FE，相当于前面定义的9种情况中的第8种，所以后面还有1个字节用来表示真正的数据，并且以整数表示。它的值是20（0x14）。</li>
-<li>最后1个字节（byte[32]）表示<code>&lt;zlend&gt;</code>，是固定的值255（0xFF）。</li>
-</ul>
-<p>总结一下，这个ziplist里存了4个数据项，分别为：</p>
-<ul>
-<li>字符串: “name”</li>
-<li>字符串: “tielei”</li>
-<li>字符串: “age”</li>
-<li>整数: 20</li>
-</ul>
-<p>实际上，这个ziplist是通过两个hset命令创建出来的。这个我们后半部分会再提到。</p>
-<h3 id="ziplist的接口"><a href="#ziplist的接口" class="headerlink" title="ziplist的接口"></a>ziplist的接口</h3><p>几个重要的接口：</p>
-<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">New(<span class="params">void</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Merge(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">**</span><span class="params">first</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">**</span><span class="params">second</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Push(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">s</span>, <span class="params">unsigned</span> <span class="params">int</span> <span class="params">slen</span>, <span class="params">int</span> <span class="params">where</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Index(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">int</span> <span class="params">index</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Next(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">p</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Prev(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">p</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Insert(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">p</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">s</span>, <span class="params">unsigned</span> <span class="params">int</span> <span class="params">slen</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Delete(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">**</span><span class="params">p</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Find(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">p</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">vstr</span>, <span class="params">unsigned</span> <span class="params">int</span> <span class="params">vlen</span>, <span class="params">unsigned</span> <span class="params">int</span> <span class="params">skip</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">int</span> ziplist<span class="constructor">Len(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>)</span>;</span><br></pre></td></tr></table></figure>
-<p>我们从这些接口的名字就可以粗略猜出它们的功能，下面简单解释一下：</p>
-<ul>
-<li>ziplist的数据类型，没有用自定义的struct之类的来表达，而就是简单的unsigned char *。这是因为ziplist本质上就是一块连续内存，内部组成结构又是一个高度动态的设计（变长编码），也没法用一个固定的数据结构来表达。</li>
-<li>ziplistNew: 创建一个空的ziplist（只包含<code>&lt;zlbytes&gt;&lt;zltail&gt;&lt;zllen&gt;&lt;zlend&gt;</code>）。</li>
-<li>ziplistMerge: 将两个ziplist合并成一个新的ziplist。</li>
-<li>ziplistPush: 在ziplist的头部或尾端插入一段数据（产生一个新的数据项）。注意一下这个接口的返回值，是一个新的ziplist。调用方必须用这里返回的新的ziplist，替换之前传进来的旧的ziplist变量，而经过这个函数处理之后，原来旧的ziplist变量就失效了。为什么一个简单的插入操作会导致产生一个新的ziplist呢？这是因为ziplist是一块连续空间，对它的追加操作，会引发内存的realloc，因此ziplist的内存位置可能会发生变化。实际上，我们在之前介绍sds的文章中提到过类似这种接口使用模式（参见sdscatlen函数的说明）。</li>
-<li>ziplistIndex: 返回index参数指定的数据项的内存位置。index可以是负数，表示从尾端向前进行索引。</li>
-<li>ziplistNext和ziplistPrev分别返回一个ziplist中指定数据项p的后一项和前一项。</li>
-<li>ziplistInsert: 在ziplist的任意数据项前面插入一个新的数据项。</li>
-<li>ziplistDelete: 删除指定的数据项。</li>
-<li>ziplistFind: 查找给定的数据（由vstr和vlen指定）。注意它有一个skip参数，表示查找的时候每次比较之间要跳过几个数据项。为什么会有这么一个参数呢？其实这个参数的主要用途是当用ziplist表示hash结构的时候，是按照一个field，一个value来依次存入ziplist的。也就是说，偶数索引的数据项存field，奇数索引的数据项存value。当按照field的值进行查找的时候，就需要把奇数项跳过去。</li>
-<li>ziplistLen: 计算ziplist的长度（即包含数据项的个数）。</li>
-</ul>
-<h3 id="hash与ziplist"><a href="#hash与ziplist" class="headerlink" title="hash与ziplist"></a>hash与ziplist</h3><p>hash是Redis中可以用来存储一个对象结构的比较理想的数据类型。一个对象的各个属性，正好对应一个hash结构的各个field。</p>
-<p>我们在网上很容易找到这样一些技术文章，它们会说存储一个对象，使用hash比string要节省内存。实际上这么说是有前提的，具体取决于对象怎么来存储。如果你把对象的多个属性存储到多个key上（各个属性值存成string），当然占的内存要多。但如果你采用一些序列化方法，比如Protocol Buffers，或者Apache Thrift，先把对象序列化为字节数组，然后再存入到Redis的string中，那么跟hash相比，哪一种更省内存，就不一定了。</p>
-<p>当然，hash比序列化后再存入string的方式，在支持的操作命令上，还是有优势的：它既支持多个field同时存取（<code>hmset</code>/<code>hmget</code>），也支持按照某个特定的field单独存取（<code>hset</code>/<code>hget</code>）。</p>
-<p>实际上，hash随着数据的增大，其底层数据结构的实现是会发生变化的，当然存储效率也就不同。<strong>在field比较少，各个value值也比较小的时候，hash采用ziplist来实现；而随着field增多和value值增大，hash可能会变成dict来实现</strong>。当hash底层变成dict来实现的时候，它的存储效率就没法跟那些序列化方式相比了。</p>
-<p>当我们为某个key第一次执行 <code>hset key field value</code> 命令的时候，Redis会创建一个hash结构，<strong>这个新创建的hash底层就是一个ziplist</strong>。</p>
-<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">robj *create<span class="constructor">HashObject(<span class="params">void</span>)</span> &#123;</span><br><span class="line">    unsigned <span class="built_in">char</span> *zl = ziplist<span class="constructor">New()</span>;</span><br><span class="line">    robj *o = create<span class="constructor">Object(OBJ_HASH, <span class="params">zl</span>)</span>;</span><br><span class="line">    o-&gt;encoding = OBJ_ENCODING_ZIPLIST;</span><br><span class="line">    return o;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>上面的<code>createHashObject</code>函数，出自object.c，它负责的任务就是创建一个新的hash结构。可以看出，它创建了一个<code>type = OBJ_HASH</code>但<code>encoding = OBJ_ENCODING_ZIPLIST</code>的robj对象。</p>
-<p>实际上，本文前面给出的那个ziplist实例，就是由如下两个命令构建出来的。</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">hset user:<span class="number">100</span> name tielei</span><br><span class="line">hset user:<span class="number">100</span> age <span class="number">20</span></span><br></pre></td></tr></table></figure>
-<p>每执行一次hset命令，插入的field和value分别作为一个新的数据项插入到ziplist中（即每次hset产生两个数据项）。</p>
-<p>当随着数据的插入，hash底层的这个ziplist就可能会转成dict。那么到底插入多少才会转呢？</p>
-<p>还记得本文开头提到的两个Redis配置吗？</p>
-<figure class="highlight excel"><table><tr><td class="code"><pre><span class="line">hash-<span class="built_in">max</span>-ziplist-entries <span class="number">512</span></span><br><span class="line">hash-<span class="built_in">max</span>-ziplist-<span class="built_in">value</span> <span class="number">64</span></span><br></pre></td></tr></table></figure>
-<p>这个配置的意思是说，在如下两个条件之一满足的时候，ziplist会转成dict：</p>
-<ul>
-<li>当hash中的数据项（即field-value对）的数目超过512的时候，也就是ziplist数据项超过1024的时候（请参考t_hash.c中的<code>hashTypeSet</code>函数）。</li>
-<li>当hash中插入的任意一个value的长度超过了64的时候（请参考t_hash.c中的<code>hashTypeTryConversion</code>函数）。</li>
-<li>Redis的hash之所以这样设计，是因为当ziplist变得很大的时候，它有如下几个缺点：</li>
-<li>每次插入或修改引发的realloc操作会有更大的概率造成内存拷贝，从而降低性能。</li>
-<li>一旦发生内存拷贝，内存拷贝的成本也相应增加，因为要拷贝更大的一块数据。</li>
-<li>当ziplist数据项过多的时候，在它上面查找指定的数据项就会性能变得很低，因为ziplist上的查找需要进行遍历。</li>
-</ul>
-<p>总之，ziplist本来就设计为各个数据项挨在一起组成连续的内存空间，这种结构并不擅长做修改操作。一旦数据发生改动，就会引发内存realloc，可能导致内存拷贝。</p>
-]]></content>
-      <categories>
-        <category>中间件</category>
-      </categories>
-      <tags>
-        <tag>redis</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>redis内部数据结构(5)-quicklist</title>
     <url>/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-5-quicklist/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -2331,139 +2374,115 @@ Redis对外暴露的list数据类型，它底层实现所依赖的内部数据�
       </tags>
   </entry>
   <entry>
-    <title>redis内部数据结构(7)-intset</title>
-    <url>/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-7-intset/</url>
+    <title>redis内部数据结构(4)-ziplist</title>
+    <url>/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-4-ziplist/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
 
-<p>Redis里面使用intset是为了实现集合(set)这种对外的数据结构。set结构类似于数学上的集合的概念，它包含的元素无序，且不能重复。Redis里的set结构还实现了基础的集合并、交、差的操作。与Redis对外暴露的其它数据结构类似，set的底层实现，随着元素类型是否是整型以及添加的元素的数目多少，而有所变化。概括来讲，<strong>当set中添加的元素都是整型且元素数目较少时，set使用intset作为底层数据结构，否则，set使用dict作为底层数据结构。</strong></p>
-<p>在本文中我们将大体分成三个部分进行介绍：</p>
-<ul>
-<li>集中介绍intset数据结构。</li>
-<li>讨论set是如何在intset和dict基础上构建起来的。</li>
-<li>集中讨论set的并、交、差的算法实现以及时间复杂度。注意，其中差集的计算在Redis中实现了两种算法。<a id="more"></a>
-
-</li>
-</ul>
-<p>我们在讨论中还会涉及到一个Redis配置（在redis.conf中的ADVANCED CONFIG部分）：</p>
-<figure class="highlight dsconfig"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set-max-intset-entries</span> <span class="string">512</span></span><br></pre></td></tr></table></figure>
-
-<p>注：本文讨论的代码实现基于Redis源码的3.2分支。</p>
-<h3 id="intset数据结构简介"><a href="#intset数据结构简介" class="headerlink" title="intset数据结构简介"></a>intset数据结构简介</h3><p>intset顾名思义，是由整数组成的集合。实际上，intset是一个由整数组成的有序集合，从而便于在上面进行二分查找，用于快速地判断一个元素是否属于这个集合。它在内存分配上与ziplist有些类似，是连续的一整块内存空间，而且对于大整数和小整数（按绝对值）采取了不同的编码，尽量对内存的使用进行了优化。</p>
-<p>intset的数据结构定义如下（出自intset.h和intset.c）</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">intset</span> &#123;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> encoding;</span><br><span class="line">    <span class="keyword">uint32_t</span> length;</span><br><span class="line">    <span class="keyword">int8_t</span> contents[];</span><br><span class="line">&#125; intset;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INTSET_ENC_INT16 (sizeof(int16_t))</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INTSET_ENC_INT32 (sizeof(int32_t))</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INTSET_ENC_INT64 (sizeof(int64_t))</span></span><br></pre></td></tr></table></figure>
-<p>各个字段含义如下：</p>
-<ul>
-<li>encoding: 数据编码，表示intset中的每个数据元素用几个字节来存储。它有三种可能的取值：INTSET_ENC_INT16表示每个元素用2个字节存储，INTSET_ENC_INT32表示每个元素用4个字节存储，INTSET_ENC_INT64表示每个元素用8个字节存储。因此，intset中存储的整数最多只能占用64bit。</li>
-<li>length: 表示intset中的元素个数。encoding和length两个字段构成了intset的头部（header）。</li>
-<li>contents: 是一个柔性数组（flexible array member），表示intset的header后面紧跟着数据元素。这个数组的总长度（即总字节数）等于encoding * length。柔性数组在Redis的很多数据结构的定义中都出现过（例如sds, quicklist, skiplist），用于表达一个偏移量。contents需要单独为其分配空间，这部分内存不包含在intset结构当中。</li>
-</ul>
-<p>其中需要注意的是，intset可能会随着数据的添加而改变它的数据编码：</p>
-<ul>
-<li>最开始，新创建的intset使用占内存最小的INTSET_ENC_INT16（值为2）作为数据编码。</li>
-<li>每添加一个新元素，则根据元素大小决定是否对数据编码进行升级。</li>
-</ul>
-<p>下图给出了一个添加数据的具体例子。<br><img src="/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-7-intset/redis_intset_add_example.png" alt="redis_intset_add_example"></p>
-<p>在上图中：</p>
-<ul>
-<li>新创建的intset只有一个header，总共8个字节。其中encoding = 2, length = 0。</li>
-<li>添加13, 5两个元素之后，因为它们是比较小的整数，都能使用2个字节表示，所以encoding不变，值还是2。</li>
-<li>当添加32768的时候，它不再能用2个字节来表示了（2个字节能表达的数据范围是-215~215-1，而32768等于215，超出范围了），因此encoding必须升级到INTSET_ENC_INT32（值为4），即用4个字节表示一个元素。</li>
-<li>在添加每个元素的过程中，intset始终保持从小到大有序。</li>
-<li>与ziplist类似，intset也是按小端（little endian）模式存储的（参见维基百科词条Endianness）。比如，在上图中intset添加完所有数据之后，表示encoding字段的4个字节应该解释成0x00000004，而第5个数据应该解释成0x000186A0 = 100000。</li>
-</ul>
-<p>intset与ziplist相比：</p>
-<ul>
-<li>ziplist可以存储任意二进制串，而intset只能存储整数。</li>
-<li>ziplist是无序的，而intset是从小到大有序的。因此，在ziplist上查找只能遍历，而在intset上可以进行二分查找，性能更高。</li>
-<li>ziplist可以对每个数据项进行不同的变长编码（每个数据项前面都有数据长度字段len），而intset只能整体使用一个统一的编码（encoding）。</li>
-</ul>
-<h3 id="intset的查找和添加操作"><a href="#intset的查找和添加操作" class="headerlink" title="intset的查找和添加操作"></a>intset的查找和添加操作</h3><p>要理解intset的一些实现细节，只需要关注intset的两个关键操作基本就可以了：查找（<code>intsetFind</code>）和添加（<code>intsetAdd</code>）元素。</p>
-<p>intsetFind的关键代码如下所示（出自intset.c）：</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="built_in">uint</span>8_t <span class="built_in">int</span>setFind(<span class="built_in">int</span><span class="keyword">set</span> *<span class="keyword">is</span>, <span class="built_in">int</span>64_t value) &#123;</span><br><span class="line">    <span class="built_in">uint</span>8_t valenc = _intsetValueEncoding(value);</span><br><span class="line">    <span class="keyword">return</span> valenc &lt;= <span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;encoding) &amp;&amp; <span class="built_in">int</span>setSearch(<span class="keyword">is</span>,value,NULL);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static <span class="built_in">uint</span>8_t <span class="built_in">int</span>setSearch(<span class="built_in">int</span><span class="keyword">set</span> *<span class="keyword">is</span>, <span class="built_in">int</span>64_t value, <span class="built_in">uint</span>32_t *pos) &#123;</span><br><span class="line">    <span class="built_in">int</span> min = <span class="number">0</span>, max = <span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length)<span class="number">-1</span>, mid = <span class="number">-1</span>;</span><br><span class="line">    <span class="built_in">int</span>64_t cur = <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* The value can never be found when the set is empty */</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (pos) *pos = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">/* Check for the case where we know we cannot find the value,</span></span><br><span class="line"><span class="comment">         * but do know the insert position. */</span></span><br><span class="line">        <span class="keyword">if</span> (value &gt; _intsetGet(<span class="keyword">is</span>,<span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length)<span class="number">-1</span>)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (pos) *pos = <span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (value &lt; _intsetGet(<span class="keyword">is</span>,<span class="number">0</span>)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (pos) *pos = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(max &gt;= min) &#123;</span><br><span class="line">        mid = ((unsigned <span class="built_in">int</span>)min + (unsigned <span class="built_in">int</span>)max) &gt;&gt; <span class="number">1</span>;</span><br><span class="line">        cur = _intsetGet(<span class="keyword">is</span>,mid);</span><br><span class="line">        <span class="keyword">if</span> (value &gt; cur) &#123;</span><br><span class="line">            min = mid+<span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (value &lt; cur) &#123;</span><br><span class="line">            max = mid<span class="number">-1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (value == cur) &#123;</span><br><span class="line">        <span class="keyword">if</span> (pos) *pos = mid;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (pos) *pos = min;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>关于以上代码，我们需要注意的地方包括：</p>
-<ul>
-<li>intsetFind在指定的intset中查找指定的元素value，找到返回1，没找到返回0。</li>
-<li>_intsetValueEncoding函数会根据要查找的value落在哪个范围而计算出相应的数据编码（即它应该用几个字节来存储）。</li>
-<li>如果value所需的数据编码比当前intset的编码要大，则它肯定在当前intset所能存储的数据范围之外（特别大或特别小），所以这时会直接返回0；否则调用intsetSearch执行一个二分查找算法。</li>
-<li>intsetSearch在指定的intset中查找指定的元素value，如果找到，则返回1并且将参数pos指向找到的元素位置；如果没找到，则返回0并且将参数pos指向能插入该元素的位置。</li>
-<li>intsetSearch是对于二分查找算法的一个实现，它大致分为三个部分：<ul>
-<li>特殊处理intset为空的情况。</li>
-<li>特殊处理两个边界情况：当要查找的value比最后一个元素还要大或者比第一个元素还要小的时候。实际上，这两部分的特殊处理，在二分查找中并不是必须的，但它们在这里提供了特殊情况下快速失败的可能。</li>
-<li>真正执行二分查找过程。注意：如果最后没找到，插入位置在min指定的位置。</li>
-</ul>
-</li>
-<li>代码中出现的intrev32ifbe是为了在需要的时候做大小端转换的。前面我们提到过，intset里的数据是按小端（little endian）模式存储的，因此在大端（big endian）机器上运行时，这里的intrev32ifbe会做相应的转换。</li>
-<li>这个查找算法的总的时间复杂度为O(log n)。</li>
-</ul>
-<p>而intsetAdd的关键代码如下所示（出自intset.c）：</p>
-<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="built_in">int</span><span class="keyword">set</span> *<span class="built_in">int</span>setAdd(<span class="built_in">int</span><span class="keyword">set</span> *<span class="keyword">is</span>, <span class="built_in">int</span>64_t value, <span class="built_in">uint</span>8_t *success) &#123;</span><br><span class="line">    <span class="built_in">uint</span>8_t valenc = _intsetValueEncoding(value);</span><br><span class="line">    <span class="built_in">uint</span>32_t pos;</span><br><span class="line">    <span class="keyword">if</span> (success) *success = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Upgrade encoding if necessary. If we need to upgrade, we know that</span></span><br><span class="line"><span class="comment">     * this value should be either appended (if &gt; 0) or prepended (if &lt; 0),</span></span><br><span class="line"><span class="comment">     * because it lies outside the range of existing values. */</span></span><br><span class="line">    <span class="keyword">if</span> (valenc &gt; <span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;encoding)) &#123;</span><br><span class="line">        <span class="comment">/* This always succeeds, so we don&#x27;t need to curry *success. */</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">int</span>setUpgradeAndAdd(<span class="keyword">is</span>,value);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">/* Abort if the value is already present in the set.</span></span><br><span class="line"><span class="comment">         * This call will populate &quot;pos&quot; with the right position to insert</span></span><br><span class="line"><span class="comment">         * the value when it cannot be found. */</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">int</span>setSearch(<span class="keyword">is</span>,value,&amp;pos)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (success) *success = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">is</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">is</span> = <span class="built_in">int</span>setResize(<span class="keyword">is</span>,<span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length)+<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">if</span> (pos &lt; <span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length)) <span class="built_in">int</span>setMoveTail(<span class="keyword">is</span>,pos,pos+<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _intsetSet(<span class="keyword">is</span>,pos,value);</span><br><span class="line">    <span class="keyword">is</span>-&gt;length = <span class="built_in">int</span>rev32ifbe(<span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length)+<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">is</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>关于以上代码，我们需要注意的地方包括：</p>
-<ul>
-<li>intsetAdd在intset中添加新元素value。如果value在添加前已经存在，则不会重复添加，这时参数success被置为0；如果value在原来intset中不存在，则将value插入到适当位置，这时参数success被置为0。</li>
-<li>如果要添加的元素value所需的数据编码比当前intset的编码要大，那么则调用intsetUpgradeAndAdd将intset的编码进行升级后再插入value。</li>
-<li>调用intsetSearch，如果能查到，则不会重复添加。</li>
-<li>如果没查到，则调用intsetResize对intset进行内存扩充，使得它能够容纳新添加的元素。因为intset是一块连续空间，因此这个操作会引发内存的realloc（参见<a href="http://man.cx/realloc%EF%BC%89%E3%80%82%E8%BF%99%E6%9C%89%E5%8F%AF%E8%83%BD%E5%B8%A6%E6%9D%A5%E4%B8%80%E6%AC%A1%E6%95%B0%E6%8D%AE%E6%8B%B7%E8%B4%9D%E3%80%82%E5%90%8C%E6%97%B6%E8%B0%83%E7%94%A8intsetMoveTail%E5%B0%86%E5%BE%85%E6%8F%92%E5%85%A5%E4%BD%8D%E7%BD%AE%E5%90%8E%E9%9D%A2%E7%9A%84%E5%85%83%E7%B4%A0%E7%BB%9F%E4%B8%80%E5%90%91%E5%90%8E%E7%A7%BB%E5%8A%A81%E4%B8%AA%E4%BD%8D%E7%BD%AE%EF%BC%8C%E8%BF%99%E4%B9%9F%E6%B6%89%E5%8F%8A%E5%88%B0%E4%B8%80%E6%AC%A1%E6%95%B0%E6%8D%AE%E6%8B%B7%E8%B4%9D%E3%80%82%E5%80%BC%E5%BE%97%E6%B3%A8%E6%84%8F%E7%9A%84%E6%98%AF%EF%BC%8C%E5%9C%A8intsetMoveTail%E4%B8%AD%E6%98%AF%E8%B0%83%E7%94%A8memmove%E5%AE%8C%E6%88%90%E8%BF%99%E6%AC%A1%E6%95%B0%E6%8D%AE%E6%8B%B7%E8%B4%9D%E7%9A%84%E3%80%82memmove%E4%BF%9D%E8%AF%81%E4%BA%86%E5%9C%A8%E6%8B%B7%E8%B4%9D%E8%BF%87%E7%A8%8B%E4%B8%AD%E4%B8%8D%E4%BC%9A%E9%80%A0%E6%88%90%E6%95%B0%E6%8D%AE%E9%87%8D%E5%8F%A0%E6%88%96%E8%A6%86%E7%9B%96%EF%BC%8C%E5%85%B7%E4%BD%93%E5%8F%82%E8%A7%81http://man.cx/memmove%E3%80%82">http://man.cx/realloc）。这有可能带来一次数据拷贝。同时调用intsetMoveTail将待插入位置后面的元素统一向后移动1个位置，这也涉及到一次数据拷贝。值得注意的是，在intsetMoveTail中是调用memmove完成这次数据拷贝的。memmove保证了在拷贝过程中不会造成数据重叠或覆盖，具体参见http://man.cx/memmove。</a></li>
-<li>intsetUpgradeAndAdd的实现中也会调用intsetResize来完成内存扩充。在进行编码升级时，intsetUpgradeAndAdd的实现会把原来intset中的每个元素取出来，再用新的编码重新写入新的位置。</li>
-<li>注意一下intsetAdd的返回值，它返回一个新的intset指针。它可能与传入的intset指针is相同，也可能不同。调用方必须用这里返回的新的intset，替换之前传进来的旧的intset变量。类似这种接口使用模式，在Redis的实现代码中是很常见的，比如我们之前在介绍sds和ziplist的时候都碰到过类似的情况。</li>
-<li>显然，这个intsetAdd算法总的时间复杂度为O(n)。</li>
-</ul>
-<h3 id="Redis的set"><a href="#Redis的set" class="headerlink" title="Redis的set"></a>Redis的set</h3><p>为了更好地理解Redis对外暴露的set数据结构，我们先看一下set的一些关键的命令。下面是一些命令举例：<br><img src="/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-7-intset/redis_set_cmd_example.png" alt="redis_set_cmd_example"></p>
-<p>上面这些命令的含义：</p>
-<ul>
-<li>sadd用于分别向集合s1和s2中添加元素。添加的元素既有数字，也有非数字（”a”和”b”）。</li>
-<li>sismember用于判断指定的元素是否在集合内存在。</li>
-<li>sinter, sunion和sdiff分别用于计算集合的交集、并集和差集。</li>
-</ul>
-<p>set的底层实现，随着元素类型是否是整型以及添加的元素的数目多少，而有所变化。例如，具体到上述命令的执行过程中，集合s1的底层数据结构会发生如下变化：</p>
-<ul>
-<li>在开始执行完sadd s1 13 5之后，由于添加的都是比较小的整数，所以s1底层是一个intset，其数据编码encoding = 2。</li>
-<li>在执行完sadd s1 32768 10 100000之后，s1底层仍然是一个intset，但其数据编码encoding从2升级到了4。</li>
-<li>在执行完sadd s1 a b之后，由于添加的元素不再是数字，s1底层的实现会转成一个dict。</li>
-</ul>
-<p>dict是一个用于维护key和value映射关系的数据结构，那么当set底层用dict表示的时候，它的key和value分别是什么呢？实际上，key就是要添加的集合元素，而value是NULL。</p>
-<p>除了前面提到的由于添加非数字元素造成集合底层由intset转成dict之外，还有两种情况可能造成这种转换：</p>
-<ul>
-<li>添加了一个数字，但它无法用64bit的有符号数来表达。intset能够表达的最大的整数范围为-264~264-1，因此，如果添加的数字超出了这个范围，这也会导致intset转成dict。</li>
-<li>添加的集合元素个数超过了<code>set-max-intset-entries</code>配置的值的时候，也会导致intset转成dict（具体的触发条件参见t_set.c中的<code>setTypeAdd</code>相关代码）。</li>
-</ul>
-<p>对于小集合使用intset来存储，主要的原因是节省内存。特别是当存储的元素个数较少的时候，dict所带来的内存开销要大得多（包含两个哈希表、链表指针以及大量的其它元数据）。所以，当存储大量的小集合而且集合元素都是数字的时候，用intset能节省下一笔可观的内存空间。</p>
-<p>实际上，从时间复杂度上比较，intset的平均情况是没有dict性能高的。以查找为例，intset是O(log n)的，而dict可以认为是O(1)的。但是，由于使用intset的时候集合元素个数比较少，所以这个影响不大。</p>
-<h3 id="Redis-set的并、交、差算法"><a href="#Redis-set的并、交、差算法" class="headerlink" title="Redis set的并、交、差算法"></a>Redis set的并、交、差算法</h3><p>Redis set的并、交、差算法的实现代码，在t_set.c中。其中计算交集调用的是<code>sinterGenericCommand</code>，计算并集和差集调用的是<code>sunionDiffGenericCommand</code>。它们都能同时对多个（可以多于2个）集合进行运算。当对多个集合进行差集运算时，它表达的含义是：用第一个集合与第二个集合做差集，所得结果再与第三个集合做差集，依次向后类推。</p>
-<h4 id="交集"><a href="#交集" class="headerlink" title="交集"></a>交集</h4><p>计算交集的过程大概可以分为三部分：</p>
-<ul>
-<li>检查各个集合，对于不存在的集合当做空集来处理。一旦出现空集，则不用继续计算了，最终的交集就是空集。</li>
-<li>对各个集合按照元素个数由少到多进行排序。这个排序有利于后面计算的时候从最小的集合开始，需要处理的元素个数较少。</li>
-<li>对排序后第一个集合（也就是最小集合）进行遍历，对于它的每一个元素，依次在后面的所有集合中进行查找。只有在所有集合中都能找到的元素，才加入到最后的结果集合中。</li>
-</ul>
-<p>需要注意的是，上述第3步在集合中进行查找，对于intset和dict的存储来说时间复杂度分别是O(log n)和O(1)。但由于只有小集合才使用intset，所以可以粗略地认为intset的查找也是常数时间复杂度的。因此，如Redis官方文档上所说（<a href="http://redis.io/commands/sinter">http://redis.io/commands/sinter</a>），<code>sinter</code>命令的时间复杂度为：</p>
+<p>在本文中，我们首先介绍一个新的Redis内部数据结构——ziplist，然后在文章后半部分我们会讨论一下在robj, dict和ziplist的基础上，Redis对外暴露的hash结构是怎样构建起来的。</p>
+<p>我们在讨论中还会涉及到两个Redis配置（在redis.conf中的ADVANCED CONFIG部分）：</p>
+<figure class="highlight excel"><table><tr><td class="code"><pre><span class="line">hash-<span class="built_in">max</span>-ziplist-entries <span class="number">512</span></span><br><span class="line">hash-<span class="built_in">max</span>-ziplist-<span class="built_in">value</span> <span class="number">64</span></span><br></pre></td></tr></table></figure>
+<a id="more"></a>
+<h3 id="什么是ziplist"><a href="#什么是ziplist" class="headerlink" title="什么是ziplist"></a>什么是ziplist</h3><p>Redis官方对于ziplist的定义是（出自ziplist.c的文件头部注释）：</p>
 <blockquote>
-<p>O(N*M) worst case where N is the cardinality of the smallest set and M is the number of sets.</p>
+<p>The ziplist is a specially encoded dually linked list that is designed to be very memory efficient. It stores both strings and integer values, where integers are encoded as actual integers instead of a series of characters. It allows push and pop operations on either side of the list in O(1) time.</p>
 </blockquote>
-<h4 id="并集"><a href="#并集" class="headerlink" title="并集"></a>并集</h4><p>计算并集最简单，只需要遍历所有集合，将每一个元素都添加到最后的结果集合中。向集合中添加元素会自动去重。</p>
-<p>由于要遍历所有集合的每个元素，所以Redis官方文档给出的sunion命令的时间复杂度为（<a href="http://redis.io/commands/sunion">http://redis.io/commands/sunion</a>）：</p>
-<blockquote>
-<p>O(N) where N is the total number of elements in all given sets.</p>
-</blockquote>
-<p>注意，这里同前面讨论交集计算一样，将元素插入到结果集合的过程，忽略intset的情况，认为时间复杂度为O(1)。</p>
-<h4 id="差集"><a href="#差集" class="headerlink" title="差集"></a>差集</h4><p>计算差集有两种可能的算法，它们的时间复杂度有所区别。</p>
-<p>第一种算法：</p>
+<p>翻译一下就是说：<code>ziplist是一个经过特殊编码的双向链表，它的设计目标就是为了提高存储效率。ziplist可以用于存储字符串或整数，其中整数是按真正的二进制表示进行编码的，而不是编码成字符串序列。它能以O(1)的时间复杂度在表的两端提供push和pop操作。</code></p>
+<p>实际上，ziplist充分体现了Redis对于存储效率的追求。一个普通的双向链表，链表中每一项都占用独立的一块内存，各项之间用地址指针（或引用）连接起来。这种方式会带来大量的内存碎片，而且地址指针也会占用额外的内存。而ziplist却是将表中每一项存放在前后连续的地址空间内，一个ziplist整体占用一大块内存。它是一个表（list），但其实不是一个链表（linked list）。</p>
+<p>另外，ziplist为了在细节上节省内存，对于值的存储采用了变长的编码方式，大概意思是说，对于大的整数，就多用一些字节来存储，而对于小的整数，就少用一些字节来存储。</p>
+<h3 id="ziplist的数据结构定义"><a href="#ziplist的数据结构定义" class="headerlink" title="ziplist的数据结构定义"></a>ziplist的数据结构定义</h3><p>从宏观上看，ziplist的内存结构如下：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">zlbytes</span>&gt;</span><span class="tag">&lt;<span class="name">zltail</span>&gt;</span><span class="tag">&lt;<span class="name">zllen</span>&gt;</span><span class="tag">&lt;<span class="name">entry</span>&gt;</span>...<span class="tag">&lt;<span class="name">entry</span>&gt;</span><span class="tag">&lt;<span class="name">zlend</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>各个部分在内存上是前后相邻的，它们分别的含义如下：</p>
 <ul>
-<li>对第一个集合进行遍历，对于它的每一个元素，依次在后面的所有集合中进行查找。只有在所有集合中都找不到的元素，才加入到最后的结果集合中。</li>
+<li><code>&lt;zlbytes&gt;</code>: 32bit，表示ziplist占用的字节总数（也包括<code>&lt;zlbytes&gt;</code>本身占用的4个字节）。</li>
+<li><code>&lt;zltail&gt;</code>: 32bit，表示ziplist表中最后一项（entry）在ziplist中的偏移字节数。<code>&lt;zltail&gt;</code>的存在，使得我们可以很方便地找到最后一项（不用遍历整个ziplist），从而可以在ziplist尾端快速地执行push或pop操作。</li>
+<li><code>&lt;zllen&gt;</code>: 16bit， 表示ziplist中数据项（entry）的个数。zllen字段因为只有16bit，所以可以表达的最大值为2^16-1。这里需要特别注意的是，如果ziplist中数据项个数超过了16bit能表达的最大值，ziplist仍然可以来表示。那怎么表示呢？这里做了这样的规定：如果<code>&lt;zllen&gt;</code>小于等于2^16-2（也就是不等于2^16-1），那么<code>&lt;zllen&gt;</code>就表示ziplist中数据项的个数；否则，也就是<code>&lt;zllen&gt;</code>等于16bit全为1的情况，那么<code>&lt;zllen&gt;</code>就不表示数据项个数了，这时候要想知道ziplist中数据项总数，那么必须对ziplist从头到尾遍历各个数据项，才能计数出来。</li>
+<li><code>&lt;entry&gt;</code>: 表示真正存放数据的数据项，长度不定。一个数据项（entry）也有它自己的内部结构，这个稍后再解释。</li>
+<li><code>&lt;zlend&gt;</code>: ziplist最后1个字节，是一个结束标记，值固定等于255。<br>上面的定义中还值得注意的一点是：<code>&lt;zlbytes&gt;</code>, <code>&lt;zltail&gt;</code>, <code>&lt;zllen&gt;</code>既然占据多个字节，那么在存储的时候就有大端（big endian）和小端（little endian）的区别。ziplist采取的是小端模式来存储，这在下面我们介绍具体例子的时候还会再详细解释。</li>
 </ul>
-<p>这种算法的时间复杂度为*<em>O(N</em>M)**，其中N是第一个集合的元素个数，M是集合数目。</p>
-<p>第二种算法：</p>
+<p>我们再来看一下每一个数据项<code>&lt;entry&gt;</code>的构成：</p>
+<figure class="highlight apache"><table><tr><td class="code"><pre><span class="line"><span class="section">&lt;prevrawlen&gt;</span><span class="section">&lt;len&gt;</span><span class="section">&lt;data&gt;</span></span><br></pre></td></tr></table></figure>
+<p>我们看到在真正的数据（<code>&lt;data&gt;</code>）前面，还有两个字段：</p>
 <ul>
-<li>将第一个集合的所有元素都加入到一个中间集合中。</li>
-<li>遍历后面所有的集合，对于碰到的每一个元素，从中间集合中删掉它。</li>
-<li>最后中间集合剩下的元素就构成了差集。</li>
+<li><code>&lt;prevrawlen&gt;</code>: 表示前一个数据项占用的总字节数。这个字段的用处是为了让ziplist能够从后向前遍历（从后一项的位置，只需向前偏移prevrawlen个字节，就找到了前一项）。这个字段采用变长编码。</li>
+<li><code>&lt;len&gt;</code>: 表示当前数据项的数据长度（即<code>&lt;data&gt;</code>部分的长度）。也采用变长编码。</li>
 </ul>
-<p>这种算法的时间复杂度为**O(N)**，其中N是所有集合的元素个数总和。</p>
-<p>在计算差集的开始部分，会先分别估算一下两种算法预期的时间复杂度，然后选择复杂度低的算法来进行运算。还有两点需要注意：</p>
+<h3 id="那么-lt-prevrawlen-gt-和-lt-len-gt-是怎么进行变长编码的呢？"><a href="#那么-lt-prevrawlen-gt-和-lt-len-gt-是怎么进行变长编码的呢？" class="headerlink" title="那么&lt;prevrawlen&gt;和&lt;len&gt;是怎么进行变长编码的呢？"></a>那么<code>&lt;prevrawlen&gt;</code>和<code>&lt;len&gt;</code>是怎么进行变长编码的呢？</h3><p>先说<code>&lt;prevrawlen&gt;</code>。它有两种可能，或者是1个字节，或者是5个字节：</p>
 <ul>
-<li>在一定程度上优先选择第一种算法，因为它涉及到的操作比较少，只用添加，而第二种算法要先添加再删除。</li>
-<li>如果选择了第一种算法，那么在执行该算法之前，Redis的实现中对于第二个集合之后的所有集合，按照元素个数由多到少进行了排序。这个排序有利于以更大的概率查找到元素，从而更快地结束查找。</li>
+<li>如果前一个数据项占用字节数小于254，那么<code>&lt;prevrawlen&gt;</code>就只用一个字节来表示，这个字节的值就是前一个数据项的占用字节数。</li>
+<li>如果前一个数据项占用字节数大于等于254，那么<code>&lt;prevrawlen&gt;</code>就用5个字节来表示，其中第1个字节的值是254（作为这种情况的一个标记），而后面4个字节组成一个整型值，来真正存储前一个数据项的占用字节数。</li>
 </ul>
-<p>对于<code>sdiff</code>的时间复杂度，Redis官方文档（<a href="http://redis.io/commands/sdiff">http://redis.io/commands/sdiff</a>）只给出了第二种算法的结果，是不准确的。</p>
+<p><strong>为什么没有255的情况呢？</strong><br>这是因为：255已经定义为ziplist结束标记<code>&lt;zlend&gt;</code>的值了。在ziplist的很多操作的实现中，都会根据数据项的第1个字节是不是255来判断当前是不是到达ziplist的结尾了，因此一个正常的数据的第1个字节（也就是<code>&lt;prevrawlen&gt;</code>的第1个字节）是不能够取255这个值的，否则就冲突了。</p>
+<p>而<len>字段就更加复杂了，它根据第1个字节的不同，总共分为9种情况（下面的表示法是按二进制表示）：</len></p>
+<ol>
+<li>|00pppppp| - 1 byte。第1个字节最高两个bit是00，那么<len>字段只有1个字节，剩余的6个bit用来表示长度值，最高可以表示63 (2^6-1)。</len></li>
+<li>|01pppppp|qqqqqqqq| - 2 bytes。第1个字节最高两个bit是01，那么<len>字段占2个字节，总共有14个bit用来表示长度值，最高可以表示16383 (2^14-1)。</len></li>
+<li>|10__|qqqqqqqq|rrrrrrrr|ssssssss|tttttttt| - 5 bytes。第1个字节最高两个bit是10，那么len字段占5个字节，总共使用32个bit来表示长度值（6个bit舍弃不用），最高可以表示2^32-1。需要注意的是：在前三种情况下，<data>都是按字符串来存储的；从下面第4种情况开始，<data>开始变为按整数来存储了。</data></data></li>
+<li>|11000000| - 1 byte。<len>字段占用1个字节，值为0xC0，后面的数据<data>存储为2个字节的int16_t类型。</data></len></li>
+<li>|11010000| - 1 byte。<len>字段占用1个字节，值为0xD0，后面的数据<data>存储为4个字节的int32_t类型。</data></len></li>
+<li>|11100000| - 1 byte。<len>字段占用1个字节，值为0xE0，后面的数据<data>存储为8个字节的int64_t类型。</data></len></li>
+<li>|11110000| - 1 byte。<len>字段占用1个字节，值为0xF0，后面的数据<data>存储为3个字节长的整数。</data></len></li>
+<li>|11111110| - 1 byte。<len>字段占用1个字节，值为0xFE，后面的数据<data>存储为1个字节的整数。</data></len></li>
+<li>|1111xxxx| - - (xxxx的值在0001和1101之间)。这是一种特殊情况，xxxx从1到13一共13个值，这时就用这13个值来表示真正的数据。注意，这里是表示真正的数据，而不是数据长度了。也就是说，在这种情况下，后面不再需要一个单独的<data>字段来表示真正的数据了，而是<len>和<data>合二为一了。另外，由于xxxx只能取0001和1101这13个值了（其它可能的值和其它情况冲突了，比如0000和1110分别同前面第7种第8种情况冲突，1111跟结束标记冲突），而小数值应该从0开始，因此这13个值分别表示0到12，即xxxx的值减去1才是它所要表示的那个整数数据的值。</data></len></data></li>
+</ol>
+<p>好了，ziplist的数据结构定义，我们介绍完了，现在我们看一个具体的例子。<br><img src="/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-4-ziplist/redis_ziplist_sample.png" alt="sample"></p>
+<p>上图是一份真实的ziplist数据。我们逐项解读一下：</p>
+<ul>
+<li>这个ziplist一共包含33个字节。字节编号从byte[0]到byte[32]。图中每个字节的值使用16进制表示。</li>
+<li>头4个字节（0x21000000）是按小端（little endian）模式存储的<code>&lt;zlbytes&gt;</code>字段。什么是小端呢？就是指数据的低字节保存在内存的低地址中（参见维基百科词条Endianness）。因此，这里<code>&lt;zlbytes&gt;</code>的值应该解析成0x00000021，用十进制表示正好就是33。</li>
+<li>接下来4个字节（byte[4..7]）是<code>&lt;zltail&gt;</code>，用小端存储模式来解释，它的值是0x0000001D（值为29），表示最后一个数据项在byte[29]的位置（那个数据项为0x05FE14）。</li>
+<li>再接下来2个字节（byte[8..9]），值为0x0004，表示这个ziplist里一共存有4项数据。</li>
+<li>接下来6个字节（byte[10..15]）是第1个数据项。其中，prevrawlen=0，因为它前面没有数据项；len=4，相当于前面定义的9种情况中的第1种，表示后面4个字节按字符串存储数据，数据的值为”name”。</li>
+<li>接下来8个字节（byte[16..23]）是第2个数据项，与前面数据项存储格式类似，存储1个字符串”tielei”。</li>
+<li>接下来5个字节（byte[24..28]）是第3个数据项，与前面数据项存储格式类似，存储1个字符串”age”。</li>
+<li>接下来3个字节（byte[29..31]）是最后一个数据项，它的格式与前面的数据项存储格式不太一样。其中，第1个字节prevrawlen=5，表示前一个数据项占用5个字节；第2个字节=FE，相当于前面定义的9种情况中的第8种，所以后面还有1个字节用来表示真正的数据，并且以整数表示。它的值是20（0x14）。</li>
+<li>最后1个字节（byte[32]）表示<code>&lt;zlend&gt;</code>，是固定的值255（0xFF）。</li>
+</ul>
+<p>总结一下，这个ziplist里存了4个数据项，分别为：</p>
+<ul>
+<li>字符串: “name”</li>
+<li>字符串: “tielei”</li>
+<li>字符串: “age”</li>
+<li>整数: 20</li>
+</ul>
+<p>实际上，这个ziplist是通过两个hset命令创建出来的。这个我们后半部分会再提到。</p>
+<h3 id="ziplist的接口"><a href="#ziplist的接口" class="headerlink" title="ziplist的接口"></a>ziplist的接口</h3><p>几个重要的接口：</p>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">New(<span class="params">void</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Merge(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">**</span><span class="params">first</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">**</span><span class="params">second</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Push(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">s</span>, <span class="params">unsigned</span> <span class="params">int</span> <span class="params">slen</span>, <span class="params">int</span> <span class="params">where</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Index(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">int</span> <span class="params">index</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Next(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">p</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Prev(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">p</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Insert(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">p</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">s</span>, <span class="params">unsigned</span> <span class="params">int</span> <span class="params">slen</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Delete(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">**</span><span class="params">p</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">char</span> *ziplist<span class="constructor">Find(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">p</span>, <span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">vstr</span>, <span class="params">unsigned</span> <span class="params">int</span> <span class="params">vlen</span>, <span class="params">unsigned</span> <span class="params">int</span> <span class="params">skip</span>)</span>;</span><br><span class="line">unsigned <span class="built_in">int</span> ziplist<span class="constructor">Len(<span class="params">unsigned</span> <span class="params">char</span> <span class="operator">*</span><span class="params">zl</span>)</span>;</span><br></pre></td></tr></table></figure>
+<p>我们从这些接口的名字就可以粗略猜出它们的功能，下面简单解释一下：</p>
+<ul>
+<li>ziplist的数据类型，没有用自定义的struct之类的来表达，而就是简单的unsigned char *。这是因为ziplist本质上就是一块连续内存，内部组成结构又是一个高度动态的设计（变长编码），也没法用一个固定的数据结构来表达。</li>
+<li>ziplistNew: 创建一个空的ziplist（只包含<code>&lt;zlbytes&gt;&lt;zltail&gt;&lt;zllen&gt;&lt;zlend&gt;</code>）。</li>
+<li>ziplistMerge: 将两个ziplist合并成一个新的ziplist。</li>
+<li>ziplistPush: 在ziplist的头部或尾端插入一段数据（产生一个新的数据项）。注意一下这个接口的返回值，是一个新的ziplist。调用方必须用这里返回的新的ziplist，替换之前传进来的旧的ziplist变量，而经过这个函数处理之后，原来旧的ziplist变量就失效了。为什么一个简单的插入操作会导致产生一个新的ziplist呢？这是因为ziplist是一块连续空间，对它的追加操作，会引发内存的realloc，因此ziplist的内存位置可能会发生变化。实际上，我们在之前介绍sds的文章中提到过类似这种接口使用模式（参见sdscatlen函数的说明）。</li>
+<li>ziplistIndex: 返回index参数指定的数据项的内存位置。index可以是负数，表示从尾端向前进行索引。</li>
+<li>ziplistNext和ziplistPrev分别返回一个ziplist中指定数据项p的后一项和前一项。</li>
+<li>ziplistInsert: 在ziplist的任意数据项前面插入一个新的数据项。</li>
+<li>ziplistDelete: 删除指定的数据项。</li>
+<li>ziplistFind: 查找给定的数据（由vstr和vlen指定）。注意它有一个skip参数，表示查找的时候每次比较之间要跳过几个数据项。为什么会有这么一个参数呢？其实这个参数的主要用途是当用ziplist表示hash结构的时候，是按照一个field，一个value来依次存入ziplist的。也就是说，偶数索引的数据项存field，奇数索引的数据项存value。当按照field的值进行查找的时候，就需要把奇数项跳过去。</li>
+<li>ziplistLen: 计算ziplist的长度（即包含数据项的个数）。</li>
+</ul>
+<h3 id="hash与ziplist"><a href="#hash与ziplist" class="headerlink" title="hash与ziplist"></a>hash与ziplist</h3><p>hash是Redis中可以用来存储一个对象结构的比较理想的数据类型。一个对象的各个属性，正好对应一个hash结构的各个field。</p>
+<p>我们在网上很容易找到这样一些技术文章，它们会说存储一个对象，使用hash比string要节省内存。实际上这么说是有前提的，具体取决于对象怎么来存储。如果你把对象的多个属性存储到多个key上（各个属性值存成string），当然占的内存要多。但如果你采用一些序列化方法，比如Protocol Buffers，或者Apache Thrift，先把对象序列化为字节数组，然后再存入到Redis的string中，那么跟hash相比，哪一种更省内存，就不一定了。</p>
+<p>当然，hash比序列化后再存入string的方式，在支持的操作命令上，还是有优势的：它既支持多个field同时存取（<code>hmset</code>/<code>hmget</code>），也支持按照某个特定的field单独存取（<code>hset</code>/<code>hget</code>）。</p>
+<p>实际上，hash随着数据的增大，其底层数据结构的实现是会发生变化的，当然存储效率也就不同。<strong>在field比较少，各个value值也比较小的时候，hash采用ziplist来实现；而随着field增多和value值增大，hash可能会变成dict来实现</strong>。当hash底层变成dict来实现的时候，它的存储效率就没法跟那些序列化方式相比了。</p>
+<p>当我们为某个key第一次执行 <code>hset key field value</code> 命令的时候，Redis会创建一个hash结构，<strong>这个新创建的hash底层就是一个ziplist</strong>。</p>
+<figure class="highlight reasonml"><table><tr><td class="code"><pre><span class="line">robj *create<span class="constructor">HashObject(<span class="params">void</span>)</span> &#123;</span><br><span class="line">    unsigned <span class="built_in">char</span> *zl = ziplist<span class="constructor">New()</span>;</span><br><span class="line">    robj *o = create<span class="constructor">Object(OBJ_HASH, <span class="params">zl</span>)</span>;</span><br><span class="line">    o-&gt;encoding = OBJ_ENCODING_ZIPLIST;</span><br><span class="line">    return o;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的<code>createHashObject</code>函数，出自object.c，它负责的任务就是创建一个新的hash结构。可以看出，它创建了一个<code>type = OBJ_HASH</code>但<code>encoding = OBJ_ENCODING_ZIPLIST</code>的robj对象。</p>
+<p>实际上，本文前面给出的那个ziplist实例，就是由如下两个命令构建出来的。</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line">hset user:<span class="number">100</span> name tielei</span><br><span class="line">hset user:<span class="number">100</span> age <span class="number">20</span></span><br></pre></td></tr></table></figure>
+<p>每执行一次hset命令，插入的field和value分别作为一个新的数据项插入到ziplist中（即每次hset产生两个数据项）。</p>
+<p>当随着数据的插入，hash底层的这个ziplist就可能会转成dict。那么到底插入多少才会转呢？</p>
+<p>还记得本文开头提到的两个Redis配置吗？</p>
+<figure class="highlight excel"><table><tr><td class="code"><pre><span class="line">hash-<span class="built_in">max</span>-ziplist-entries <span class="number">512</span></span><br><span class="line">hash-<span class="built_in">max</span>-ziplist-<span class="built_in">value</span> <span class="number">64</span></span><br></pre></td></tr></table></figure>
+<p>这个配置的意思是说，在如下两个条件之一满足的时候，ziplist会转成dict：</p>
+<ul>
+<li>当hash中的数据项（即field-value对）的数目超过512的时候，也就是ziplist数据项超过1024的时候（请参考t_hash.c中的<code>hashTypeSet</code>函数）。</li>
+<li>当hash中插入的任意一个value的长度超过了64的时候（请参考t_hash.c中的<code>hashTypeTryConversion</code>函数）。</li>
+<li>Redis的hash之所以这样设计，是因为当ziplist变得很大的时候，它有如下几个缺点：</li>
+<li>每次插入或修改引发的realloc操作会有更大的概率造成内存拷贝，从而降低性能。</li>
+<li>一旦发生内存拷贝，内存拷贝的成本也相应增加，因为要拷贝更大的一块数据。</li>
+<li>当ziplist数据项过多的时候，在它上面查找指定的数据项就会性能变得很低，因为ziplist上的查找需要进行遍历。</li>
+</ul>
+<p>总之，ziplist本来就设计为各个数据项挨在一起组成连续的内存空间，这种结构并不擅长做修改操作。一旦数据发生改动，就会引发内存realloc，可能导致内存拷贝。</p>
 ]]></content>
       <categories>
         <category>中间件</category>
@@ -2675,6 +2694,148 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
 <li>They are simpler to implement, debug, and so forth. For instance thanks to the skip list simplicity I received a patch (already in Redis master) with augmented skip lists implementing ZRANK in O(log(N)). It required little changes to the code.</li>
 </ol>
 </blockquote>
+]]></content>
+      <categories>
+        <category>中间件</category>
+      </categories>
+      <tags>
+        <tag>redis</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>redis内部数据结构(7)-intset</title>
+    <url>/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-7-intset/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<p>Redis里面使用intset是为了实现集合(set)这种对外的数据结构。set结构类似于数学上的集合的概念，它包含的元素无序，且不能重复。Redis里的set结构还实现了基础的集合并、交、差的操作。与Redis对外暴露的其它数据结构类似，set的底层实现，随着元素类型是否是整型以及添加的元素的数目多少，而有所变化。概括来讲，<strong>当set中添加的元素都是整型且元素数目较少时，set使用intset作为底层数据结构，否则，set使用dict作为底层数据结构。</strong></p>
+<p>在本文中我们将大体分成三个部分进行介绍：</p>
+<ul>
+<li>集中介绍intset数据结构。</li>
+<li>讨论set是如何在intset和dict基础上构建起来的。</li>
+<li>集中讨论set的并、交、差的算法实现以及时间复杂度。注意，其中差集的计算在Redis中实现了两种算法。<a id="more"></a>
+
+</li>
+</ul>
+<p>我们在讨论中还会涉及到一个Redis配置（在redis.conf中的ADVANCED CONFIG部分）：</p>
+<figure class="highlight dsconfig"><table><tr><td class="code"><pre><span class="line"><span class="built_in">set-max-intset-entries</span> <span class="string">512</span></span><br></pre></td></tr></table></figure>
+
+<p>注：本文讨论的代码实现基于Redis源码的3.2分支。</p>
+<h3 id="intset数据结构简介"><a href="#intset数据结构简介" class="headerlink" title="intset数据结构简介"></a>intset数据结构简介</h3><p>intset顾名思义，是由整数组成的集合。实际上，intset是一个由整数组成的有序集合，从而便于在上面进行二分查找，用于快速地判断一个元素是否属于这个集合。它在内存分配上与ziplist有些类似，是连续的一整块内存空间，而且对于大整数和小整数（按绝对值）采取了不同的编码，尽量对内存的使用进行了优化。</p>
+<p>intset的数据结构定义如下（出自intset.h和intset.c）</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">intset</span> &#123;</span></span><br><span class="line">    <span class="keyword">uint32_t</span> encoding;</span><br><span class="line">    <span class="keyword">uint32_t</span> length;</span><br><span class="line">    <span class="keyword">int8_t</span> contents[];</span><br><span class="line">&#125; intset;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INTSET_ENC_INT16 (sizeof(int16_t))</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INTSET_ENC_INT32 (sizeof(int32_t))</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> INTSET_ENC_INT64 (sizeof(int64_t))</span></span><br></pre></td></tr></table></figure>
+<p>各个字段含义如下：</p>
+<ul>
+<li>encoding: 数据编码，表示intset中的每个数据元素用几个字节来存储。它有三种可能的取值：INTSET_ENC_INT16表示每个元素用2个字节存储，INTSET_ENC_INT32表示每个元素用4个字节存储，INTSET_ENC_INT64表示每个元素用8个字节存储。因此，intset中存储的整数最多只能占用64bit。</li>
+<li>length: 表示intset中的元素个数。encoding和length两个字段构成了intset的头部（header）。</li>
+<li>contents: 是一个柔性数组（flexible array member），表示intset的header后面紧跟着数据元素。这个数组的总长度（即总字节数）等于encoding * length。柔性数组在Redis的很多数据结构的定义中都出现过（例如sds, quicklist, skiplist），用于表达一个偏移量。contents需要单独为其分配空间，这部分内存不包含在intset结构当中。</li>
+</ul>
+<p>其中需要注意的是，intset可能会随着数据的添加而改变它的数据编码：</p>
+<ul>
+<li>最开始，新创建的intset使用占内存最小的INTSET_ENC_INT16（值为2）作为数据编码。</li>
+<li>每添加一个新元素，则根据元素大小决定是否对数据编码进行升级。</li>
+</ul>
+<p>下图给出了一个添加数据的具体例子。<br><img src="/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-7-intset/redis_intset_add_example.png" alt="redis_intset_add_example"></p>
+<p>在上图中：</p>
+<ul>
+<li>新创建的intset只有一个header，总共8个字节。其中encoding = 2, length = 0。</li>
+<li>添加13, 5两个元素之后，因为它们是比较小的整数，都能使用2个字节表示，所以encoding不变，值还是2。</li>
+<li>当添加32768的时候，它不再能用2个字节来表示了（2个字节能表达的数据范围是-215~215-1，而32768等于215，超出范围了），因此encoding必须升级到INTSET_ENC_INT32（值为4），即用4个字节表示一个元素。</li>
+<li>在添加每个元素的过程中，intset始终保持从小到大有序。</li>
+<li>与ziplist类似，intset也是按小端（little endian）模式存储的（参见维基百科词条Endianness）。比如，在上图中intset添加完所有数据之后，表示encoding字段的4个字节应该解释成0x00000004，而第5个数据应该解释成0x000186A0 = 100000。</li>
+</ul>
+<p>intset与ziplist相比：</p>
+<ul>
+<li>ziplist可以存储任意二进制串，而intset只能存储整数。</li>
+<li>ziplist是无序的，而intset是从小到大有序的。因此，在ziplist上查找只能遍历，而在intset上可以进行二分查找，性能更高。</li>
+<li>ziplist可以对每个数据项进行不同的变长编码（每个数据项前面都有数据长度字段len），而intset只能整体使用一个统一的编码（encoding）。</li>
+</ul>
+<h3 id="intset的查找和添加操作"><a href="#intset的查找和添加操作" class="headerlink" title="intset的查找和添加操作"></a>intset的查找和添加操作</h3><p>要理解intset的一些实现细节，只需要关注intset的两个关键操作基本就可以了：查找（<code>intsetFind</code>）和添加（<code>intsetAdd</code>）元素。</p>
+<p>intsetFind的关键代码如下所示（出自intset.c）：</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="built_in">uint</span>8_t <span class="built_in">int</span>setFind(<span class="built_in">int</span><span class="keyword">set</span> *<span class="keyword">is</span>, <span class="built_in">int</span>64_t value) &#123;</span><br><span class="line">    <span class="built_in">uint</span>8_t valenc = _intsetValueEncoding(value);</span><br><span class="line">    <span class="keyword">return</span> valenc &lt;= <span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;encoding) &amp;&amp; <span class="built_in">int</span>setSearch(<span class="keyword">is</span>,value,NULL);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static <span class="built_in">uint</span>8_t <span class="built_in">int</span>setSearch(<span class="built_in">int</span><span class="keyword">set</span> *<span class="keyword">is</span>, <span class="built_in">int</span>64_t value, <span class="built_in">uint</span>32_t *pos) &#123;</span><br><span class="line">    <span class="built_in">int</span> min = <span class="number">0</span>, max = <span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length)<span class="number">-1</span>, mid = <span class="number">-1</span>;</span><br><span class="line">    <span class="built_in">int</span>64_t cur = <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* The value can never be found when the set is empty */</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (pos) *pos = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">/* Check for the case where we know we cannot find the value,</span></span><br><span class="line"><span class="comment">         * but do know the insert position. */</span></span><br><span class="line">        <span class="keyword">if</span> (value &gt; _intsetGet(<span class="keyword">is</span>,<span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length)<span class="number">-1</span>)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (pos) *pos = <span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (value &lt; _intsetGet(<span class="keyword">is</span>,<span class="number">0</span>)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (pos) *pos = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span>(max &gt;= min) &#123;</span><br><span class="line">        mid = ((unsigned <span class="built_in">int</span>)min + (unsigned <span class="built_in">int</span>)max) &gt;&gt; <span class="number">1</span>;</span><br><span class="line">        cur = _intsetGet(<span class="keyword">is</span>,mid);</span><br><span class="line">        <span class="keyword">if</span> (value &gt; cur) &#123;</span><br><span class="line">            min = mid+<span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (value &lt; cur) &#123;</span><br><span class="line">            max = mid<span class="number">-1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (value == cur) &#123;</span><br><span class="line">        <span class="keyword">if</span> (pos) *pos = mid;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (pos) *pos = min;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于以上代码，我们需要注意的地方包括：</p>
+<ul>
+<li>intsetFind在指定的intset中查找指定的元素value，找到返回1，没找到返回0。</li>
+<li>_intsetValueEncoding函数会根据要查找的value落在哪个范围而计算出相应的数据编码（即它应该用几个字节来存储）。</li>
+<li>如果value所需的数据编码比当前intset的编码要大，则它肯定在当前intset所能存储的数据范围之外（特别大或特别小），所以这时会直接返回0；否则调用intsetSearch执行一个二分查找算法。</li>
+<li>intsetSearch在指定的intset中查找指定的元素value，如果找到，则返回1并且将参数pos指向找到的元素位置；如果没找到，则返回0并且将参数pos指向能插入该元素的位置。</li>
+<li>intsetSearch是对于二分查找算法的一个实现，它大致分为三个部分：<ul>
+<li>特殊处理intset为空的情况。</li>
+<li>特殊处理两个边界情况：当要查找的value比最后一个元素还要大或者比第一个元素还要小的时候。实际上，这两部分的特殊处理，在二分查找中并不是必须的，但它们在这里提供了特殊情况下快速失败的可能。</li>
+<li>真正执行二分查找过程。注意：如果最后没找到，插入位置在min指定的位置。</li>
+</ul>
+</li>
+<li>代码中出现的intrev32ifbe是为了在需要的时候做大小端转换的。前面我们提到过，intset里的数据是按小端（little endian）模式存储的，因此在大端（big endian）机器上运行时，这里的intrev32ifbe会做相应的转换。</li>
+<li>这个查找算法的总的时间复杂度为O(log n)。</li>
+</ul>
+<p>而intsetAdd的关键代码如下所示（出自intset.c）：</p>
+<figure class="highlight angelscript"><table><tr><td class="code"><pre><span class="line"><span class="built_in">int</span><span class="keyword">set</span> *<span class="built_in">int</span>setAdd(<span class="built_in">int</span><span class="keyword">set</span> *<span class="keyword">is</span>, <span class="built_in">int</span>64_t value, <span class="built_in">uint</span>8_t *success) &#123;</span><br><span class="line">    <span class="built_in">uint</span>8_t valenc = _intsetValueEncoding(value);</span><br><span class="line">    <span class="built_in">uint</span>32_t pos;</span><br><span class="line">    <span class="keyword">if</span> (success) *success = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Upgrade encoding if necessary. If we need to upgrade, we know that</span></span><br><span class="line"><span class="comment">     * this value should be either appended (if &gt; 0) or prepended (if &lt; 0),</span></span><br><span class="line"><span class="comment">     * because it lies outside the range of existing values. */</span></span><br><span class="line">    <span class="keyword">if</span> (valenc &gt; <span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;encoding)) &#123;</span><br><span class="line">        <span class="comment">/* This always succeeds, so we don&#x27;t need to curry *success. */</span></span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">int</span>setUpgradeAndAdd(<span class="keyword">is</span>,value);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">/* Abort if the value is already present in the set.</span></span><br><span class="line"><span class="comment">         * This call will populate &quot;pos&quot; with the right position to insert</span></span><br><span class="line"><span class="comment">         * the value when it cannot be found. */</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">int</span>setSearch(<span class="keyword">is</span>,value,&amp;pos)) &#123;</span><br><span class="line">            <span class="keyword">if</span> (success) *success = <span class="number">0</span>;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">is</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">is</span> = <span class="built_in">int</span>setResize(<span class="keyword">is</span>,<span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length)+<span class="number">1</span>);</span><br><span class="line">        <span class="keyword">if</span> (pos &lt; <span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length)) <span class="built_in">int</span>setMoveTail(<span class="keyword">is</span>,pos,pos+<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    _intsetSet(<span class="keyword">is</span>,pos,value);</span><br><span class="line">    <span class="keyword">is</span>-&gt;length = <span class="built_in">int</span>rev32ifbe(<span class="built_in">int</span>rev32ifbe(<span class="keyword">is</span>-&gt;length)+<span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">is</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于以上代码，我们需要注意的地方包括：</p>
+<ul>
+<li>intsetAdd在intset中添加新元素value。如果value在添加前已经存在，则不会重复添加，这时参数success被置为0；如果value在原来intset中不存在，则将value插入到适当位置，这时参数success被置为0。</li>
+<li>如果要添加的元素value所需的数据编码比当前intset的编码要大，那么则调用intsetUpgradeAndAdd将intset的编码进行升级后再插入value。</li>
+<li>调用intsetSearch，如果能查到，则不会重复添加。</li>
+<li>如果没查到，则调用intsetResize对intset进行内存扩充，使得它能够容纳新添加的元素。因为intset是一块连续空间，因此这个操作会引发内存的realloc（参见<a href="http://man.cx/realloc%EF%BC%89%E3%80%82%E8%BF%99%E6%9C%89%E5%8F%AF%E8%83%BD%E5%B8%A6%E6%9D%A5%E4%B8%80%E6%AC%A1%E6%95%B0%E6%8D%AE%E6%8B%B7%E8%B4%9D%E3%80%82%E5%90%8C%E6%97%B6%E8%B0%83%E7%94%A8intsetMoveTail%E5%B0%86%E5%BE%85%E6%8F%92%E5%85%A5%E4%BD%8D%E7%BD%AE%E5%90%8E%E9%9D%A2%E7%9A%84%E5%85%83%E7%B4%A0%E7%BB%9F%E4%B8%80%E5%90%91%E5%90%8E%E7%A7%BB%E5%8A%A81%E4%B8%AA%E4%BD%8D%E7%BD%AE%EF%BC%8C%E8%BF%99%E4%B9%9F%E6%B6%89%E5%8F%8A%E5%88%B0%E4%B8%80%E6%AC%A1%E6%95%B0%E6%8D%AE%E6%8B%B7%E8%B4%9D%E3%80%82%E5%80%BC%E5%BE%97%E6%B3%A8%E6%84%8F%E7%9A%84%E6%98%AF%EF%BC%8C%E5%9C%A8intsetMoveTail%E4%B8%AD%E6%98%AF%E8%B0%83%E7%94%A8memmove%E5%AE%8C%E6%88%90%E8%BF%99%E6%AC%A1%E6%95%B0%E6%8D%AE%E6%8B%B7%E8%B4%9D%E7%9A%84%E3%80%82memmove%E4%BF%9D%E8%AF%81%E4%BA%86%E5%9C%A8%E6%8B%B7%E8%B4%9D%E8%BF%87%E7%A8%8B%E4%B8%AD%E4%B8%8D%E4%BC%9A%E9%80%A0%E6%88%90%E6%95%B0%E6%8D%AE%E9%87%8D%E5%8F%A0%E6%88%96%E8%A6%86%E7%9B%96%EF%BC%8C%E5%85%B7%E4%BD%93%E5%8F%82%E8%A7%81http://man.cx/memmove%E3%80%82">http://man.cx/realloc）。这有可能带来一次数据拷贝。同时调用intsetMoveTail将待插入位置后面的元素统一向后移动1个位置，这也涉及到一次数据拷贝。值得注意的是，在intsetMoveTail中是调用memmove完成这次数据拷贝的。memmove保证了在拷贝过程中不会造成数据重叠或覆盖，具体参见http://man.cx/memmove。</a></li>
+<li>intsetUpgradeAndAdd的实现中也会调用intsetResize来完成内存扩充。在进行编码升级时，intsetUpgradeAndAdd的实现会把原来intset中的每个元素取出来，再用新的编码重新写入新的位置。</li>
+<li>注意一下intsetAdd的返回值，它返回一个新的intset指针。它可能与传入的intset指针is相同，也可能不同。调用方必须用这里返回的新的intset，替换之前传进来的旧的intset变量。类似这种接口使用模式，在Redis的实现代码中是很常见的，比如我们之前在介绍sds和ziplist的时候都碰到过类似的情况。</li>
+<li>显然，这个intsetAdd算法总的时间复杂度为O(n)。</li>
+</ul>
+<h3 id="Redis的set"><a href="#Redis的set" class="headerlink" title="Redis的set"></a>Redis的set</h3><p>为了更好地理解Redis对外暴露的set数据结构，我们先看一下set的一些关键的命令。下面是一些命令举例：<br><img src="/2020/11/26/redis%E5%86%85%E9%83%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-7-intset/redis_set_cmd_example.png" alt="redis_set_cmd_example"></p>
+<p>上面这些命令的含义：</p>
+<ul>
+<li>sadd用于分别向集合s1和s2中添加元素。添加的元素既有数字，也有非数字（”a”和”b”）。</li>
+<li>sismember用于判断指定的元素是否在集合内存在。</li>
+<li>sinter, sunion和sdiff分别用于计算集合的交集、并集和差集。</li>
+</ul>
+<p>set的底层实现，随着元素类型是否是整型以及添加的元素的数目多少，而有所变化。例如，具体到上述命令的执行过程中，集合s1的底层数据结构会发生如下变化：</p>
+<ul>
+<li>在开始执行完sadd s1 13 5之后，由于添加的都是比较小的整数，所以s1底层是一个intset，其数据编码encoding = 2。</li>
+<li>在执行完sadd s1 32768 10 100000之后，s1底层仍然是一个intset，但其数据编码encoding从2升级到了4。</li>
+<li>在执行完sadd s1 a b之后，由于添加的元素不再是数字，s1底层的实现会转成一个dict。</li>
+</ul>
+<p>dict是一个用于维护key和value映射关系的数据结构，那么当set底层用dict表示的时候，它的key和value分别是什么呢？实际上，key就是要添加的集合元素，而value是NULL。</p>
+<p>除了前面提到的由于添加非数字元素造成集合底层由intset转成dict之外，还有两种情况可能造成这种转换：</p>
+<ul>
+<li>添加了一个数字，但它无法用64bit的有符号数来表达。intset能够表达的最大的整数范围为-264~264-1，因此，如果添加的数字超出了这个范围，这也会导致intset转成dict。</li>
+<li>添加的集合元素个数超过了<code>set-max-intset-entries</code>配置的值的时候，也会导致intset转成dict（具体的触发条件参见t_set.c中的<code>setTypeAdd</code>相关代码）。</li>
+</ul>
+<p>对于小集合使用intset来存储，主要的原因是节省内存。特别是当存储的元素个数较少的时候，dict所带来的内存开销要大得多（包含两个哈希表、链表指针以及大量的其它元数据）。所以，当存储大量的小集合而且集合元素都是数字的时候，用intset能节省下一笔可观的内存空间。</p>
+<p>实际上，从时间复杂度上比较，intset的平均情况是没有dict性能高的。以查找为例，intset是O(log n)的，而dict可以认为是O(1)的。但是，由于使用intset的时候集合元素个数比较少，所以这个影响不大。</p>
+<h3 id="Redis-set的并、交、差算法"><a href="#Redis-set的并、交、差算法" class="headerlink" title="Redis set的并、交、差算法"></a>Redis set的并、交、差算法</h3><p>Redis set的并、交、差算法的实现代码，在t_set.c中。其中计算交集调用的是<code>sinterGenericCommand</code>，计算并集和差集调用的是<code>sunionDiffGenericCommand</code>。它们都能同时对多个（可以多于2个）集合进行运算。当对多个集合进行差集运算时，它表达的含义是：用第一个集合与第二个集合做差集，所得结果再与第三个集合做差集，依次向后类推。</p>
+<h4 id="交集"><a href="#交集" class="headerlink" title="交集"></a>交集</h4><p>计算交集的过程大概可以分为三部分：</p>
+<ul>
+<li>检查各个集合，对于不存在的集合当做空集来处理。一旦出现空集，则不用继续计算了，最终的交集就是空集。</li>
+<li>对各个集合按照元素个数由少到多进行排序。这个排序有利于后面计算的时候从最小的集合开始，需要处理的元素个数较少。</li>
+<li>对排序后第一个集合（也就是最小集合）进行遍历，对于它的每一个元素，依次在后面的所有集合中进行查找。只有在所有集合中都能找到的元素，才加入到最后的结果集合中。</li>
+</ul>
+<p>需要注意的是，上述第3步在集合中进行查找，对于intset和dict的存储来说时间复杂度分别是O(log n)和O(1)。但由于只有小集合才使用intset，所以可以粗略地认为intset的查找也是常数时间复杂度的。因此，如Redis官方文档上所说（<a href="http://redis.io/commands/sinter">http://redis.io/commands/sinter</a>），<code>sinter</code>命令的时间复杂度为：</p>
+<blockquote>
+<p>O(N*M) worst case where N is the cardinality of the smallest set and M is the number of sets.</p>
+</blockquote>
+<h4 id="并集"><a href="#并集" class="headerlink" title="并集"></a>并集</h4><p>计算并集最简单，只需要遍历所有集合，将每一个元素都添加到最后的结果集合中。向集合中添加元素会自动去重。</p>
+<p>由于要遍历所有集合的每个元素，所以Redis官方文档给出的sunion命令的时间复杂度为（<a href="http://redis.io/commands/sunion">http://redis.io/commands/sunion</a>）：</p>
+<blockquote>
+<p>O(N) where N is the total number of elements in all given sets.</p>
+</blockquote>
+<p>注意，这里同前面讨论交集计算一样，将元素插入到结果集合的过程，忽略intset的情况，认为时间复杂度为O(1)。</p>
+<h4 id="差集"><a href="#差集" class="headerlink" title="差集"></a>差集</h4><p>计算差集有两种可能的算法，它们的时间复杂度有所区别。</p>
+<p>第一种算法：</p>
+<ul>
+<li>对第一个集合进行遍历，对于它的每一个元素，依次在后面的所有集合中进行查找。只有在所有集合中都找不到的元素，才加入到最后的结果集合中。</li>
+</ul>
+<p>这种算法的时间复杂度为*<em>O(N</em>M)**，其中N是第一个集合的元素个数，M是集合数目。</p>
+<p>第二种算法：</p>
+<ul>
+<li>将第一个集合的所有元素都加入到一个中间集合中。</li>
+<li>遍历后面所有的集合，对于碰到的每一个元素，从中间集合中删掉它。</li>
+<li>最后中间集合剩下的元素就构成了差集。</li>
+</ul>
+<p>这种算法的时间复杂度为**O(N)**，其中N是所有集合的元素个数总和。</p>
+<p>在计算差集的开始部分，会先分别估算一下两种算法预期的时间复杂度，然后选择复杂度低的算法来进行运算。还有两点需要注意：</p>
+<ul>
+<li>在一定程度上优先选择第一种算法，因为它涉及到的操作比较少，只用添加，而第二种算法要先添加再删除。</li>
+<li>如果选择了第一种算法，那么在执行该算法之前，Redis的实现中对于第二个集合之后的所有集合，按照元素个数由多到少进行了排序。这个排序有利于以更大的概率查找到元素，从而更快地结束查找。</li>
+</ul>
+<p>对于<code>sdiff</code>的时间复杂度，Redis官方文档（<a href="http://redis.io/commands/sdiff">http://redis.io/commands/sdiff</a>）只给出了第二种算法的结果，是不准确的。</p>
 ]]></content>
       <categories>
         <category>中间件</category>
@@ -3097,31 +3258,31 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
     <url>/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
 
-<h3 id="分布式配置中心的作用"><a href="#分布式配置中心的作用" class="headerlink" title="分布式配置中心的作用"></a>分布式配置中心的作用</h3><p>分布式配置中心可以实现不需要重启我们的服务器，动态的修改我们的配置文件内容，<br>常见的配置中心有携程的阿波罗、SpringCloud Config、Nacos轻量级的配置中心等。</p>
+<h1 id="一-分布式配置中心的作用"><a href="#一-分布式配置中心的作用" class="headerlink" title="一.分布式配置中心的作用"></a>一.分布式配置中心的作用</h1><p>分布式配置中心可以实现不需要重启我们的服务器，动态的修改我们的配置文件内容，<br>常见的配置中心有携程的阿波罗、SpringCloud Config、Nacos轻量级的配置中心等。</p>
 <p><strong>轻量级：</strong> 部署、架构设计原理都比较简单，学习成本也比较低。<br><strong>重量级：</strong> 部署、架构设计、体积都非常大，学习成本比较高。</p>
 <a id="more"></a>
 
-<h3 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h3><p>1、本地应用读取我们云端分布式配置中心文件（第一次建立长连接）<br>2、本地应用读取到配置文件之后，本地jvm和硬盘中都会缓存一份<br>3、本地应用与分布式配置中心服务端一直保持长连接<br>4、当我们的配置文件发生变化（MD5|版本号）实现区分，将变化结果通知给我们的本地应用及时地刷新我们的配置文件。<br><img src="/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/%E5%88%86%E5%B8%83%E5%BC%8F%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%8E%9F%E7%90%86.jpg" alt="原理"><br>完全百分百实现动态化修改我们的配置文件</p>
-<h3 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h3><h5 id="1、新增配置文件"><a href="#1、新增配置文件" class="headerlink" title="1、新增配置文件"></a>1、新增配置文件</h5><p><img src="/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/1.jpg" alt="新增配置文件"></p>
-<h5 id="2、项目中添加依赖"><a href="#2、项目中添加依赖" class="headerlink" title="2、项目中添加依赖"></a>2、项目中添加依赖</h5><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-config<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.2.2.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h1 id="二-原理"><a href="#二-原理" class="headerlink" title="二.原理"></a>二.原理</h1><p>1、本地应用读取我们云端分布式配置中心文件（第一次建立长连接）<br>2、本地应用读取到配置文件之后，本地jvm和硬盘中都会缓存一份<br>3、本地应用与分布式配置中心服务端一直保持长连接<br>4、当我们的配置文件发生变化（MD5|版本号）实现区分，将变化结果通知给我们的本地应用及时地刷新我们的配置文件。<br><img src="/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/%E5%88%86%E5%B8%83%E5%BC%8F%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83%E5%8E%9F%E7%90%86.jpg" alt="原理"><br>完全百分百实现动态化修改我们的配置文件</p>
+<h1 id="三-代码实现"><a href="#三-代码实现" class="headerlink" title="三.代码实现"></a>三.代码实现</h1><h2 id="1-新增配置文件"><a href="#1-新增配置文件" class="headerlink" title="1.新增配置文件"></a>1.新增配置文件</h2><p><img src="/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/1.jpg" alt="新增配置文件"></p>
+<h2 id="2-项目中添加依赖"><a href="#2-项目中添加依赖" class="headerlink" title="2.项目中添加依赖"></a>2.项目中添加依赖</h2><figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.cloud<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-cloud-starter-alibaba-nacos-config<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>0.2.2.RELEASE<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
 
-<h5 id="3、新建bootstrap-yml"><a href="#3、新建bootstrap-yml" class="headerlink" title="3、新建bootstrap.yml"></a>3、新建bootstrap.yml</h5><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">        <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">config:</span></span><br><span class="line">        <span class="comment">###配置中心连接地址</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">        <span class="comment">###分组</span></span><br><span class="line">        <span class="attr">group:</span> <span class="string">DEFAULT_GROUP</span></span><br><span class="line">        <span class="comment">###类型</span></span><br><span class="line">        <span class="attr">file-extension:</span> <span class="string">yaml</span></span><br></pre></td></tr></table></figure>
+<h2 id="3-新建bootstrap-yml"><a href="#3-新建bootstrap-yml" class="headerlink" title="3.新建bootstrap.yml"></a>3.新建bootstrap.yml</h2><figure class="highlight yaml"><table><tr><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line">  <span class="attr">cloud:</span></span><br><span class="line">    <span class="attr">nacos:</span></span><br><span class="line">      <span class="attr">discovery:</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">        <span class="attr">enabled:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">config:</span></span><br><span class="line">        <span class="comment">###配置中心连接地址</span></span><br><span class="line">        <span class="attr">server-addr:</span> <span class="number">127.0</span><span class="number">.0</span><span class="number">.1</span><span class="string">:8848</span></span><br><span class="line">        <span class="comment">###分组</span></span><br><span class="line">        <span class="attr">group:</span> <span class="string">DEFAULT_GROUP</span></span><br><span class="line">        <span class="comment">###类型</span></span><br><span class="line">        <span class="attr">file-extension:</span> <span class="string">yaml</span></span><br></pre></td></tr></table></figure>
 
-<h5 id="5、代码"><a href="#5、代码" class="headerlink" title="5、代码"></a>5、代码</h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RefreshScope</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserServiceImpl</span> <span class="keyword">implements</span> <span class="title">UserService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;tinner.name&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String tinnerName;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getUser</span><span class="params">(Integer userId)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> tinnerName + <span class="string">&quot;我是会员服务&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="4-代码"><a href="#4-代码" class="headerlink" title="4.代码"></a>4.代码</h2><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@RestController</span></span><br><span class="line"><span class="meta">@RefreshScope</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserServiceImpl</span> <span class="keyword">implements</span> <span class="title">UserService</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Value(&quot;$&#123;tinner.name&#125;&quot;)</span></span><br><span class="line">    <span class="keyword">private</span> String tinnerName;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getUser</span><span class="params">(Integer userId)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> tinnerName + <span class="string">&quot;我是会员服务&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h3 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h3><ul>
+<h3 id="5-注意事项"><a href="#5-注意事项" class="headerlink" title="5.注意事项"></a>5.注意事项</h3><ul>
 <li>本地如果也配置相同的key，那么在启动的时候可能会抛出异常</li>
 <li>可以实现动态实现<code>@RefreshScope</code></li>
 <li>nacos在windows版本下运行默认是单机版本 需要指定<code>startup.cmd -m cluster</code></li>
 <li>nacos在linux版本下运行默认是集群版本 如果想连接单机版本 <code>startup.cmd –m standalone</code></li>
 </ul>
-<h3 id="bootstrap与application区别"><a href="#bootstrap与application区别" class="headerlink" title="bootstrap与application区别"></a>bootstrap与application区别</h3><ul>
+<h3 id="6-bootstrap与application区别"><a href="#6-bootstrap与application区别" class="headerlink" title="6.bootstrap与application区别"></a>6.bootstrap与application区别</h3><ul>
 <li>bootstrap.yml 用于应用程序上下文的引导阶段。</li>
 <li>application.yml 由父Spring ApplicationContext加载。</li>
 </ul>
-<h3 id="多版本控制"><a href="#多版本控制" class="headerlink" title="多版本控制"></a>多版本控制</h3><h5 id="1、新增prod配置文件"><a href="#1、新增prod配置文件" class="headerlink" title="1、新增prod配置文件"></a>1、新增prod配置文件</h5><p><img src="/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/2.jpg" alt="新增配置文件"></p>
-<h5 id="2、修改项目的配置文件"><a href="#2、修改项目的配置文件" class="headerlink" title="2、修改项目的配置文件"></a>2、修改项目的配置文件</h5><p><img src="/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/3.jpg" alt="新增配置文件"></p>
-<h3 id="Nacos集群模式"><a href="#Nacos集群模式" class="headerlink" title="Nacos集群模式"></a>Nacos集群模式</h3><p>官方文档：<a href="https://nacos.io/en-us/docs/cluster-mode-quick-start.html">https://nacos.io/en-us/docs/cluster-mode-quick-start.html</a><br>视频教程：<a href="https://www.bilibili.com/video/BV1D7411A7Ru?p=43">https://www.bilibili.com/video/BV1D7411A7Ru?p=43</a></p>
+<h1 id="四-多版本控制"><a href="#四-多版本控制" class="headerlink" title="四.多版本控制"></a>四.多版本控制</h1><h2 id="1-新增prod配置文件"><a href="#1-新增prod配置文件" class="headerlink" title="1.新增prod配置文件"></a>1.新增prod配置文件</h2><p><img src="/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/2.jpg" alt="新增配置文件"></p>
+<h2 id="2-修改项目的配置文件"><a href="#2-修改项目的配置文件" class="headerlink" title="2.修改项目的配置文件"></a>2.修改项目的配置文件</h2><p><img src="/2020/08/17/%E5%88%86%E5%B8%83%E5%BC%8F%E9%85%8D%E7%BD%AE%E4%B8%AD%E5%BF%83/3.jpg" alt="新增配置文件"></p>
+<h1 id="五-Nacos集群模式"><a href="#五-Nacos集群模式" class="headerlink" title="五. Nacos集群模式"></a>五. Nacos集群模式</h1><p>官方文档：<a href="https://nacos.io/en-us/docs/cluster-mode-quick-start.html">https://nacos.io/en-us/docs/cluster-mode-quick-start.html</a><br>视频教程：<a href="https://www.bilibili.com/video/BV1D7411A7Ru?p=43">https://www.bilibili.com/video/BV1D7411A7Ru?p=43</a></p>
 ]]></content>
       <categories>
         <category>Java</category>
@@ -3298,6 +3459,91 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
       </tags>
   </entry>
   <entry>
+    <title>服务注册与发现nacos</title>
+    <url>/2020/08/05/%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0nacos/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<h3 id="服务治理基本的概念"><a href="#服务治理基本的概念" class="headerlink" title="服务治理基本的概念"></a>服务治理基本的概念</h3><p><strong>服务治理概念：</strong><br>在RPC远程调用过程中，服务与服务之间依赖关系非常大，服务Url地址管理非常复杂，所以这时候需要对我们服务的url实现治理，通过服务治理可以实现服务注册与发现、负载均衡、容错等。<br><strong>服务注册中心的概念</strong><br>每次调用该服务如果地址直接写死的话，一旦接口发生变化的情况下，这时候需要重新发布版本才可以该接口调用地址，所以需要一个注册中心统一管理我们的服务注册与发现。</p>
+<a id="more"></a>
+
+<p><strong>注册中心：</strong><br>我们的服务注册到我们注册中心，key为<code>服务名称</code>、value为<code>该服务调用地址</code>，该类型为集合类型。常用的注册中心有：Eureka、consul、zookeeper、nacos等。</p>
+<p><strong>服务注册:</strong><br>我们生产者项目启动的时候，会将当前服务自己的信息地址注册到注册中心。</p>
+<p><strong>服务发现:</strong><br>消费者从我们的注册中心上获取生产者调用的地址（集合），在使用负载均衡的策略获取集群中某个地址实现本地rpc远程调用。</p>
+<h3 id="微服务调用接口常用名词"><a href="#微服务调用接口常用名词" class="headerlink" title="微服务调用接口常用名词"></a>微服务调用接口常用名词</h3><p><strong>生产者：</strong> 提供接口被其他服务调用<br><strong>消费者：</strong> 调用生产者接口实现消费<br><strong>服务注册：</strong> 将当前服务地址注册<br><strong>服务发现：</strong><br><img src="/2020/08/05/%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0nacos/1.png" alt="微服务调用接口常用名词"></p>
+<h3 id="Nacos"><a href="#Nacos" class="headerlink" title="Nacos"></a>Nacos</h3><p>Nacos可以实现分布式服务注册与发现/分布式配置中心框架。<br>官网的介绍: <a href="https://nacos.io/zh-cn/docs/what-is-nacos.html">https://nacos.io/zh-cn/docs/what-is-nacos.html</a></p>
+<p>Nacos安装及基本操作：<a href="https://nacos.io/zh-cn/docs/quick-start.html">https://nacos.io/zh-cn/docs/quick-start.html</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>SpringCloud</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>架构演变</title>
+    <url>/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+
+<h3 id="传统架构"><a href="#传统架构" class="headerlink" title="传统架构"></a>传统架构</h3><p>传统的架构，也就是为单点应用，也就是大家在早期所学习的JavaEE知识SSH或者SSM架构模式，会采用分层架构模式：数据库访问层、业务逻辑层、控制层，从前端到后台所有的代码都是一个开发者去完成。<br>该架构模式没有对我们业务逻辑代码实现拆分，所有的代码都写入到同一个工程中里面，适合于小公司开发团队或者个人开发。<br>这种架构模式最大的缺点，如果该系统一个模块出现不可用、会导致整个系统无法使用。</p>
+<a id="more"></a>
+
+<p><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%8D%95%E4%BD%93.png" alt="单体架构"></p>
+<h3 id="分布式架构"><a href="#分布式架构" class="headerlink" title="分布式架构"></a>分布式架构</h3><p>分布式架构模式是基于传统的架构模式演变过来，将传统的单点项目根据业务模块实现拆分、会拆分为会员系统、订单系统、支付系统、秒杀系统等。 从而降低我们项目的耦合度，这种架构模式开始慢慢的适合于互联网公司开发团队。 </p>
+<h3 id="SOA面向服务架构"><a href="#SOA面向服务架构" class="headerlink" title="SOA面向服务架构"></a>SOA面向服务架构</h3><p>SOA面向服务架构就是基于我们的分布式架构演变过来的，俗称服务化，也就是面向于接口开发（服务开发）。<br>SOA架构模式也称作为：面向服务架构模式、俗称面向与接口开发，将共同存在的业务逻辑抽取成一个共同的服务，提供给其他的服务接口实现调用、服务与服务之间通讯采用rpc远程调用技术。</p>
+<p>SOA架构模式特点：</p>
+<ul>
+<li>SOA架构通讯中，采用XML方式实现通讯、在高并发下通讯过程中协议存在非常大冗余性，所以在最后微服务架构模式中使用JSON格式替代了XML。</li>
+<li>SOA架构模式实现方案为WebService或者是ESB企业服务总线 底层通讯协议SOAP协议（Http+XML）实现传输。<br><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/soa.png" alt="SOA架构"></li>
+</ul>
+<h3 id="ESB企业服务总线"><a href="#ESB企业服务总线" class="headerlink" title="ESB企业服务总线"></a>ESB企业服务总线</h3><p>解决多系统之间跨语言无法实现通讯的问题，数据协议的转换，提供可靠消息传输。</p>
+<h3 id="微服务架构"><a href="#微服务架构" class="headerlink" title="微服务架构"></a>微服务架构</h3><h5 id="微服务架构产生的原因"><a href="#微服务架构产生的原因" class="headerlink" title="微服务架构产生的原因"></a>微服务架构产生的原因</h5><p>微服务架构基于SOA架构演变过来的<br>在传统的WebService架构中有如下问题:</p>
+<ul>
+<li>依赖中心化服务发现机制</li>
+<li>使用Soap通讯协议，通常使用XML格式来序列化通讯数据，xml格式非常喜欢重，比较占宽带传输。</li>
+<li>服务化管理和治理设施不完善</li>
+<li>不适合前后端分离架构模式</li>
+</ul>
+<h5 id="微服务架构基本概念"><a href="#微服务架构基本概念" class="headerlink" title="微服务架构基本概念"></a>微服务架构基本概念</h5><p>微服务架构模式是从SOA架构模式演变过来， 比SOA架构模式粒度更加精细，让专业的人去做专业的事情（专注），目的是提高效率，每个服务与服务之间互不影响，微服务架构中：每个服务必须独立部署、互不影响，微服务架构模式体现轻巧、轻量级、适合于互联网公司开发模式。</p>
+<p>微服务架构倡导应用程序设计程多个独立、可配置、可运行和可微服务的子服务。<br>服务与服务通讯协议采用Http协议，使用restful风格API形式来进行通讯，数据交换格式轻量级json格式通讯，整个传输过程中，采用二进制，所以http协议可以跨语言平台，并且可以和其他不同的语言进行相互的通讯，所以很多开放平台都采用http协议接口。<br><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%BE%AE%E6%9C%8D%E5%8A%A11.png" alt="SOA架构"><br><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%BE%AE%E6%9C%8D%E5%8A%A12.png" alt="SOA架构"></p>
+<h5 id="微服务架构与SOA架构的不同"><a href="#微服务架构与SOA架构的不同" class="headerlink" title="微服务架构与SOA架构的不同"></a>微服务架构与SOA架构的不同</h5><p>1.微服务架构基于 SOA架构 演变过来，继承 SOA架构的优点，在微服务架构中去除 SOA 架构中SOAP协议和 ESB 企业服务总线，采用 http+json（restful）进行传输。<br>2.微服务架构比 SOA 架构粒度会更加精细，让专业的人去做专业的事情（专注），目的提高效率，每个服务于服务之间互不影响，微服务架构中，每个服务必须独立部署，微服务架构更加轻巧，轻量级。<br>3.SOA 架构中可能数据库存储会发生共享，微服务强调独每个服务都是单独数据库，保证每个服务于服务之间互不影响。<br>4.项目体现特征微服务架构比 SOA 架构更加适合与互联网公司敏捷开发、快速迭代版本，因为粒度非常精细。</p>
+<h5 id="微服务架构会产生那些问题"><a href="#微服务架构会产生那些问题" class="headerlink" title="微服务架构会产生那些问题"></a>微服务架构会产生那些问题</h5><p>分布式事务解决方案(rabbitmq/rocketmq/lcn(已经淘汰)/ Seata)<br>分布式任务调度平台(XXL-Job、阿里Scheduler)<br>分布式日志采集系统ELK+Kafka<br>分布式服务注册中心 eureka、Zookeeper、consule、nacos等。<br>分布式服务追踪与调用链Zipkin等。<br>分布式服务配置中心（springcloud config/携程阿波罗/nacos/disconfig）</p>
+<p>非常重要的概念：独立部署、可配置、动态化</p>
+<h5 id="为什么我们要使用SpringCloud"><a href="#为什么我们要使用SpringCloud" class="headerlink" title="为什么我们要使用SpringCloud"></a>为什么我们要使用SpringCloud</h5><p>SpringCloud并不是rpc远程调用框架，而是一套全家桶的微服务解决框架，理念就是解决我们在微服务架构中遇到的任何问题。</p>
+<h5 id="SpringCloud第一代与第二代的区别"><a href="#SpringCloud第一代与第二代的区别" class="headerlink" title="SpringCloud第一代与第二代的区别"></a>SpringCloud第一代与第二代的区别</h5><p><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%8C%BA%E5%88%AB.png" alt="SOA架构"><br><strong>SpringCloud第一代实际上都是用的Netflix开源的组件整合微服务解决方案。</strong></p>
+<ul>
+<li>SpringCloud Config 分布式配置中心</li>
+<li>SpringCloud Netflix 核心组件</li>
+<li>Eureka:服务治理 </li>
+<li>Hystrix:服务保护框架</li>
+<li>Ribbon:客户端负载均衡器</li>
+<li>Feign：基于ribbon和hystrix的声明式服务调用组件</li>
+<li>Zuul: 网关组件,提供智能路由、访问过滤等功能。</li>
+</ul>
+<p><strong>SpringCloud第二代（自己研发）和优秀的组件组合：</strong></p>
+<ul>
+<li>Spring Cloud Gateway 网关</li>
+<li>Spring Cloud Loadbalancer 客户端负载均衡器</li>
+<li>Spring Cloud r4j(Resilience4J) 服务保护</li>
+<li>Spring Cloud Alibaba Nacos 服务注册</li>
+<li>Spring Cloud Alibaba Nacos 分布式配置中心</li>
+<li>Spring Cloud Alibaba Sentinel服务保护 </li>
+<li>SpringCloud Alibaba Seata分布式事务解决框架</li>
+<li>Alibaba Cloud OSS 阿里云存储</li>
+<li>Alibaba Cloud SchedulerX 分布式任务调度平台</li>
+<li>Alibaba Cloud SMS 分布式短信系统</li>
+</ul>
+<h5 id="为什么Alibaba要推出SpringCloud组件"><a href="#为什么Alibaba要推出SpringCloud组件" class="headerlink" title="为什么Alibaba要推出SpringCloud组件"></a>为什么Alibaba要推出SpringCloud组件</h5><p>目的就是为了对阿里云的产品实现扩展。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>集群</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>多线程相关面试题</title>
     <url>/2020/10/23/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -3333,28 +3579,6 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
       </categories>
       <tags>
         <tag>面试题</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>服务注册与发现nacos</title>
-    <url>/2020/08/05/%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0nacos/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-<h3 id="服务治理基本的概念"><a href="#服务治理基本的概念" class="headerlink" title="服务治理基本的概念"></a>服务治理基本的概念</h3><p><strong>服务治理概念：</strong><br>在RPC远程调用过程中，服务与服务之间依赖关系非常大，服务Url地址管理非常复杂，所以这时候需要对我们服务的url实现治理，通过服务治理可以实现服务注册与发现、负载均衡、容错等。<br><strong>服务注册中心的概念</strong><br>每次调用该服务如果地址直接写死的话，一旦接口发生变化的情况下，这时候需要重新发布版本才可以该接口调用地址，所以需要一个注册中心统一管理我们的服务注册与发现。</p>
-<a id="more"></a>
-
-<p><strong>注册中心：</strong><br>我们的服务注册到我们注册中心，key为<code>服务名称</code>、value为<code>该服务调用地址</code>，该类型为集合类型。常用的注册中心有：Eureka、consul、zookeeper、nacos等。</p>
-<p><strong>服务注册:</strong><br>我们生产者项目启动的时候，会将当前服务自己的信息地址注册到注册中心。</p>
-<p><strong>服务发现:</strong><br>消费者从我们的注册中心上获取生产者调用的地址（集合），在使用负载均衡的策略获取集群中某个地址实现本地rpc远程调用。</p>
-<h3 id="微服务调用接口常用名词"><a href="#微服务调用接口常用名词" class="headerlink" title="微服务调用接口常用名词"></a>微服务调用接口常用名词</h3><p><strong>生产者：</strong> 提供接口被其他服务调用<br><strong>消费者：</strong> 调用生产者接口实现消费<br><strong>服务注册：</strong> 将当前服务地址注册<br><strong>服务发现：</strong><br><img src="/2020/08/05/%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0nacos/1.png" alt="微服务调用接口常用名词"></p>
-<h3 id="Nacos"><a href="#Nacos" class="headerlink" title="Nacos"></a>Nacos</h3><p>Nacos可以实现分布式服务注册与发现/分布式配置中心框架。<br>官网的介绍: <a href="https://nacos.io/zh-cn/docs/what-is-nacos.html">https://nacos.io/zh-cn/docs/what-is-nacos.html</a></p>
-<p>Nacos安装及基本操作：<a href="https://nacos.io/zh-cn/docs/quick-start.html">https://nacos.io/zh-cn/docs/quick-start.html</a></p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>SpringCloud</tag>
       </tags>
   </entry>
   <entry>
@@ -3426,69 +3650,6 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
       </categories>
       <tags>
         <tag>线上问题</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>架构演变</title>
-    <url>/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-
-<h3 id="传统架构"><a href="#传统架构" class="headerlink" title="传统架构"></a>传统架构</h3><p>传统的架构，也就是为单点应用，也就是大家在早期所学习的JavaEE知识SSH或者SSM架构模式，会采用分层架构模式：数据库访问层、业务逻辑层、控制层，从前端到后台所有的代码都是一个开发者去完成。<br>该架构模式没有对我们业务逻辑代码实现拆分，所有的代码都写入到同一个工程中里面，适合于小公司开发团队或者个人开发。<br>这种架构模式最大的缺点，如果该系统一个模块出现不可用、会导致整个系统无法使用。</p>
-<a id="more"></a>
-
-<p><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%8D%95%E4%BD%93.png" alt="单体架构"></p>
-<h3 id="分布式架构"><a href="#分布式架构" class="headerlink" title="分布式架构"></a>分布式架构</h3><p>分布式架构模式是基于传统的架构模式演变过来，将传统的单点项目根据业务模块实现拆分、会拆分为会员系统、订单系统、支付系统、秒杀系统等。 从而降低我们项目的耦合度，这种架构模式开始慢慢的适合于互联网公司开发团队。 </p>
-<h3 id="SOA面向服务架构"><a href="#SOA面向服务架构" class="headerlink" title="SOA面向服务架构"></a>SOA面向服务架构</h3><p>SOA面向服务架构就是基于我们的分布式架构演变过来的，俗称服务化，也就是面向于接口开发（服务开发）。<br>SOA架构模式也称作为：面向服务架构模式、俗称面向与接口开发，将共同存在的业务逻辑抽取成一个共同的服务，提供给其他的服务接口实现调用、服务与服务之间通讯采用rpc远程调用技术。</p>
-<p>SOA架构模式特点：</p>
-<ul>
-<li>SOA架构通讯中，采用XML方式实现通讯、在高并发下通讯过程中协议存在非常大冗余性，所以在最后微服务架构模式中使用JSON格式替代了XML。</li>
-<li>SOA架构模式实现方案为WebService或者是ESB企业服务总线 底层通讯协议SOAP协议（Http+XML）实现传输。<br><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/soa.png" alt="SOA架构"></li>
-</ul>
-<h3 id="ESB企业服务总线"><a href="#ESB企业服务总线" class="headerlink" title="ESB企业服务总线"></a>ESB企业服务总线</h3><p>解决多系统之间跨语言无法实现通讯的问题，数据协议的转换，提供可靠消息传输。</p>
-<h3 id="微服务架构"><a href="#微服务架构" class="headerlink" title="微服务架构"></a>微服务架构</h3><h5 id="微服务架构产生的原因"><a href="#微服务架构产生的原因" class="headerlink" title="微服务架构产生的原因"></a>微服务架构产生的原因</h5><p>微服务架构基于SOA架构演变过来的<br>在传统的WebService架构中有如下问题:</p>
-<ul>
-<li>依赖中心化服务发现机制</li>
-<li>使用Soap通讯协议，通常使用XML格式来序列化通讯数据，xml格式非常喜欢重，比较占宽带传输。</li>
-<li>服务化管理和治理设施不完善</li>
-<li>不适合前后端分离架构模式</li>
-</ul>
-<h5 id="微服务架构基本概念"><a href="#微服务架构基本概念" class="headerlink" title="微服务架构基本概念"></a>微服务架构基本概念</h5><p>微服务架构模式是从SOA架构模式演变过来， 比SOA架构模式粒度更加精细，让专业的人去做专业的事情（专注），目的是提高效率，每个服务与服务之间互不影响，微服务架构中：每个服务必须独立部署、互不影响，微服务架构模式体现轻巧、轻量级、适合于互联网公司开发模式。</p>
-<p>微服务架构倡导应用程序设计程多个独立、可配置、可运行和可微服务的子服务。<br>服务与服务通讯协议采用Http协议，使用restful风格API形式来进行通讯，数据交换格式轻量级json格式通讯，整个传输过程中，采用二进制，所以http协议可以跨语言平台，并且可以和其他不同的语言进行相互的通讯，所以很多开放平台都采用http协议接口。<br><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%BE%AE%E6%9C%8D%E5%8A%A11.png" alt="SOA架构"><br><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%BE%AE%E6%9C%8D%E5%8A%A12.png" alt="SOA架构"></p>
-<h5 id="微服务架构与SOA架构的不同"><a href="#微服务架构与SOA架构的不同" class="headerlink" title="微服务架构与SOA架构的不同"></a>微服务架构与SOA架构的不同</h5><p>1.微服务架构基于 SOA架构 演变过来，继承 SOA架构的优点，在微服务架构中去除 SOA 架构中SOAP协议和 ESB 企业服务总线，采用 http+json（restful）进行传输。<br>2.微服务架构比 SOA 架构粒度会更加精细，让专业的人去做专业的事情（专注），目的提高效率，每个服务于服务之间互不影响，微服务架构中，每个服务必须独立部署，微服务架构更加轻巧，轻量级。<br>3.SOA 架构中可能数据库存储会发生共享，微服务强调独每个服务都是单独数据库，保证每个服务于服务之间互不影响。<br>4.项目体现特征微服务架构比 SOA 架构更加适合与互联网公司敏捷开发、快速迭代版本，因为粒度非常精细。</p>
-<h5 id="微服务架构会产生那些问题"><a href="#微服务架构会产生那些问题" class="headerlink" title="微服务架构会产生那些问题"></a>微服务架构会产生那些问题</h5><p>分布式事务解决方案(rabbitmq/rocketmq/lcn(已经淘汰)/ Seata)<br>分布式任务调度平台(XXL-Job、阿里Scheduler)<br>分布式日志采集系统ELK+Kafka<br>分布式服务注册中心 eureka、Zookeeper、consule、nacos等。<br>分布式服务追踪与调用链Zipkin等。<br>分布式服务配置中心（springcloud config/携程阿波罗/nacos/disconfig）</p>
-<p>非常重要的概念：独立部署、可配置、动态化</p>
-<h5 id="为什么我们要使用SpringCloud"><a href="#为什么我们要使用SpringCloud" class="headerlink" title="为什么我们要使用SpringCloud"></a>为什么我们要使用SpringCloud</h5><p>SpringCloud并不是rpc远程调用框架，而是一套全家桶的微服务解决框架，理念就是解决我们在微服务架构中遇到的任何问题。</p>
-<h5 id="SpringCloud第一代与第二代的区别"><a href="#SpringCloud第一代与第二代的区别" class="headerlink" title="SpringCloud第一代与第二代的区别"></a>SpringCloud第一代与第二代的区别</h5><p><img src="/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/%E5%8C%BA%E5%88%AB.png" alt="SOA架构"><br><strong>SpringCloud第一代实际上都是用的Netflix开源的组件整合微服务解决方案。</strong></p>
-<ul>
-<li>SpringCloud Config 分布式配置中心</li>
-<li>SpringCloud Netflix 核心组件</li>
-<li>Eureka:服务治理 </li>
-<li>Hystrix:服务保护框架</li>
-<li>Ribbon:客户端负载均衡器</li>
-<li>Feign：基于ribbon和hystrix的声明式服务调用组件</li>
-<li>Zuul: 网关组件,提供智能路由、访问过滤等功能。</li>
-</ul>
-<p><strong>SpringCloud第二代（自己研发）和优秀的组件组合：</strong></p>
-<ul>
-<li>Spring Cloud Gateway 网关</li>
-<li>Spring Cloud Loadbalancer 客户端负载均衡器</li>
-<li>Spring Cloud r4j(Resilience4J) 服务保护</li>
-<li>Spring Cloud Alibaba Nacos 服务注册</li>
-<li>Spring Cloud Alibaba Nacos 分布式配置中心</li>
-<li>Spring Cloud Alibaba Sentinel服务保护 </li>
-<li>SpringCloud Alibaba Seata分布式事务解决框架</li>
-<li>Alibaba Cloud OSS 阿里云存储</li>
-<li>Alibaba Cloud SchedulerX 分布式任务调度平台</li>
-<li>Alibaba Cloud SMS 分布式短信系统</li>
-</ul>
-<h5 id="为什么Alibaba要推出SpringCloud组件"><a href="#为什么Alibaba要推出SpringCloud组件" class="headerlink" title="为什么Alibaba要推出SpringCloud组件"></a>为什么Alibaba要推出SpringCloud组件</h5><p>目的就是为了对阿里云的产品实现扩展。</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>集群</tag>
       </tags>
   </entry>
   <entry>
