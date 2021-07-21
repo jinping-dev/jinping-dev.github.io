@@ -670,9 +670,9 @@ HTTP请求都是明文传输的，所谓的明文指的是没有经过加密的�
 <h2 id="对称加密"><a href="#对称加密" class="headerlink" title="对称加密"></a>对称加密</h2><p>对称加密又叫做私钥加密，即信息的发送方和接收方使用同一个密钥去加密和解密数据。对称加密的特点是算法公开、加密和解密速度快，适合于对大数据量进行加密，常见的对称加密算法有DES、3DES、TDEA、Blowfish、RC5和IDEA。</p>
 <ul>
 <li>加密：明文+加密算法+私钥—&gt;密文</li>
-<li>解密：密文+解密算法+私钥—&gt;明文</li>
+<li>解密：密文+解密算法+私钥—&gt;明文<a id="more"></a>
+其加密过程中的私钥与解密过程中用到的私钥是同一个密钥，这也是称加密之所以称之为“对称”的原因。由于对称加密的算法是公开的，所以一旦私钥被泄露，那么密文就很容易被破解，所以对称加密的缺点是密钥安全管理困难。</li>
 </ul>
-<p>其加密过程中的私钥与解密过程中用到的私钥是同一个密钥，这也是称加密之所以称之为“对称”的原因。由于对称加密的算法是公开的，所以一旦私钥被泄露，那么密文就很容易被破解，所以对称加密的缺点是密钥安全管理困难。</p>
 <h2 id="非对称加密"><a href="#非对称加密" class="headerlink" title="非对称加密"></a>非对称加密</h2><p>非对称加密也叫做公钥加密。非对称加密与对称加密相比，其安全性更好。对称加密的通信双方使用相同的密钥，如果一方的密钥遭泄露，那么整个通信就会被破解。而非对称加密使用一对密钥，即<code>公钥</code>和<code>私钥</code>，且二者成对出现。</p>
 <p>私钥被自己保存，不能对外泄露。<br>公钥指的是公共的密钥，任何人都可以获得该密钥。<br>用公钥或私钥中的任何一个进行加密，用另一个进行解密。<br><strong>公钥和私钥是一一对应的</strong><br>被公钥加密过的密文只能被私钥解密，过程如下：</p>
 <ul>
@@ -1328,6 +1328,41 @@ HTTP请求都是明文传输的，所谓的明文指的是没有经过加密的�
       </tags>
   </entry>
   <entry>
+    <title>Nacos和其他注册中心的比较</title>
+    <url>/2020/08/17/Nacos%E5%92%8C%E5%85%B6%E4%BB%96%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E7%9A%84%E6%AF%94%E8%BE%83/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<h3 id="CAP定律"><a href="#CAP定律" class="headerlink" title="CAP定律"></a>CAP定律</h3><p>这个定理的内容是指的是在一个分布式系统中、<code>Consistency（一致性）</code>、 <code>Availability（可用性）</code>、<code>Partition tolerance（分区容错性）</code>，三者不可得兼。</p>
+<p><strong>一致性(C)：</strong> 在分布式系统中，如果服务器集群，每个节点在同时刻访问必须要保持数据的一致性。<br><strong>可用性(A)：</strong> 集群节点中，部分节点出现故障后任然可以使用 （高可用）<br><strong>分区容错性(P)：</strong> 在分布式系统中网络会存在脑裂的问题，部分Server与整个集群失去节点联系，无法组成一个群体。</p>
+<p>只有在CP和AP选择一个平衡点</p>
+<p>两种情况：</p>
+<ul>
+<li>CP情况下，虽然我们服务不能用，但是必须要保证数据的一致性</li>
+<li>AP情况下，可以短暂保证数据不一致，但是最终可以一致性，不管怎么样，要保证我的服务可用。<br>注册中心大多数采用<strong>AP</strong> 模式<a id="more"></a>
+
+</li>
+</ul>
+<h3 id="Nacos、Eureka、Zookeeper比较"><a href="#Nacos、Eureka、Zookeeper比较" class="headerlink" title="Nacos、Eureka、Zookeeper比较"></a>Nacos、Eureka、Zookeeper比较</h3><h4 id="相同点"><a href="#相同点" class="headerlink" title="相同点"></a>相同点</h4><pre><code>都可以实现分布式服务注册中心</code></pre>
+<h4 id="不同点"><a href="#不同点" class="headerlink" title="不同点"></a>不同点</h4><h5 id="1-Zookeeper"><a href="#1-Zookeeper" class="headerlink" title="1.Zookeeper"></a>1.Zookeeper</h5><p>Zookeeper采用CP保证数据一致性的问题，原理采用Zab原子广播协议，当我们的zk领导因为某种原因宕机的情况下，会自动触发重新选一个新的领导角色，整个选举的过程为了保证数据的一致性的问题，在选举的过程中整个zk环境是不可以使用的，可能短暂无法使用到zk，意味着微服务采用该模式的情况下可能无法实现通讯（本地有缓存除外）。ZK可以运行的节点必须满足过半机制，整个zk才可以使用。</p>
+<h5 id="2-Eureka"><a href="#2-Eureka" class="headerlink" title="2.Eureka"></a>2.Eureka</h5><p>Eureka采用AP的设计理念架构注册中心，完全去中心化思想，也就是说没有主从之分。每个节点都是均等的，采用相互注册原理，你中有我我中有你，只要有最后有一个节点存在就可以保证整个微服务可以实现通讯。</p>
+<blockquote>
+<p>中心化：必须要围绕一个领导角色为核心，选举为领导和跟随者角色<br>去中心化：每个角色都是均等的</p>
+</blockquote>
+<h5 id="3-Eureka"><a href="#3-Eureka" class="headerlink" title="3.Eureka"></a>3.Eureka</h5><p>Nacos从1.0版本支持CP和AP混合模式集群，默认是采用AP保证服务可用性，CP的形式底层集群通过<em>raft协议</em>保证数据的一致性问题。如果我们采用AP模式，注册服务的实例仅支持临时注册形式，在网络分区产生抖动的情况下，仍然可以继续注册我们的服务列表。如果选择CP模式，必须保证数据的强一致性问题，如果网络分区产生抖动的情况下，是无法注册我们的服务列表，但是选择CP模式可以支持注册实例持久。</p>
+<p><strong>什么情况下选择AP和CP呢？</strong><br>必须要求读取接口的地质保证强一致性的问题，可以采用CP模式，一般AP的情况是可以的。</p>
+<p><strong>如何实现切换模式？</strong></p>
+<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line"><span class="variable">$nacos_server</span>:<span class="number">8848</span><span class="regexp">/nacos/</span>v1<span class="regexp">/ns/</span>operator/switches?entry=serverMode&amp;value=CP</span><br></pre></td></tr></table></figure>
+<p><strong>注意：</strong> 必须是发送PUT请求！！！</p>
+<p>我们在使用注册中心时，可以允许读取的数据短暂不一致，但是要保证注册中心能够使用，<strong>可用性优先级最高</strong>。</p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>SpringCloud</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Mysql(二)Mysql的数据目录</title>
     <url>/2020/12/07/Mysql-%E4%BA%8C-Mysql%E7%9A%84%E6%95%B0%E6%8D%AE%E7%9B%AE%E5%BD%95/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -1412,41 +1447,6 @@ HTTP请求都是明文传输的，所谓的明文指的是没有经过加密的�
       </categories>
       <tags>
         <tag>Mysql</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Nacos和其他注册中心的比较</title>
-    <url>/2020/08/17/Nacos%E5%92%8C%E5%85%B6%E4%BB%96%E6%B3%A8%E5%86%8C%E4%B8%AD%E5%BF%83%E7%9A%84%E6%AF%94%E8%BE%83/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-<h3 id="CAP定律"><a href="#CAP定律" class="headerlink" title="CAP定律"></a>CAP定律</h3><p>这个定理的内容是指的是在一个分布式系统中、<code>Consistency（一致性）</code>、 <code>Availability（可用性）</code>、<code>Partition tolerance（分区容错性）</code>，三者不可得兼。</p>
-<p><strong>一致性(C)：</strong> 在分布式系统中，如果服务器集群，每个节点在同时刻访问必须要保持数据的一致性。<br><strong>可用性(A)：</strong> 集群节点中，部分节点出现故障后任然可以使用 （高可用）<br><strong>分区容错性(P)：</strong> 在分布式系统中网络会存在脑裂的问题，部分Server与整个集群失去节点联系，无法组成一个群体。</p>
-<p>只有在CP和AP选择一个平衡点</p>
-<p>两种情况：</p>
-<ul>
-<li>CP情况下，虽然我们服务不能用，但是必须要保证数据的一致性</li>
-<li>AP情况下，可以短暂保证数据不一致，但是最终可以一致性，不管怎么样，要保证我的服务可用。<br>注册中心大多数采用<strong>AP</strong> 模式<a id="more"></a>
-
-</li>
-</ul>
-<h3 id="Nacos、Eureka、Zookeeper比较"><a href="#Nacos、Eureka、Zookeeper比较" class="headerlink" title="Nacos、Eureka、Zookeeper比较"></a>Nacos、Eureka、Zookeeper比较</h3><h4 id="相同点"><a href="#相同点" class="headerlink" title="相同点"></a>相同点</h4><pre><code>都可以实现分布式服务注册中心</code></pre>
-<h4 id="不同点"><a href="#不同点" class="headerlink" title="不同点"></a>不同点</h4><h5 id="1-Zookeeper"><a href="#1-Zookeeper" class="headerlink" title="1.Zookeeper"></a>1.Zookeeper</h5><p>Zookeeper采用CP保证数据一致性的问题，原理采用Zab原子广播协议，当我们的zk领导因为某种原因宕机的情况下，会自动触发重新选一个新的领导角色，整个选举的过程为了保证数据的一致性的问题，在选举的过程中整个zk环境是不可以使用的，可能短暂无法使用到zk，意味着微服务采用该模式的情况下可能无法实现通讯（本地有缓存除外）。ZK可以运行的节点必须满足过半机制，整个zk才可以使用。</p>
-<h5 id="2-Eureka"><a href="#2-Eureka" class="headerlink" title="2.Eureka"></a>2.Eureka</h5><p>Eureka采用AP的设计理念架构注册中心，完全去中心化思想，也就是说没有主从之分。每个节点都是均等的，采用相互注册原理，你中有我我中有你，只要有最后有一个节点存在就可以保证整个微服务可以实现通讯。</p>
-<blockquote>
-<p>中心化：必须要围绕一个领导角色为核心，选举为领导和跟随者角色<br>去中心化：每个角色都是均等的</p>
-</blockquote>
-<h5 id="3-Eureka"><a href="#3-Eureka" class="headerlink" title="3.Eureka"></a>3.Eureka</h5><p>Nacos从1.0版本支持CP和AP混合模式集群，默认是采用AP保证服务可用性，CP的形式底层集群通过<em>raft协议</em>保证数据的一致性问题。如果我们采用AP模式，注册服务的实例仅支持临时注册形式，在网络分区产生抖动的情况下，仍然可以继续注册我们的服务列表。如果选择CP模式，必须保证数据的强一致性问题，如果网络分区产生抖动的情况下，是无法注册我们的服务列表，但是选择CP模式可以支持注册实例持久。</p>
-<p><strong>什么情况下选择AP和CP呢？</strong><br>必须要求读取接口的地质保证强一致性的问题，可以采用CP模式，一般AP的情况是可以的。</p>
-<p><strong>如何实现切换模式？</strong></p>
-<figure class="highlight awk"><table><tr><td class="code"><pre><span class="line"><span class="variable">$nacos_server</span>:<span class="number">8848</span><span class="regexp">/nacos/</span>v1<span class="regexp">/ns/</span>operator/switches?entry=serverMode&amp;value=CP</span><br></pre></td></tr></table></figure>
-<p><strong>注意：</strong> 必须是发送PUT请求！！！</p>
-<p>我们在使用注册中心时，可以允许读取的数据短暂不一致，但是要保证注册中心能够使用，<strong>可用性优先级最高</strong>。</p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>SpringCloud</tag>
       </tags>
   </entry>
   <entry>
@@ -3451,6 +3451,192 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
       </tags>
   </entry>
   <entry>
+    <title>垃圾回收</title>
+    <url>/2020/10/27/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<h3 id="一-如何知道对象是一个垃圾？"><a href="#一-如何知道对象是一个垃圾？" class="headerlink" title="一.如何知道对象是一个垃圾？"></a>一.如何知道对象是一个垃圾？</h3><p>没有任何引用指向的对象就是垃圾。</p>
+<ul>
+<li>可达性分析(非GCRoot引用的对象)<ol>
+<li>通过判断对象的引用链是否可达来决定对象是否可以被回收</li>
+<li>通过一系列名为GCRoot的对象为起始点，从这些节点开始向下搜索，搜索所走过的路径就被称为引用链</li>
+<li>当一个对象从GCRoot没有任何引用链相连，即从GCRoot到这个对象是不可达的，在这个时候就证明了这个对象是不可用的，可以进行回收</li>
+</ol>
+</li>
+<li>引用计数法（判断对象的引用数量来决定对象是否可以被回收）<ol>
+<li>每个对象实例都有一个引用计数器，被引用则+1，完成引用则-1</li>
+<li>任何引用计数为0的对象实例可以被当做垃圾收集<br>优点：执行效率高，程序执行受影响较小<br>缺点：无法检测出循环引用的情况，导致内存泄漏</li>
+</ol>
+</li>
+</ul>
+<a id="more"></a>
+
+<h3 id="二-可以作为GCRoot的对象有哪些？"><a href="#二-可以作为GCRoot的对象有哪些？" class="headerlink" title="二.可以作为GCRoot的对象有哪些？"></a>二.可以作为GCRoot的对象有哪些？</h3><ul>
+<li>虚拟机栈中引用的对象（栈帧中的本地变量表）</li>
+<li>方法区中的常量引用的对象</li>
+<li>方法区中的类静态属性引用的对象</li>
+<li>本地方法栈中JNI(native方法）的引用对象</li>
+<li>活跃线程的引用对象</li>
+</ul>
+<h3 id="三-GC算法"><a href="#三-GC算法" class="headerlink" title="三.GC算法"></a>三.GC算法</h3><ul>
+<li>1.标记清除（有碎片）</li>
+<li>2.拷贝算法（浪费空间，一般用于MinorGC,对于新生代的）</li>
+<li>3.标记整理（一边做标记一边做整理，但是效率低）</li>
+</ul>
+<p><code>标记清除</code>和<code>标记整理</code>算法一般都是针对老年代进行回收的算法</p>
+<h3 id="四-垃圾回收器"><a href="#四-垃圾回收器" class="headerlink" title="四.垃圾回收器"></a>四.垃圾回收器</h3><h4 id="需要了解的相关概念："><a href="#需要了解的相关概念：" class="headerlink" title="需要了解的相关概念："></a>需要了解的相关概念：</h4><ul>
+<li>吞吐量=运行用户代码时间/(运行用户代码时间+垃圾收集时间)</li>
+<li>Stop-the-world（STW）<br>  JVM由于要执行GC而停止了应用程序的执行<br>  任何一种GC算法中都会发生<br>  多数GC优化通过减少Stop-the-world发生的时间来提升程序性能</li>
+<li>Safepoint（安全点）<br>  分析可达性的过程中引用关系不会发生变化的点<br>  产生Safepoint的地方：方法调用、循环跳转、异常跳转等<br>  安全点的数量需要适中。太少会让GC等待太长的时间，太多会增加程序运行的负荷</li>
+<li>JVM的运行模式<br>  Server：启动较慢，但是启动成功之后server程序的运行效率要比Client快。采用的是重量级的虚拟机，对程序采用了更多的优化。<br>  Client：启动较快，采用的是轻量级的虚拟机<br>  通过<code>java -version</code>命令进行查看</li>
+</ul>
+<h4 id="1-分代模型"><a href="#1-分代模型" class="headerlink" title="1.分代模型"></a>1.分代模型</h4><p>对于新生代：</p>
+<ul>
+<li>Serial(最早的垃圾回收器，现在很少用，单线程)<br>  可以通过<code>-XX:+UseSerialGC</code>,使得年轻代使用该垃圾回收期进行回收<br>  在jdk1.3之前，是Java年轻代垃圾回收器的唯一选择<br>  单线程通过复制算法进行收集，在进行垃圾收集时，必须暂停所有的工作线程<br>  简单高效，是Client模式下默认的年轻代收集器</li>
+<li>ParNew(多线程处理,工作在年轻代,专门和CMS做配合的)<br>  可以通过<code>-XX:+UseParNewGC</code>,使得年轻代使用该垃圾回收期进行回收<br>  多线程收集，其余的行为、特点和Serial收集器一样<br>  是Server模式下首选的年轻代回收器<br>  也是使用复制算法<br>  单核执行效率不如Serial，在多核下执行才有优势</li>
+<li>Parallel Scavenge(多线程处理,工作在年轻代)<br>  可以通过<code>-XX:+UseParallelGC</code>,使得年轻代使用该垃圾回收期进行回收<br>  使用复制算法<br>  比起关注用户线程停顿时间，更关注系统的吞吐量<br>  在多核执行下才有优势，Server模式下默认的年轻代收集器<br>  自适应调节策略：<code>-XX:+UseAdaptiveSizePolicy</code>,会把内置管理的调优任务交给虚拟机去完成</li>
+</ul>
+<p>对于老年代：</p>
+<ul>
+<li>Serial Old(单线程)<br>  可以通过<code>-XX:+UseSerialOldGC</code>,使得老年代使用该垃圾回收期进行回收<br>  单线程通过标记-整理算法进行收集，在进行垃圾收集时，必须暂停所有的工作线程<br>  简单高效，是Client模式下默认的老年代收集器</li>
+<li>Parallel Old(多线程处理)<br>  可以通过<code>-XX:+UseParallelOldGC</code>,使得老年代使用该垃圾回收期进行回收<br>  多线程使用标记-整理算法进行收集，JDK6之后开始提供的，吞吐量优先</li>
+<li>CMS<br>  标记-清除算法<br>  垃圾回收线程几乎能与用户线程做到同时工作，只是尽可能缩短了停顿时间<br>  JDK5提出的第一款针对于老年代GC与工作线程并发执行的收集器</li>
+</ul>
+<h4 id="2-分区模型"><a href="#2-分区模型" class="headerlink" title="2.分区模型"></a>2.分区模型</h4><ul>
+<li>G1（1.8可用）</li>
+<li>ZGC</li>
+<li>Shenandoah</li>
+<li>Epsilon(无用)</li>
+</ul>
+<h4 id="3-关于JDK1-8"><a href="#3-关于JDK1-8" class="headerlink" title="3.关于JDK1.8"></a>3.关于JDK1.8</h4><ul>
+<li>1.8默认的垃圾回收器：PS+PO</li>
+<li>1.8推荐用G1</li>
+</ul>
+<h4 id="4-CMS垃圾回收器"><a href="#4-CMS垃圾回收器" class="headerlink" title="4.CMS垃圾回收器"></a>4.CMS垃圾回收器</h4><ul>
+<li>中文：concurrent mark sweep</li>
+<li>沿着路线在前进：内存越来越大，卡顿时间越来越短</li>
+<li>垃圾回收线程和工作线程可以一起并行工作。</li>
+<li>大致六个阶段，主要有四个阶段：1.初始标记；2.并发标记；3.重新标记；4.并发清理<br>  1.初始标记：STW的时间很短，降低STW时间；G1垃圾回收器在STW的时间更短<br>  2.并发标记：会跟工作线程发生混乱，会发生错标的问题<br>  3.并发预清理：查找执行并发标记阶段从年轻代晋升到老年代的对象<br>  4.重新标记：修正那些错标的对象，remark阶段，必须从头扫描一遍，暂停虚拟机，扫描堆中的剩余对象<br>  5.并发清理：也是并发执行，发生错标问题，但是没关系，下次循环可以解决<br>  6.并发重置：重置CMS收集器的数据结构，等待下一次垃圾回收</li>
+</ul>
+<p><strong>对于三色标记算法产生的漏标问题：</strong>CMS的解决方案为：<code>incremental update</code></p>
+<h5 id="5-G1垃圾回收器"><a href="#5-G1垃圾回收器" class="headerlink" title="5.G1垃圾回收器"></a>5.G1垃圾回收器</h5><ul>
+<li>既用于新生代，也可以用于老年代的垃圾回收器</li>
+<li>使用<code>复制+标记-整理</code>算法进行回收</li>
+<li>设计的目的是为了替换掉JDK5中发布的CMS垃圾回收期</li>
+<li>并发+并行，使用多个CPU来缩短STW的停顿时间，与用户线程并发执行</li>
+<li>分代收集，独立管理整个堆</li>
+<li>空间整合，基于标记整理算法，解决了内存碎片的问题</li>
+<li>可预测的停顿，能建立可预测的停顿时间模型，能让使用者明确指定在一个长度为n毫秒的时间片段内消耗在垃圾收集上的时间不得超过n毫秒，这个n是可以设置的。</li>
+<li>用到了读屏障和写屏障</li>
+<li>对于三色标记算法产生的漏标问题，对应的算法为SATB</li>
+<li>将整个Java堆内存划分成多个大小相等的Region区</li>
+<li>年轻代和老年代不再物理隔离</li>
+</ul>
+<h5 id="5-触发fullGC的情况"><a href="#5-触发fullGC的情况" class="headerlink" title="5.触发fullGC的情况"></a>5.触发fullGC的情况</h5><ul>
+<li>老年代空间不足</li>
+<li>永久代空间不足（jdk8之后没有了永久代，该条件不成立，取而代之的是元空间，目的是为了降低fullGC的频率，减少GC的负担，提升效率），只针对1.7</li>
+<li>CMS GC时出现promotionfailed,concurrent mode failure</li>
+<li>MinorGC晋升到老年代平均大小大于老年代的剩余空间</li>
+<li>调用System.gc(),不会立即回收，而是通知jvm进行回收，回收时机需要等底层进行</li>
+<li>使用RMI来进行RPC或管理的JDK的应用，每小时执行一次FullGC</li>
+</ul>
+<h3 id="五-内存模型"><a href="#五-内存模型" class="headerlink" title="五.内存模型"></a>五.内存模型</h3><h4 id="1-分代"><a href="#1-分代" class="headerlink" title="1.分代"></a>1.分代</h4><h5 id="1-1-新生代"><a href="#1-1-新生代" class="headerlink" title="1.1 新生代"></a>1.1 新生代</h5><ul>
+<li>新生代就是刚刚new出来的对象</li>
+<li>新生代可以理解为大多数一次垃圾回收就能回收掉的对象</li>
+<li>在新生代里面用<code>拷贝算法</code>效率极高</li>
+<li>年轻代分为三个区域：<code>Eden</code>、2个<code>survivor(幸存者)</code>。比例为：8:1:1</li>
+<li>不能回收的对象在两个survivor区中来回存活，直到达到<code>-XX:MaxTenuringThreshold</code>设置的最大年龄则进入老年代，默认为16</li>
+<li>CMS的默认的一个对象在新生代的最大年龄为16</li>
+<li>新生代空间耗尽触发<code>MinorGC/YGC</code><h5 id="1-2-老年代"><a href="#1-2-老年代" class="headerlink" title="1.2 老年代"></a>1.2 老年代</h5></li>
+<li>老年代就是经过了好多次垃圾回收之后老是回收不了的对象</li>
+<li>垃圾回收不容易回收掉的对象</li>
+<li>在老年代一般用<code>标记清除</code>或者<code>标记整理</code></li>
+<li>在老年代无法继续分配空间时触发<code>MajorGC/FullGC</code>，新生代老年代同时进行回收</li>
+<li>大对象直接放在老年代（有参数可以确定）</li>
+</ul>
+<h3 id="六-对象回收步骤"><a href="#六-对象回收步骤" class="headerlink" title="六.对象回收步骤"></a>六.对象回收步骤</h3><ul>
+<li>当new一个对象的时候，判断是否可以不在堆上进行分配（可以在栈上进行分配，只要栈pop之后，对象就可以直接被回收，不用被GC所回收），但是这个栈上的对象有两个前提：逃逸分析(一个方法中的对象不能被另一个方法所引用)和标量替换(基础数据类型)</li>
+<li>如果对象是个大对象，直接放到老年代</li>
+<li>如果不是大对象，不管是不是TLAB（线程本地分配缓冲区），都会进入Eden区，然后进行GC清除，能清除的直接清除。清除不了的进入survivor1区域，年龄够了进入老年代，年龄不够进入survivor2，循环往复。</li>
+</ul>
+<h3 id="七-GC常用参数"><a href="#七-GC常用参数" class="headerlink" title="七.GC常用参数"></a>七.GC常用参数</h3><ul>
+<li>-Xmn:年轻代</li>
+<li>-Xms:最小堆内存</li>
+<li>-Xmx:最大堆内存</li>
+<li>-Xss:栈空间<h4 id="关于G1的参数"><a href="#关于G1的参数" class="headerlink" title="关于G1的参数"></a>关于G1的参数</h4></li>
+<li>-XX:+UseG1GC</li>
+<li>-XX:MaxGCPauseMillis(建议值，G1会尝试调整young区的块数来达到这个值)</li>
+<li>-XX:GCPauseIntervalMillis(GC的间隔时间)</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>JVM</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>多线程相关面试题</title>
+    <url>/2020/10/23/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<h2 id="Java中进程和线程的关系"><a href="#Java中进程和线程的关系" class="headerlink" title="Java中进程和线程的关系"></a>Java中进程和线程的关系</h2><p>Java对操作系统提供的功能进行封装，包括进程和线程<br>运行一个程序会产生一个进程，进程包含至少一个线程<br>每个进程对应一个JVM实例，多个线程共享JVM里的堆<br>Java采用单线程编程模型，程序会自动创建主线程<br>主线程可以创建子线程，原则上要后于子线程完成执行</p>
+<a id="more"></a>
+
+<h2 id="start和run方法的区别"><a href="#start和run方法的区别" class="headerlink" title="start和run方法的区别"></a>start和run方法的区别</h2><p>调用start()方法会创建一个新的子线程并启动<br>run()方法只是Thread的一个普通方法的调用<br>start()方法会去调用start0()方法，是一个native方法，底层是调用JVM_StartThread方法创建一个线程去调用run方法</p>
+<h2 id="Thread和Runnable是什么关系？"><a href="#Thread和Runnable是什么关系？" class="headerlink" title="Thread和Runnable是什么关系？"></a>Thread和Runnable是什么关系？</h2><p>Thread是一个类，这个类实现了Runnable接口，使得run支持多线程<br>因类的单一继承原则，推荐多使用Runnable接口</p>
+<h2 id="如何给run-方法传参？"><a href="#如何给run-方法传参？" class="headerlink" title="如何给run()方法传参？"></a>如何给run()方法传参？</h2><p>构造函数传参<br>成员变量传参<br>回调函数传参</p>
+<h2 id="如何实现处理线程的返回值？"><a href="#如何实现处理线程的返回值？" class="headerlink" title="如何实现处理线程的返回值？"></a>如何实现处理线程的返回值？</h2><h3 id="1-主线程等待法：让主线程循环等待，直到目标子线程返回为止"><a href="#1-主线程等待法：让主线程循环等待，直到目标子线程返回为止" class="headerlink" title="1.主线程等待法：让主线程循环等待，直到目标子线程返回为止"></a>1.主线程等待法：让主线程循环等待，直到目标子线程返回为止</h3><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">   <span class="keyword">public</span> <span class="keyword">class</span> <span class="title">CycleWait</span> <span class="title">implements</span> <span class="title">Runnable</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String <span class="keyword">value</span>;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.currentThread().sleep(<span class="number">5000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">value</span> = <span class="string">&quot;we have data now&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span>(<span class="params">String[] args</span>) throws InterruptedException</span> &#123;</span><br><span class="line">        CycleWait cycleWait = <span class="keyword">new</span> CycleWait();</span><br><span class="line">        Thread t = <span class="keyword">new</span> Thread(cycleWait);</span><br><span class="line">        t.start();</span><br><span class="line">        <span class="keyword">while</span> (cycleWait.<span class="keyword">value</span> == <span class="literal">null</span>)&#123;</span><br><span class="line">            Thread.currentThread().sleep(<span class="number">100</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.<span class="keyword">out</span>.println(<span class="string">&quot;value:&quot;</span>+ cycleWait.<span class="keyword">value</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="2-使用Thread类的join方法阻塞当前线程以等待子线程处理完毕"><a href="#2-使用Thread类的join方法阻塞当前线程以等待子线程处理完毕" class="headerlink" title="2.使用Thread类的join方法阻塞当前线程以等待子线程处理完毕"></a>2.使用Thread类的join方法阻塞当前线程以等待子线程处理完毕</h3><h3 id="3-通过Callable接口实现，通过FutureTask或者线程池获取"><a href="#3-通过Callable接口实现，通过FutureTask或者线程池获取" class="headerlink" title="3.通过Callable接口实现，通过FutureTask或者线程池获取"></a>3.通过Callable接口实现，通过FutureTask或者线程池获取</h3><h2 id="线程的六个状态"><a href="#线程的六个状态" class="headerlink" title="线程的六个状态"></a>线程的六个状态</h2><ul>
+<li>新建(new)：创建后尚未启动的线程的状态    </li>
+<li>运行(Runnable):包含Running和Ready</li>
+<li>无限等待(WAITING)：不会被分配CPU执行时间，需要显式被唤醒<br>  没有设置Timeout参数的Object.wait()方法<br>  没有设置Timeout参数的Thread.join()方法<br>  LockSupport.park()方法</li>
+<li>限期等待(TIMED_WAITING)：在一定时间后会由系统自动唤醒<br>  Thread.sleep()方法<br>  设置了Timeout参数的Object.wait()方法<br>  设置了Timeout参数的Thread.join()方法<br>  LockSupport.parkNanos()方法<br>  LockSupport.parkUntil()方法</li>
+<li>阻塞(BLOCKED):等待获取排他锁</li>
+<li>结束(TERMINATED):已终止线程的状态，线程已经执行结束。一个线程处于结束状态就不能进行start()了</li>
+</ul>
+<h3 id="阻塞状态与等待方法的区别："><a href="#阻塞状态与等待方法的区别：" class="headerlink" title="阻塞状态与等待方法的区别："></a>阻塞状态与等待方法的区别：</h3><p>阻塞状态在等待获取排他锁，这个事件将在一个线程放弃这个锁的时候发生<br>等待状态是等待一段时间或者有唤醒动作的时候发生<br>在程序等待进入同步区域的时候，线程将进入阻塞状态，比如当某个线程进入synchronized关键字修饰的方法（即获取锁去执行）的时候，其他想执行该方法的线程就只能等着，他们的状态就是BLOCKED</p>
+<h2 id="sleep和wait的区别"><a href="#sleep和wait的区别" class="headerlink" title="sleep和wait的区别"></a>sleep和wait的区别</h2><p>sleep是Thread类的方法，wait是Object类中定义的方法<br>sleep是可以在任何地方去使用的<br>wait方法只能在synchronized方法或synchronized代码块中使用<br>Thread.sleep只会让出CPU，不会导致锁行为的改变<br>Object.wait不仅让出CPU，还会释放已经占有的同步资源锁</p>
+<h2 id="notify和notifyAll的区别"><a href="#notify和notifyAll的区别" class="headerlink" title="notify和notifyAll的区别"></a>notify和notifyAll的区别</h2><p>notifyAll会让所有处于等待池的线程全部进入锁池去竞争获取锁的机会<br>notify只会随机选取一个处于等待池中的线程进入锁池去竞争获取锁的机会</p>
+<h3 id="1-两个概念"><a href="#1-两个概念" class="headerlink" title="1.两个概念"></a>1.两个概念</h3><p><strong>锁池EntryList</strong><br>假设线程A已经拥有了某个对象的锁，而其他线程B、C想要调用这个对象的某个synchronized方法，由于B、C线程在进入对象的synchronized方法之前必须先获取该对象锁的拥有权，而恰巧该对象的锁目前正在被线程A锁占用，此时B、C线程就会被阻塞，进入一个地方去等待锁的释放，这个地方便是该对象的锁池<br><strong>等待池WaitSet</strong><br>假设线程A调用了某个对象的wait()方法，线程A就会释放该对象的锁，同时线程A就进入到了该对象的等待池中，进入到等待池中的线程不会竞争该对象的锁</p>
+<h2 id="yield"><a href="#yield" class="headerlink" title="yield"></a>yield</h2><p>当调用Thread.yield()函数时，会给线程调度器一个当前线程愿意让出CPU使用权的暗示，但是线程调度器可能会忽略这个暗示</p>
+<h2 id="如何中断线程"><a href="#如何中断线程" class="headerlink" title="如何中断线程"></a>如何中断线程</h2><h3 id="1-已经被抛弃的方法"><a href="#1-已经被抛弃的方法" class="headerlink" title="1.已经被抛弃的方法"></a>1.已经被抛弃的方法</h3><p>通过调用stop()方法停止线程，可以由一个线程去停止另一个线程，这个方法太过暴力而且不安全<br>通过调用线程实例的suspend()和resume()方法</p>
+<h3 id="2-目前使用的方法"><a href="#2-目前使用的方法" class="headerlink" title="2.目前使用的方法"></a>2.目前使用的方法</h3><ul>
+<li>调用interrupt()，通知线程应该中断了</li>
+</ul>
+<p>1.如果一个线程处于被阻塞状态，那么线程将立即退出被阻塞状态，并抛出一个InterruptedException异常<br>2.如果线程处于正常活动状态，那么会将该线程的中断标志设置为true。被设置中断标志的线程将继续正常运行，不受影响</p>
+]]></content>
+      <categories>
+        <category>面试题</category>
+      </categories>
+      <tags>
+        <tag>面试题</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>服务注册与发现nacos</title>
+    <url>/2020/08/05/%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0nacos/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<h3 id="服务治理基本的概念"><a href="#服务治理基本的概念" class="headerlink" title="服务治理基本的概念"></a>服务治理基本的概念</h3><p><strong>服务治理概念：</strong><br>在RPC远程调用过程中，服务与服务之间依赖关系非常大，服务Url地址管理非常复杂，所以这时候需要对我们服务的url实现治理，通过服务治理可以实现服务注册与发现、负载均衡、容错等。<br><strong>服务注册中心的概念</strong><br>每次调用该服务如果地址直接写死的话，一旦接口发生变化的情况下，这时候需要重新发布版本才可以该接口调用地址，所以需要一个注册中心统一管理我们的服务注册与发现。</p>
+<a id="more"></a>
+
+<p><strong>注册中心：</strong><br>我们的服务注册到我们注册中心，key为<code>服务名称</code>、value为<code>该服务调用地址</code>，该类型为集合类型。常用的注册中心有：Eureka、consul、zookeeper、nacos等。</p>
+<p><strong>服务注册:</strong><br>我们生产者项目启动的时候，会将当前服务自己的信息地址注册到注册中心。</p>
+<p><strong>服务发现:</strong><br>消费者从我们的注册中心上获取生产者调用的地址（集合），在使用负载均衡的策略获取集群中某个地址实现本地rpc远程调用。</p>
+<h3 id="微服务调用接口常用名词"><a href="#微服务调用接口常用名词" class="headerlink" title="微服务调用接口常用名词"></a>微服务调用接口常用名词</h3><p><strong>生产者：</strong> 提供接口被其他服务调用<br><strong>消费者：</strong> 调用生产者接口实现消费<br><strong>服务注册：</strong> 将当前服务地址注册<br><strong>服务发现：</strong><br><img src="/2020/08/05/%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0nacos/1.png" alt="微服务调用接口常用名词"></p>
+<h3 id="Nacos"><a href="#Nacos" class="headerlink" title="Nacos"></a>Nacos</h3><p>Nacos可以实现分布式服务注册与发现/分布式配置中心框架。<br>官网的介绍: <a href="https://nacos.io/zh-cn/docs/what-is-nacos.html">https://nacos.io/zh-cn/docs/what-is-nacos.html</a></p>
+<p>Nacos安装及基本操作：<a href="https://nacos.io/zh-cn/docs/quick-start.html">https://nacos.io/zh-cn/docs/quick-start.html</a></p>
+]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>SpringCloud</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>架构演变</title>
     <url>/2020/08/04/%E6%9E%B6%E6%9E%84%E6%BC%94%E5%8F%98/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -3585,28 +3771,6 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
       </tags>
   </entry>
   <entry>
-    <title>服务注册与发现nacos</title>
-    <url>/2020/08/05/%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0nacos/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-<h3 id="服务治理基本的概念"><a href="#服务治理基本的概念" class="headerlink" title="服务治理基本的概念"></a>服务治理基本的概念</h3><p><strong>服务治理概念：</strong><br>在RPC远程调用过程中，服务与服务之间依赖关系非常大，服务Url地址管理非常复杂，所以这时候需要对我们服务的url实现治理，通过服务治理可以实现服务注册与发现、负载均衡、容错等。<br><strong>服务注册中心的概念</strong><br>每次调用该服务如果地址直接写死的话，一旦接口发生变化的情况下，这时候需要重新发布版本才可以该接口调用地址，所以需要一个注册中心统一管理我们的服务注册与发现。</p>
-<a id="more"></a>
-
-<p><strong>注册中心：</strong><br>我们的服务注册到我们注册中心，key为<code>服务名称</code>、value为<code>该服务调用地址</code>，该类型为集合类型。常用的注册中心有：Eureka、consul、zookeeper、nacos等。</p>
-<p><strong>服务注册:</strong><br>我们生产者项目启动的时候，会将当前服务自己的信息地址注册到注册中心。</p>
-<p><strong>服务发现:</strong><br>消费者从我们的注册中心上获取生产者调用的地址（集合），在使用负载均衡的策略获取集群中某个地址实现本地rpc远程调用。</p>
-<h3 id="微服务调用接口常用名词"><a href="#微服务调用接口常用名词" class="headerlink" title="微服务调用接口常用名词"></a>微服务调用接口常用名词</h3><p><strong>生产者：</strong> 提供接口被其他服务调用<br><strong>消费者：</strong> 调用生产者接口实现消费<br><strong>服务注册：</strong> 将当前服务地址注册<br><strong>服务发现：</strong><br><img src="/2020/08/05/%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E4%B8%8E%E5%8F%91%E7%8E%B0nacos/1.png" alt="微服务调用接口常用名词"></p>
-<h3 id="Nacos"><a href="#Nacos" class="headerlink" title="Nacos"></a>Nacos</h3><p>Nacos可以实现分布式服务注册与发现/分布式配置中心框架。<br>官网的介绍: <a href="https://nacos.io/zh-cn/docs/what-is-nacos.html">https://nacos.io/zh-cn/docs/what-is-nacos.html</a></p>
-<p>Nacos安装及基本操作：<a href="https://nacos.io/zh-cn/docs/quick-start.html">https://nacos.io/zh-cn/docs/quick-start.html</a></p>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>SpringCloud</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>计算机内存</title>
     <url>/2020/10/27/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%86%85%E5%AD%98/</url>
     <content><![CDATA[<meta name="referrer" content="no-referrer">
@@ -3636,44 +3800,6 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
       </categories>
       <tags>
         <tag>基础知识</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>多线程相关面试题</title>
-    <url>/2020/10/23/%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%9B%B8%E5%85%B3%E9%9D%A2%E8%AF%95%E9%A2%98/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-<h2 id="Java中进程和线程的关系"><a href="#Java中进程和线程的关系" class="headerlink" title="Java中进程和线程的关系"></a>Java中进程和线程的关系</h2><p>Java对操作系统提供的功能进行封装，包括进程和线程<br>运行一个程序会产生一个进程，进程包含至少一个线程<br>每个进程对应一个JVM实例，多个线程共享JVM里的堆<br>Java采用单线程编程模型，程序会自动创建主线程<br>主线程可以创建子线程，原则上要后于子线程完成执行</p>
-<a id="more"></a>
-
-<h2 id="start和run方法的区别"><a href="#start和run方法的区别" class="headerlink" title="start和run方法的区别"></a>start和run方法的区别</h2><p>调用start()方法会创建一个新的子线程并启动<br>run()方法只是Thread的一个普通方法的调用<br>start()方法会去调用start0()方法，是一个native方法，底层是调用JVM_StartThread方法创建一个线程去调用run方法</p>
-<h2 id="Thread和Runnable是什么关系？"><a href="#Thread和Runnable是什么关系？" class="headerlink" title="Thread和Runnable是什么关系？"></a>Thread和Runnable是什么关系？</h2><p>Thread是一个类，这个类实现了Runnable接口，使得run支持多线程<br>因类的单一继承原则，推荐多使用Runnable接口</p>
-<h2 id="如何给run-方法传参？"><a href="#如何给run-方法传参？" class="headerlink" title="如何给run()方法传参？"></a>如何给run()方法传参？</h2><p>构造函数传参<br>成员变量传参<br>回调函数传参</p>
-<h2 id="如何实现处理线程的返回值？"><a href="#如何实现处理线程的返回值？" class="headerlink" title="如何实现处理线程的返回值？"></a>如何实现处理线程的返回值？</h2><h3 id="1-主线程等待法：让主线程循环等待，直到目标子线程返回为止"><a href="#1-主线程等待法：让主线程循环等待，直到目标子线程返回为止" class="headerlink" title="1.主线程等待法：让主线程循环等待，直到目标子线程返回为止"></a>1.主线程等待法：让主线程循环等待，直到目标子线程返回为止</h3><figure class="highlight csharp"><table><tr><td class="code"><pre><span class="line">   <span class="keyword">public</span> <span class="keyword">class</span> <span class="title">CycleWait</span> <span class="title">implements</span> <span class="title">Runnable</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> String <span class="keyword">value</span>;</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.currentThread().sleep(<span class="number">5000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">value</span> = <span class="string">&quot;we have data now&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span>(<span class="params">String[] args</span>) throws InterruptedException</span> &#123;</span><br><span class="line">        CycleWait cycleWait = <span class="keyword">new</span> CycleWait();</span><br><span class="line">        Thread t = <span class="keyword">new</span> Thread(cycleWait);</span><br><span class="line">        t.start();</span><br><span class="line">        <span class="keyword">while</span> (cycleWait.<span class="keyword">value</span> == <span class="literal">null</span>)&#123;</span><br><span class="line">            Thread.currentThread().sleep(<span class="number">100</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        System.<span class="keyword">out</span>.println(<span class="string">&quot;value:&quot;</span>+ cycleWait.<span class="keyword">value</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="2-使用Thread类的join方法阻塞当前线程以等待子线程处理完毕"><a href="#2-使用Thread类的join方法阻塞当前线程以等待子线程处理完毕" class="headerlink" title="2.使用Thread类的join方法阻塞当前线程以等待子线程处理完毕"></a>2.使用Thread类的join方法阻塞当前线程以等待子线程处理完毕</h3><h3 id="3-通过Callable接口实现，通过FutureTask或者线程池获取"><a href="#3-通过Callable接口实现，通过FutureTask或者线程池获取" class="headerlink" title="3.通过Callable接口实现，通过FutureTask或者线程池获取"></a>3.通过Callable接口实现，通过FutureTask或者线程池获取</h3><h2 id="线程的六个状态"><a href="#线程的六个状态" class="headerlink" title="线程的六个状态"></a>线程的六个状态</h2><ul>
-<li>新建(new)：创建后尚未启动的线程的状态    </li>
-<li>运行(Runnable):包含Running和Ready</li>
-<li>无限等待(WAITING)：不会被分配CPU执行时间，需要显式被唤醒<br>  没有设置Timeout参数的Object.wait()方法<br>  没有设置Timeout参数的Thread.join()方法<br>  LockSupport.park()方法</li>
-<li>限期等待(TIMED_WAITING)：在一定时间后会由系统自动唤醒<br>  Thread.sleep()方法<br>  设置了Timeout参数的Object.wait()方法<br>  设置了Timeout参数的Thread.join()方法<br>  LockSupport.parkNanos()方法<br>  LockSupport.parkUntil()方法</li>
-<li>阻塞(BLOCKED):等待获取排他锁</li>
-<li>结束(TERMINATED):已终止线程的状态，线程已经执行结束。一个线程处于结束状态就不能进行start()了</li>
-</ul>
-<h3 id="阻塞状态与等待方法的区别："><a href="#阻塞状态与等待方法的区别：" class="headerlink" title="阻塞状态与等待方法的区别："></a>阻塞状态与等待方法的区别：</h3><p>阻塞状态在等待获取排他锁，这个事件将在一个线程放弃这个锁的时候发生<br>等待状态是等待一段时间或者有唤醒动作的时候发生<br>在程序等待进入同步区域的时候，线程将进入阻塞状态，比如当某个线程进入synchronized关键字修饰的方法（即获取锁去执行）的时候，其他想执行该方法的线程就只能等着，他们的状态就是BLOCKED</p>
-<h2 id="sleep和wait的区别"><a href="#sleep和wait的区别" class="headerlink" title="sleep和wait的区别"></a>sleep和wait的区别</h2><p>sleep是Thread类的方法，wait是Object类中定义的方法<br>sleep是可以在任何地方去使用的<br>wait方法只能在synchronized方法或synchronized代码块中使用<br>Thread.sleep只会让出CPU，不会导致锁行为的改变<br>Object.wait不仅让出CPU，还会释放已经占有的同步资源锁</p>
-<h2 id="notify和notifyAll的区别"><a href="#notify和notifyAll的区别" class="headerlink" title="notify和notifyAll的区别"></a>notify和notifyAll的区别</h2><p>notifyAll会让所有处于等待池的线程全部进入锁池去竞争获取锁的机会<br>notify只会随机选取一个处于等待池中的线程进入锁池去竞争获取锁的机会</p>
-<h3 id="1-两个概念"><a href="#1-两个概念" class="headerlink" title="1.两个概念"></a>1.两个概念</h3><p><strong>锁池EntryList</strong><br>假设线程A已经拥有了某个对象的锁，而其他线程B、C想要调用这个对象的某个synchronized方法，由于B、C线程在进入对象的synchronized方法之前必须先获取该对象锁的拥有权，而恰巧该对象的锁目前正在被线程A锁占用，此时B、C线程就会被阻塞，进入一个地方去等待锁的释放，这个地方便是该对象的锁池<br><strong>等待池WaitSet</strong><br>假设线程A调用了某个对象的wait()方法，线程A就会释放该对象的锁，同时线程A就进入到了该对象的等待池中，进入到等待池中的线程不会竞争该对象的锁</p>
-<h2 id="yield"><a href="#yield" class="headerlink" title="yield"></a>yield</h2><p>当调用Thread.yield()函数时，会给线程调度器一个当前线程愿意让出CPU使用权的暗示，但是线程调度器可能会忽略这个暗示</p>
-<h2 id="如何中断线程"><a href="#如何中断线程" class="headerlink" title="如何中断线程"></a>如何中断线程</h2><h3 id="1-已经被抛弃的方法"><a href="#1-已经被抛弃的方法" class="headerlink" title="1.已经被抛弃的方法"></a>1.已经被抛弃的方法</h3><p>通过调用stop()方法停止线程，可以由一个线程去停止另一个线程，这个方法太过暴力而且不安全<br>通过调用线程实例的suspend()和resume()方法</p>
-<h3 id="2-目前使用的方法"><a href="#2-目前使用的方法" class="headerlink" title="2.目前使用的方法"></a>2.目前使用的方法</h3><ul>
-<li>调用interrupt()，通知线程应该中断了</li>
-</ul>
-<p>1.如果一个线程处于被阻塞状态，那么线程将立即退出被阻塞状态，并抛出一个InterruptedException异常<br>2.如果线程处于正常活动状态，那么会将该线程的中断标志设置为true。被设置中断标志的线程将继续正常运行，不受影响</p>
-]]></content>
-      <categories>
-        <category>面试题</category>
-      </categories>
-      <tags>
-        <tag>面试题</tag>
       </tags>
   </entry>
   <entry>
@@ -3863,132 +3989,6 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
       </categories>
       <tags>
         <tag>SpringCloud</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>垃圾回收</title>
-    <url>/2020/10/27/%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6/</url>
-    <content><![CDATA[<meta name="referrer" content="no-referrer">
-
-<h3 id="一-如何知道对象是一个垃圾？"><a href="#一-如何知道对象是一个垃圾？" class="headerlink" title="一.如何知道对象是一个垃圾？"></a>一.如何知道对象是一个垃圾？</h3><p>没有任何引用指向的对象就是垃圾。</p>
-<ul>
-<li>可达性分析(非GCRoot引用的对象)<ol>
-<li>通过判断对象的引用链是否可达来决定对象是否可以被回收</li>
-<li>通过一系列名为GCRoot的对象为起始点，从这些节点开始向下搜索，搜索所走过的路径就被称为引用链</li>
-<li>当一个对象从GCRoot没有任何引用链相连，即从GCRoot到这个对象是不可达的，在这个时候就证明了这个对象是不可用的，可以进行回收</li>
-</ol>
-</li>
-<li>引用计数法（判断对象的引用数量来决定对象是否可以被回收）<ol>
-<li>每个对象实例都有一个引用计数器，被引用则+1，完成引用则-1</li>
-<li>任何引用计数为0的对象实例可以被当做垃圾收集<br>优点：执行效率高，程序执行受影响较小<br>缺点：无法检测出循环引用的情况，导致内存泄漏</li>
-</ol>
-</li>
-</ul>
-<a id="more"></a>
-
-<h3 id="二-可以作为GCRoot的对象有哪些？"><a href="#二-可以作为GCRoot的对象有哪些？" class="headerlink" title="二.可以作为GCRoot的对象有哪些？"></a>二.可以作为GCRoot的对象有哪些？</h3><ul>
-<li>虚拟机栈中引用的对象（栈帧中的本地变量表）</li>
-<li>方法区中的常量引用的对象</li>
-<li>方法区中的类静态属性引用的对象</li>
-<li>本地方法栈中JNI(native方法）的引用对象</li>
-<li>活跃线程的引用对象</li>
-</ul>
-<h3 id="三-GC算法"><a href="#三-GC算法" class="headerlink" title="三.GC算法"></a>三.GC算法</h3><ul>
-<li>1.标记清除（有碎片）</li>
-<li>2.拷贝算法（浪费空间，一般用于MinorGC,对于新生代的）</li>
-<li>3.标记整理（一边做标记一边做整理，但是效率低）</li>
-</ul>
-<p><code>标记清除</code>和<code>标记整理</code>算法一般都是针对老年代进行回收的算法</p>
-<h3 id="四-垃圾回收器"><a href="#四-垃圾回收器" class="headerlink" title="四.垃圾回收器"></a>四.垃圾回收器</h3><h4 id="需要了解的相关概念："><a href="#需要了解的相关概念：" class="headerlink" title="需要了解的相关概念："></a>需要了解的相关概念：</h4><ul>
-<li>吞吐量=运行用户代码时间/(运行用户代码时间+垃圾收集时间)</li>
-<li>Stop-the-world（STW）<br>  JVM由于要执行GC而停止了应用程序的执行<br>  任何一种GC算法中都会发生<br>  多数GC优化通过减少Stop-the-world发生的时间来提升程序性能</li>
-<li>Safepoint（安全点）<br>  分析可达性的过程中引用关系不会发生变化的点<br>  产生Safepoint的地方：方法调用、循环跳转、异常跳转等<br>  安全点的数量需要适中。太少会让GC等待太长的时间，太多会增加程序运行的负荷</li>
-<li>JVM的运行模式<br>  Server：启动较慢，但是启动成功之后server程序的运行效率要比Client快。采用的是重量级的虚拟机，对程序采用了更多的优化。<br>  Client：启动较快，采用的是轻量级的虚拟机<br>  通过<code>java -version</code>命令进行查看</li>
-</ul>
-<h4 id="1-分代模型"><a href="#1-分代模型" class="headerlink" title="1.分代模型"></a>1.分代模型</h4><p>对于新生代：</p>
-<ul>
-<li>Serial(最早的垃圾回收器，现在很少用，单线程)<br>  可以通过<code>-XX:+UseSerialGC</code>,使得年轻代使用该垃圾回收期进行回收<br>  在jdk1.3之前，是Java年轻代垃圾回收器的唯一选择<br>  单线程通过复制算法进行收集，在进行垃圾收集时，必须暂停所有的工作线程<br>  简单高效，是Client模式下默认的年轻代收集器</li>
-<li>ParNew(多线程处理,工作在年轻代,专门和CMS做配合的)<br>  可以通过<code>-XX:+UseParNewGC</code>,使得年轻代使用该垃圾回收期进行回收<br>  多线程收集，其余的行为、特点和Serial收集器一样<br>  是Server模式下首选的年轻代回收器<br>  也是使用复制算法<br>  单核执行效率不如Serial，在多核下执行才有优势</li>
-<li>Parallel Scavenge(多线程处理,工作在年轻代)<br>  可以通过<code>-XX:+UseParallelGC</code>,使得年轻代使用该垃圾回收期进行回收<br>  使用复制算法<br>  比起关注用户线程停顿时间，更关注系统的吞吐量<br>  在多核执行下才有优势，Server模式下默认的年轻代收集器<br>  自适应调节策略：<code>-XX:+UseAdaptiveSizePolicy</code>,会把内置管理的调优任务交给虚拟机去完成</li>
-</ul>
-<p>对于老年代：</p>
-<ul>
-<li>Serial Old(单线程)<br>  可以通过<code>-XX:+UseSerialOldGC</code>,使得老年代使用该垃圾回收期进行回收<br>  单线程通过标记-整理算法进行收集，在进行垃圾收集时，必须暂停所有的工作线程<br>  简单高效，是Client模式下默认的老年代收集器</li>
-<li>Parallel Old(多线程处理)<br>  可以通过<code>-XX:+UseParallelOldGC</code>,使得老年代使用该垃圾回收期进行回收<br>  多线程使用标记-整理算法进行收集，JDK6之后开始提供的，吞吐量优先</li>
-<li>CMS<br>  标记-清除算法<br>  垃圾回收线程几乎能与用户线程做到同时工作，只是尽可能缩短了停顿时间<br>  JDK5提出的第一款针对于老年代GC与工作线程并发执行的收集器</li>
-</ul>
-<h4 id="2-分区模型"><a href="#2-分区模型" class="headerlink" title="2.分区模型"></a>2.分区模型</h4><ul>
-<li>G1（1.8可用）</li>
-<li>ZGC</li>
-<li>Shenandoah</li>
-<li>Epsilon(无用)</li>
-</ul>
-<h4 id="3-关于JDK1-8"><a href="#3-关于JDK1-8" class="headerlink" title="3.关于JDK1.8"></a>3.关于JDK1.8</h4><ul>
-<li>1.8默认的垃圾回收器：PS+PO</li>
-<li>1.8推荐用G1</li>
-</ul>
-<h4 id="4-CMS垃圾回收器"><a href="#4-CMS垃圾回收器" class="headerlink" title="4.CMS垃圾回收器"></a>4.CMS垃圾回收器</h4><ul>
-<li>中文：concurrent mark sweep</li>
-<li>沿着路线在前进：内存越来越大，卡顿时间越来越短</li>
-<li>垃圾回收线程和工作线程可以一起并行工作。</li>
-<li>大致六个阶段，主要有四个阶段：1.初始标记；2.并发标记；3.重新标记；4.并发清理<br>  1.初始标记：STW的时间很短，降低STW时间；G1垃圾回收器在STW的时间更短<br>  2.并发标记：会跟工作线程发生混乱，会发生错标的问题<br>  3.并发预清理：查找执行并发标记阶段从年轻代晋升到老年代的对象<br>  4.重新标记：修正那些错标的对象，remark阶段，必须从头扫描一遍，暂停虚拟机，扫描堆中的剩余对象<br>  5.并发清理：也是并发执行，发生错标问题，但是没关系，下次循环可以解决<br>  6.并发重置：重置CMS收集器的数据结构，等待下一次垃圾回收</li>
-</ul>
-<p><strong>对于三色标记算法产生的漏标问题：</strong>CMS的解决方案为：<code>incremental update</code></p>
-<h5 id="5-G1垃圾回收器"><a href="#5-G1垃圾回收器" class="headerlink" title="5.G1垃圾回收器"></a>5.G1垃圾回收器</h5><ul>
-<li>既用于新生代，也可以用于老年代的垃圾回收器</li>
-<li>使用<code>复制+标记-整理</code>算法进行回收</li>
-<li>设计的目的是为了替换掉JDK5中发布的CMS垃圾回收期</li>
-<li>并发+并行，使用多个CPU来缩短STW的停顿时间，与用户线程并发执行</li>
-<li>分代收集，独立管理整个堆</li>
-<li>空间整合，基于标记整理算法，解决了内存碎片的问题</li>
-<li>可预测的停顿，能建立可预测的停顿时间模型，能让使用者明确指定在一个长度为n毫秒的时间片段内消耗在垃圾收集上的时间不得超过n毫秒，这个n是可以设置的。</li>
-<li>用到了读屏障和写屏障</li>
-<li>对于三色标记算法产生的漏标问题，对应的算法为SATB</li>
-<li>将整个Java堆内存划分成多个大小相等的Region区</li>
-<li>年轻代和老年代不再物理隔离</li>
-</ul>
-<h5 id="5-触发fullGC的情况"><a href="#5-触发fullGC的情况" class="headerlink" title="5.触发fullGC的情况"></a>5.触发fullGC的情况</h5><ul>
-<li>老年代空间不足</li>
-<li>永久代空间不足（jdk8之后没有了永久代，该条件不成立，取而代之的是元空间，目的是为了降低fullGC的频率，减少GC的负担，提升效率），只针对1.7</li>
-<li>CMS GC时出现promotionfailed,concurrent mode failure</li>
-<li>MinorGC晋升到老年代平均大小大于老年代的剩余空间</li>
-<li>调用System.gc(),不会立即回收，而是通知jvm进行回收，回收时机需要等底层进行</li>
-<li>使用RMI来进行RPC或管理的JDK的应用，每小时执行一次FullGC</li>
-</ul>
-<h3 id="五-内存模型"><a href="#五-内存模型" class="headerlink" title="五.内存模型"></a>五.内存模型</h3><h4 id="1-分代"><a href="#1-分代" class="headerlink" title="1.分代"></a>1.分代</h4><h5 id="1-1-新生代"><a href="#1-1-新生代" class="headerlink" title="1.1 新生代"></a>1.1 新生代</h5><ul>
-<li>新生代就是刚刚new出来的对象</li>
-<li>新生代可以理解为大多数一次垃圾回收就能回收掉的对象</li>
-<li>在新生代里面用<code>拷贝算法</code>效率极高</li>
-<li>年轻代分为三个区域：<code>Eden</code>、2个<code>survivor(幸存者)</code>。比例为：8:1:1</li>
-<li>不能回收的对象在两个survivor区中来回存活，直到达到<code>-XX:MaxTenuringThreshold</code>设置的最大年龄则进入老年代，默认为16</li>
-<li>CMS的默认的一个对象在新生代的最大年龄为16</li>
-<li>新生代空间耗尽触发<code>MinorGC/YGC</code><h5 id="1-2-老年代"><a href="#1-2-老年代" class="headerlink" title="1.2 老年代"></a>1.2 老年代</h5></li>
-<li>老年代就是经过了好多次垃圾回收之后老是回收不了的对象</li>
-<li>垃圾回收不容易回收掉的对象</li>
-<li>在老年代一般用<code>标记清除</code>或者<code>标记整理</code></li>
-<li>在老年代无法继续分配空间时触发<code>MajorGC/FullGC</code>，新生代老年代同时进行回收</li>
-<li>大对象直接放在老年代（有参数可以确定）</li>
-</ul>
-<h3 id="六-对象回收步骤"><a href="#六-对象回收步骤" class="headerlink" title="六.对象回收步骤"></a>六.对象回收步骤</h3><ul>
-<li>当new一个对象的时候，判断是否可以不在堆上进行分配（可以在栈上进行分配，只要栈pop之后，对象就可以直接被回收，不用被GC所回收），但是这个栈上的对象有两个前提：逃逸分析(一个方法中的对象不能被另一个方法所引用)和标量替换(基础数据类型)</li>
-<li>如果对象是个大对象，直接放到老年代</li>
-<li>如果不是大对象，不管是不是TLAB（线程本地分配缓冲区），都会进入Eden区，然后进行GC清除，能清除的直接清除。清除不了的进入survivor1区域，年龄够了进入老年代，年龄不够进入survivor2，循环往复。</li>
-</ul>
-<h3 id="七-GC常用参数"><a href="#七-GC常用参数" class="headerlink" title="七.GC常用参数"></a>七.GC常用参数</h3><ul>
-<li>-Xmn:年轻代</li>
-<li>-Xms:最小堆内存</li>
-<li>-Xmx:最大堆内存</li>
-<li>-Xss:栈空间<h4 id="关于G1的参数"><a href="#关于G1的参数" class="headerlink" title="关于G1的参数"></a>关于G1的参数</h4></li>
-<li>-XX:+UseG1GC</li>
-<li>-XX:MaxGCPauseMillis(建议值，G1会尝试调整young区的块数来达到这个值)</li>
-<li>-XX:GCPauseIntervalMillis(GC的间隔时间)</li>
-</ul>
-]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>JVM</tag>
       </tags>
   </entry>
   <entry>
@@ -4251,6 +4251,91 @@ Redis里面使用skiplist是为了实现`sorted set`这种对外的数据结构�
       </categories>
       <tags>
         <tag>面试题</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>音视频行业业务名词</title>
+    <url>/2019/09/21/%E9%9F%B3%E8%A7%86%E9%A2%91%E8%A1%8C%E4%B8%9A%E4%B8%9A%E5%8A%A1%E5%90%8D%E8%AF%8D/</url>
+    <content><![CDATA[<meta name="referrer" content="no-referrer">
+
+<blockquote>
+<p>在K12教育行业呆了1年左右的时间，期间经历了音视频流相关的业务开发，在直播、备播行业相关的业务名词需要理解</p>
+</blockquote>
+<h1 id="1-视频上传"><a href="#1-视频上传" class="headerlink" title="1. 视频上传"></a>1. 视频上传</h1><p>顾名思义，视频上传 即通过使用相关工具，将视频从本地导入到云端服务器进行存储的过程。一般使用阿里云OSS、七牛云进行上传到云服务上。</p>
+<h1 id="2-stream视频流"><a href="#2-stream视频流" class="headerlink" title="2. stream视频流"></a>2. stream视频流</h1><p>视频流是指视频数据的传输，例如，它能够被作为一个稳定的和连续的流通过网络处理。</p>
+<p>因为流动，客户机浏览器或插件能够在整个文件被传输完成前显示多媒体数据。</p>
+<p>视频流式传输的优点：</p>
+<ul>
+<li>启动时延大幅度缩短，边下边播，不需要等待所有内容下载完成才开始浏览。网络状况较好的情况下，卡顿较少，但快进、快退需要时间等待</li>
+<li>对系统缓存容量的需求大大降低， 由于Internet是以包传输为基础进行断续的异步传输，数据被分解为许多包进行传输，动态变化的网络使各个包可能选择不同的路由，故到达用户计算机的时间延迟也就不同。所以，在客户端需要缓存系统来弥补延迟和抖动的影响和保证数据包传输顺序的正确，使媒体数据能连续输出，不会因网络暂时拥堵而使播放出现停顿。虽然流式传输仍需要缓存，但由于不需要把所有的动画、视音频内容都下载到缓存中，因此，对缓存的要求降低。</li>
+<li>流式传输的实现有特定的实时传输协议采用RTSP等实时传输协议，更加适合动画、视音频在网上的流式实时传输。</li>
+</ul>
+<a id="more"></a>
+
+<h2 id="2-1-流媒体的组成部分"><a href="#2-1-流媒体的组成部分" class="headerlink" title="2.1 流媒体的组成部分"></a>2.1 流媒体的组成部分</h2><ol>
+<li>编码工具：用于创建、捕捉和编辑多媒体数据，形成流媒体格式</li>
+<li>流媒体数据</li>
+<li>服务器：存放和控制流媒体的数据</li>
+<li>网络：适合多媒体传输协议甚至是实时传输协议的网络</li>
+<li>播放器：供客户端浏览流媒体文件 </li>
+</ol>
+<p>这5个部分有些是网站需要的，有些是客户端需要的，而且不同的流媒体标准和不同公司的解决方案会在某些方面有所不同。 </p>
+<h2 id="2-2-科普"><a href="#2-2-科普" class="headerlink" title="2.2 科普"></a>2.2 科普</h2><p>各种多媒体信息的流媒体传输格式 在Internet上所传输的多媒体格式中，基本上只有文本、图形可以照原格式在网上传输。动画、音频、视频等虽然可以直接播放在网上播放，但文件偏大，即使使用专线上网，也要等完全下载后才能观看，这三种类型的媒体均要采用流式技术来进行处理以便于在网上传输。另外，还有一些如PowerPoint文件、多媒体课件等内容也需要用流式技术进行传输。 流媒体格式是将一个资料（动画、影音等）分段传送，用户不必等待整个内容传送完毕，就可以观看到即时的连续的内容，甚至可以随时的暂停、快进、快倒。由于不同的公司发展的文件格式不同，传送的方式也有所差异，因此，我们必须非常清楚各种流媒体文件的格式。</p>
+<h2 id="2-3-视频播放"><a href="#2-3-视频播放" class="headerlink" title="2.3 视频播放"></a>2.3 视频播放</h2><p>流媒体是从英语Streaming Media中翻译过来，它是一种可以使音频、视频和其它多媒体能在Internet及Intranet上以实时的、无需下载等待的方式进行播放的技术。流媒体文件格式是支持采用流式传输及播放的媒体格式。流式传输方式是将动画、视音频等多媒体文件经过特殊的压缩方式分成一个个压缩包用户不必像非流式播放那样等到整个文件全部下载完毕后才能看到当中的内容，而是只需经过几秒或几十秒的启动延时即可在用户的计算机上利用相应的播放器或其它的硬件、软件对压缩的动画、视音频等流式多媒体文件解压后进行播放和观看，多媒体文件的剩余部分将在后台的服务器内继续下载。</p>
+<h2 id="2-4-流式下载编辑"><a href="#2-4-流式下载编辑" class="headerlink" title="2.4 流式下载编辑"></a>2.4 流式下载编辑</h2><p>下载边播放的BT软件,下载时必须要从电影的开头下载,而并非是其它BT软件的下载方式，这种可以边下载边播放的下载方式,就可以称为流式下载。 　如果想要边下载边播放的话,就推荐你用流式下载。　如果是其它无法在线播放的资源,推荐使用非流式下载。媒体是指采用流式传输的方式在Internet播放的媒体格式。流式传输方式则是将整个A/V及3D等多媒体文件经过特殊的压缩方式分成一个个压缩包，由视频服务器向用户计算机连续、实时传送。在采用流式传输方式的系统中，用户不必像采用下载方式那样等到整个文件全部下载完毕，而是只需经过几秒或几十秒的启动延时即可在用户的计算机上利用解压设备(硬件或软件)对压缩的A/V、3D等多媒体文件解压后进行播放和观看。此时多媒体文件的剩余部分将在后台的服务器内继续下载。与单纯的下载方式相比，这种对多媒体文件边下载边播放的流式传输方式不仅使启动延时大幅度地缩短，而且对系统缓存容量的需求也大大降低。</p>
+<h1 id="3-H264-H265"><a href="#3-H264-H265" class="headerlink" title="3. H264 H265"></a>3. H264 H265</h1><p>H.265与H.264有何不同,同等画质体积仅为一半、带宽占用省一半、画质更细腻等诸多优势 首先分别介绍一下：H.264与H.265</p>
+<ol>
+<li>H.264也称作MPEG-4AVC(Advanced Video Codec，高级视频编码)，是一种视频压缩标准，同时也是一种被广泛使用的高精度视频的录制、压缩和发布格式。H.264因其是蓝光光盘的一种编解码标准而着名，所有蓝光播放器都必须能解码H.264。H.264相较于以前的编码标准有着一些新特性，如多参考帧的运动补偿、变块尺寸运动补偿、帧内预测编码等，通过利用这些新特性，H.264比其他编码标准有着更高的视频质量和更低的码率</li>
+<li>H.265/HEVC的编码架构大致上和H.264/AVC的架构相似，也主要包含：帧内预测(intra prediction)、帧间预测(inter prediction)、转换 (transform)、量化 (quantization)、去区块滤波器(deblocking filter)、熵编码(entropy coding)等模块。但在HEVC编码架构中，整体被分为了三个基本单位，分别是：编码单位(coding unit，CU)、预测单位(predict unit，PU) 和转换单位(transform unit，TU )。</li>
+</ol>
+<p><strong>H.265是新的编码协议，也即是H.264的升级版。</strong></p>
+<h1 id="4-视频拆条"><a href="#4-视频拆条" class="headerlink" title="4. 视频拆条"></a>4. 视频拆条</h1><p>视频拆条是因互联网视频和新媒体短视频内容平台的需要，对传统电视媒体节目进行二次加工，将原来完整的一条节目内容，按照某种逻辑思维或特定需要，将其拆分成多条视频。</p>
+<p>互联网视频内容的主要来源包括传统电视媒体的节目、各类机构视频成品、影视公司影视作品，通过将这些视频拆条，可以深度挖掘有价值的信息，重新编目后，可用于IPTV、OTT、手机电视和新媒体短视频平台，满足新媒体视听节目碎片化要求，是视音频编目行业一个新的尝试和探索。</p>
+<h1 id="5-视频抽帧"><a href="#5-视频抽帧" class="headerlink" title="5.视频抽帧"></a>5.视频抽帧</h1><p>从视频流中截取关键的帧</p>
+<p>简单的说，视频抽帧就是从视频中把要做抽帧的片段在轨道里放到能看见一帧帧画面的模式，用刀片再割断删除你要去除的某帧，比如每隔一帧去除一帧，或者每隔三帧去除二帧~等等等等，然后将剩下的帧移动紧挨对齐，这就是抽帧。</p>
+<h1 id="6-视频帧率"><a href="#6-视频帧率" class="headerlink" title="6. 视频帧率"></a>6. 视频帧率</h1><p>视频帧率（Frame rate）是用于测量显示帧数的量度。所谓的测量单位为每秒显示帧数(Frames per Second，简：FPS）或“赫兹”（Hz）。此词多用于影视制作和电子游戏。</p>
+<h1 id="7-视频分发"><a href="#7-视频分发" class="headerlink" title="7. 视频分发"></a>7. 视频分发</h1><p>一般视频分发基于算法进行</p>
+<p>视频来源多样化，有的基于UCG（用户主动生成），有些基于爬虫，爬取其他平台的内容（一般都有水印）</p>
+<p>视频分发还可以配合精准推荐算法，进行定向广告投放</p>
+<blockquote>
+<p>在爱奇艺头条的商业化上，爱奇艺与百度合作力求让信息流广告更精准：依托从百度搜索引擎的数据，知道每个爱奇艺用户过去三十天在百度上搜索过什么类型关键词，根据他的消费兴趣爱好，可以帮助广告主投放定向广告。无论对于广告主、视频创作者还是爱奇艺，这都是件好事。</p>
+</blockquote>
+<h1 id="8-视频缩略图"><a href="#8-视频缩略图" class="headerlink" title="8. 视频缩略图"></a>8. 视频缩略图</h1><p>一般会抽取视频第一帧作为视频缩略图，或者支持后台上传图片作为视频缩略图</p>
+<h1 id="9-ffmpeg"><a href="#9-ffmpeg" class="headerlink" title="9. ffmpeg"></a>9. ffmpeg</h1><p>FFmpeg是一个开源免费跨平台的视频和音频流方案，属于自由软件，采用LGPL或GPL许可证（依据你选择的组件）。它提供了录制、转换以及流化音视频的完整解决方案。它包含了非常先进的音频/视频编解码库libavcodec，为了保证高可移植性和编解码质量，libavcodec里很多codec都是从头开发的。</p>
+<p>这个项目最早由Fabrice Bellard发起，现在由Michael Niedermayer维护。许多FFmpeg的开发人员都来自MPlayer项目，而且当前FFmpeg也是放在MPlayer项目组的服务器上。项目的名称来自MPEG视频编码标准，前面的”FF”代表”Fast Forward”。</p>
+<p>FFmpeg是一套可以用来记录、转换数字音频、视频，并能将其转化为流的开源计算机程序。它包括了目前领先的音/视频编码库libavcodec。 FFmpeg是在Linux下开发出来的，但它可以在包括Windows在内的大多数操作系统中编译。这个项目是由Fabrice Bellard发起的，现在由Michael Niedermayer主持。可以轻易地实现多种视频格式之间的相互转换，例如可以将摄录下的视频avi等转成现在视频网站所采用的flv格式。</p>
+<h1 id="10-视频加工"><a href="#10-视频加工" class="headerlink" title="10. 视频加工"></a>10. 视频加工</h1><p>通过工具对视频进行基本分析（长宽），格式校验，压缩，编解码，格式转换，缩略图抽取等操作</p>
+<h1 id="11-视频格式"><a href="#11-视频格式" class="headerlink" title="11. 视频格式"></a>11. 视频格式</h1><blockquote>
+<p>问题：本地视频文件常见有MP4、MKV、AVI等，这些都是什么？有什么区别？</p>
+</blockquote>
+<p>首先，MP4、AVI、MKV都是本地视频文件的后缀，在windows系统下，用于提示操作系统应该采用哪个应用程序打开。而在流媒体领域，这些都被称为『视频封装格式』，因为除了音视频流之外，它们还包含了一些辅助信息以及组织视音频的方式。不同格式的视频在不同平台上用户体验不同，很大原因在于对视音频的组织方式带来的差异。笔者以为百度百科上的解释蛮通俗易懂的（维基百科的说法不够直白）：</p>
+<p>视频格式是视频播放软件为了能够播放视频文件而赋予视频文件的一种识别符号。</p>
+<p>简言之，<strong>视频格式规定了和播放器的通信协议。</strong></p>
+<h1 id="12-视频协议"><a href="#12-视频协议" class="headerlink" title="12. 视频协议"></a>12. 视频协议</h1><blockquote>
+<p>问题：在腾讯视频、哔哩哔哩网上看的视频，与本地播放的MP4、MKV、AVI文件，有什么区别？</p>
+</blockquote>
+<p>『视频协议』是针对网络流媒体而言的，也就是只有在有网络时通过浏览器或者移动端APP才能看到的视频，目前常见的协议有RTSP、RTMP、HLS、HTTP等。笔者短暂地接触过GStreamer开发，在连接到RSTP视频时，发现除了视音频流和metadata之外，还携带了播放的信令。</p>
+<p>也有文章会把『视频协议』归入『视频封装格式』。『视频协议』和『视频封装格式』都同时携带了视音频和metadata，以及协议/格式需要的其他信息。以FFMpeg为例，并不区分视频格式和视频协议；但是GStreamer的话，还时需要指定『视频协议』，但是不区分『视频封装格式』。</p>
+<p>剥开『视频封装格式』和『视频协议』的外壳，接下来了解视音频流本身，这才是流媒体领域中真正的主角。</p>
+<h1 id="13-视频流-以及-编解码-视频转码"><a href="#13-视频流-以及-编解码-视频转码" class="headerlink" title="13. 视频流 以及 编解码 / 视频转码"></a>13. 视频流 以及 编解码 / 视频转码</h1><p>就视频流而言，相信大家平时一定经常听到类似“h264码流”、“yuv流”、“编码流”、“解码流”，“原始流”、“裸流”，“压缩后的流”或者“未压缩的流”等等。归纳而言，提到『视频流』的时候，一定只有两种形式：</p>
+<ul>
+<li>经过压缩算法压缩的流数据，称为『编码流』，又因为目前压缩/编码算法以H264为主，因此也常常称为『H264码流』。</li>
+<li>未经压缩的流数据，是解码后的流数据，称为『原始流』，可以想象视频是由一幅一幅在时间上连续的“图像”组成的，而因为视频内部的“图像”是『YUV』（后文将介绍），因此也常常称为『YUV流』。</li>
+</ul>
+<p>总结出现的名称，“h264码流”、“编码流”、“压缩后的流”是压缩/编码后的视频流；而“yuv流”、“解码流”、“未压缩的流”则是未经压缩/编码的视频流。“裸流”是一个具有歧义的词，是上下文内容，既可以是前者，也可以是后者。</p>
+<p>因此，如果以后阅读任何流媒体相关的文章时，看到『视频流』都应该搞清楚，这究竟是编码/压缩的，还是没有。在生活中，接触到的视频文件绝大部分都是编码/压缩后的；在网络传输场景中，绝大部分也是编码/压缩后的。只有在视频播放时，观众观赏到的时一帧帧被『转码』为『RGB』的解码后视频流。</p>
+<p>编码/压缩在流媒体领域是一项非常重要的技术：从『H264码流』到『YUV流』的过程称为解码，反之称为编码</p>
+<h1 id="14-常见的帧名词-重点"><a href="#14-常见的帧名词-重点" class="headerlink" title="14. 常见的帧名词(重点)"></a>14. 常见的帧名词(重点)</h1><h2 id="14-1-帧率（FPS）"><a href="#14-1-帧率（FPS）" class="headerlink" title="14.1 帧率（FPS）"></a>14.1 帧率（FPS）</h2><p>『帧率』，FPS，全称Frames Per Second。指每秒传输的帧数，或者每秒显示的帧数，一般来说，『帧率』影响画面流畅度，且成正比：帧率越大，画面越流畅；帧率越小，画面越有跳动感。一个较权威的说法：<br>当视频帧率不低于24fps时，人眼才会觉得视频时连贯的，称为“视觉暂留”现象。<br>因此，才有说法：尽管『帧率』越高越流畅，但在很多实际应用场景中24fps就可以了。</p>
+<h2 id="14-2-分辨率（Resolution）"><a href="#14-2-分辨率（Resolution）" class="headerlink" title="14.2 分辨率（Resolution）"></a>14.2 分辨率（Resolution）</h2><p>『分辨率』，也常被俗称为『图像的尺寸』或者『图像的大小』。指一帧图像包含的像素的多少，常见有1280x720（720P），1920X1080（1080P）等规格。『分辨率』影响图像大小，且与之成正比：『分辨率』越高，图像越大；反之，图像越小。</p>
+<h2 id="14-3-码率（BPS）"><a href="#14-3-码率（BPS）" class="headerlink" title="14.3 码率（BPS）"></a>14.3 码率（BPS）</h2><p>『码率』，BPS，全称Bits Per Second。指每秒传送的数据位数，常见单位KBPS（千位每秒）和MBPS（兆位每秒）。笔者认为这个概念真正要理解起来还是需要好好说明的，网上一说：“『码率』与体积成正比：码率越大，体积越大；码率越小，体积越小”；另一说：“『码率』越大，说明单位时间内取样率越大，数据流精度就越高，这样表现出来的的效果就是：视频画面更清晰画质更高”；还有说法是：“『码率』就是『失真度』”。</p>
+<h1 id="15-参考链接"><a href="#15-参考链接" class="headerlink" title="15. 参考链接"></a>15. 参考链接</h1><p><a href="https://www.bgteach.com/article/134">https://www.bgteach.com/article/134</a></p>
+]]></content>
+      <categories>
+        <category>程序员</category>
+      </categories>
+      <tags>
+        <tag>音视频行业</tag>
+        <tag>科普</tag>
       </tags>
   </entry>
 </search>

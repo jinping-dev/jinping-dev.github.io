@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.0.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Monda:300,300italic,400,400italic,700,700italic|Roboto Slab:300,300italic,400,400italic,700,700italic|PT Mono:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"jinping-dev.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"always","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"default"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="在K12教育行业呆了1年左右的时间，期间经历了音视频流相关的业务开发，在直播、备播行业相关的业务名词需要理解  1. 视频上传顾名思义，视频上传 即通过使用相关工具，将视频从本地导入到云端服务器进行存储的过程。一般使用阿里云OSS、七牛云进行上传到云服务上。 2. stream视频流视频流是指视频数据的传输，例如，它能够被作为一个稳定的和连续的流通过网络处理。 因为流动，客户机浏览器或插件能">
+<meta property="og:type" content="article">
+<meta property="og:title" content="音视频行业业务名词">
+<meta property="og:url" content="https://jinping-dev.github.io/2019/09/21/%E9%9F%B3%E8%A7%86%E9%A2%91%E8%A1%8C%E4%B8%9A%E4%B8%9A%E5%8A%A1%E5%90%8D%E8%AF%8D/index.html">
+<meta property="og:site_name" content="Jinping&#39;s Blog">
+<meta property="og:description" content="在K12教育行业呆了1年左右的时间，期间经历了音视频流相关的业务开发，在直播、备播行业相关的业务名词需要理解  1. 视频上传顾名思义，视频上传 即通过使用相关工具，将视频从本地导入到云端服务器进行存储的过程。一般使用阿里云OSS、七牛云进行上传到云服务上。 2. stream视频流视频流是指视频数据的传输，例如，它能够被作为一个稳定的和连续的流通过网络处理。 因为流动，客户机浏览器或插件能">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2019-09-21T10:44:15.000Z">
+<meta property="article:modified_time" content="2021-07-21T07:31:29.742Z">
+<meta property="article:author" content="Jinping">
+<meta property="article:tag" content="音视频行业">
+<meta property="article:tag" content="科普">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://jinping-dev.github.io/2019/09/21/%E9%9F%B3%E8%A7%86%E9%A2%91%E8%A1%8C%E4%B8%9A%E4%B8%9A%E5%8A%A1%E5%90%8D%E8%AF%8D/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>音视频行业业务名词 | Jinping's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?8963e74cb35315df308c698224929229";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Jinping's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">程序员要常思考</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">25</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">10</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">54</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://jinping-dev.github.io/2019/09/21/%E9%9F%B3%E8%A7%86%E9%A2%91%E8%A1%8C%E4%B8%9A%E4%B8%9A%E5%8A%A1%E5%90%8D%E8%AF%8D/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/image.png">
+      <meta itemprop="name" content="Jinping">
+      <meta itemprop="description" content="程序员要常思考">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Jinping's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          音视频行业业务名词
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-09-21 18:44:15" itemprop="dateCreated datePublished" datetime="2019-09-21T18:44:15+08:00">2019-09-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-07-21 15:31:29" itemprop="dateModified" datetime="2021-07-21T15:31:29+08:00">2021-07-21</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F%E5%91%98/" itemprop="url" rel="index"><span itemprop="name">程序员</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <meta name="referrer" content="no-referrer">
+
+<blockquote>
+<p>在K12教育行业呆了1年左右的时间，期间经历了音视频流相关的业务开发，在直播、备播行业相关的业务名词需要理解</p>
+</blockquote>
+<h1 id="1-视频上传"><a href="#1-视频上传" class="headerlink" title="1. 视频上传"></a>1. 视频上传</h1><p>顾名思义，视频上传 即通过使用相关工具，将视频从本地导入到云端服务器进行存储的过程。一般使用阿里云OSS、七牛云进行上传到云服务上。</p>
+<h1 id="2-stream视频流"><a href="#2-stream视频流" class="headerlink" title="2. stream视频流"></a>2. stream视频流</h1><p>视频流是指视频数据的传输，例如，它能够被作为一个稳定的和连续的流通过网络处理。</p>
+<p>因为流动，客户机浏览器或插件能够在整个文件被传输完成前显示多媒体数据。</p>
+<p>视频流式传输的优点：</p>
+<ul>
+<li>启动时延大幅度缩短，边下边播，不需要等待所有内容下载完成才开始浏览。网络状况较好的情况下，卡顿较少，但快进、快退需要时间等待</li>
+<li>对系统缓存容量的需求大大降低， 由于Internet是以包传输为基础进行断续的异步传输，数据被分解为许多包进行传输，动态变化的网络使各个包可能选择不同的路由，故到达用户计算机的时间延迟也就不同。所以，在客户端需要缓存系统来弥补延迟和抖动的影响和保证数据包传输顺序的正确，使媒体数据能连续输出，不会因网络暂时拥堵而使播放出现停顿。虽然流式传输仍需要缓存，但由于不需要把所有的动画、视音频内容都下载到缓存中，因此，对缓存的要求降低。</li>
+<li>流式传输的实现有特定的实时传输协议采用RTSP等实时传输协议，更加适合动画、视音频在网上的流式实时传输。</li>
+</ul>
+<a id="more"></a>
+
+<h2 id="2-1-流媒体的组成部分"><a href="#2-1-流媒体的组成部分" class="headerlink" title="2.1 流媒体的组成部分"></a>2.1 流媒体的组成部分</h2><ol>
+<li>编码工具：用于创建、捕捉和编辑多媒体数据，形成流媒体格式</li>
+<li>流媒体数据</li>
+<li>服务器：存放和控制流媒体的数据</li>
+<li>网络：适合多媒体传输协议甚至是实时传输协议的网络</li>
+<li>播放器：供客户端浏览流媒体文件 </li>
+</ol>
+<p>这5个部分有些是网站需要的，有些是客户端需要的，而且不同的流媒体标准和不同公司的解决方案会在某些方面有所不同。 </p>
+<h2 id="2-2-科普"><a href="#2-2-科普" class="headerlink" title="2.2 科普"></a>2.2 科普</h2><p>各种多媒体信息的流媒体传输格式 在Internet上所传输的多媒体格式中，基本上只有文本、图形可以照原格式在网上传输。动画、音频、视频等虽然可以直接播放在网上播放，但文件偏大，即使使用专线上网，也要等完全下载后才能观看，这三种类型的媒体均要采用流式技术来进行处理以便于在网上传输。另外，还有一些如PowerPoint文件、多媒体课件等内容也需要用流式技术进行传输。 流媒体格式是将一个资料（动画、影音等）分段传送，用户不必等待整个内容传送完毕，就可以观看到即时的连续的内容，甚至可以随时的暂停、快进、快倒。由于不同的公司发展的文件格式不同，传送的方式也有所差异，因此，我们必须非常清楚各种流媒体文件的格式。</p>
+<h2 id="2-3-视频播放"><a href="#2-3-视频播放" class="headerlink" title="2.3 视频播放"></a>2.3 视频播放</h2><p>流媒体是从英语Streaming Media中翻译过来，它是一种可以使音频、视频和其它多媒体能在Internet及Intranet上以实时的、无需下载等待的方式进行播放的技术。流媒体文件格式是支持采用流式传输及播放的媒体格式。流式传输方式是将动画、视音频等多媒体文件经过特殊的压缩方式分成一个个压缩包用户不必像非流式播放那样等到整个文件全部下载完毕后才能看到当中的内容，而是只需经过几秒或几十秒的启动延时即可在用户的计算机上利用相应的播放器或其它的硬件、软件对压缩的动画、视音频等流式多媒体文件解压后进行播放和观看，多媒体文件的剩余部分将在后台的服务器内继续下载。</p>
+<h2 id="2-4-流式下载编辑"><a href="#2-4-流式下载编辑" class="headerlink" title="2.4 流式下载编辑"></a>2.4 流式下载编辑</h2><p>下载边播放的BT软件,下载时必须要从电影的开头下载,而并非是其它BT软件的下载方式，这种可以边下载边播放的下载方式,就可以称为流式下载。 　如果想要边下载边播放的话,就推荐你用流式下载。　如果是其它无法在线播放的资源,推荐使用非流式下载。媒体是指采用流式传输的方式在Internet播放的媒体格式。流式传输方式则是将整个A/V及3D等多媒体文件经过特殊的压缩方式分成一个个压缩包，由视频服务器向用户计算机连续、实时传送。在采用流式传输方式的系统中，用户不必像采用下载方式那样等到整个文件全部下载完毕，而是只需经过几秒或几十秒的启动延时即可在用户的计算机上利用解压设备(硬件或软件)对压缩的A/V、3D等多媒体文件解压后进行播放和观看。此时多媒体文件的剩余部分将在后台的服务器内继续下载。与单纯的下载方式相比，这种对多媒体文件边下载边播放的流式传输方式不仅使启动延时大幅度地缩短，而且对系统缓存容量的需求也大大降低。</p>
+<h1 id="3-H264-H265"><a href="#3-H264-H265" class="headerlink" title="3. H264 H265"></a>3. H264 H265</h1><p>H.265与H.264有何不同,同等画质体积仅为一半、带宽占用省一半、画质更细腻等诸多优势 首先分别介绍一下：H.264与H.265</p>
+<ol>
+<li>H.264也称作MPEG-4AVC(Advanced Video Codec，高级视频编码)，是一种视频压缩标准，同时也是一种被广泛使用的高精度视频的录制、压缩和发布格式。H.264因其是蓝光光盘的一种编解码标准而着名，所有蓝光播放器都必须能解码H.264。H.264相较于以前的编码标准有着一些新特性，如多参考帧的运动补偿、变块尺寸运动补偿、帧内预测编码等，通过利用这些新特性，H.264比其他编码标准有着更高的视频质量和更低的码率</li>
+<li>H.265/HEVC的编码架构大致上和H.264/AVC的架构相似，也主要包含：帧内预测(intra prediction)、帧间预测(inter prediction)、转换 (transform)、量化 (quantization)、去区块滤波器(deblocking filter)、熵编码(entropy coding)等模块。但在HEVC编码架构中，整体被分为了三个基本单位，分别是：编码单位(coding unit，CU)、预测单位(predict unit，PU) 和转换单位(transform unit，TU )。</li>
+</ol>
+<p><strong>H.265是新的编码协议，也即是H.264的升级版。</strong></p>
+<h1 id="4-视频拆条"><a href="#4-视频拆条" class="headerlink" title="4. 视频拆条"></a>4. 视频拆条</h1><p>视频拆条是因互联网视频和新媒体短视频内容平台的需要，对传统电视媒体节目进行二次加工，将原来完整的一条节目内容，按照某种逻辑思维或特定需要，将其拆分成多条视频。</p>
+<p>互联网视频内容的主要来源包括传统电视媒体的节目、各类机构视频成品、影视公司影视作品，通过将这些视频拆条，可以深度挖掘有价值的信息，重新编目后，可用于IPTV、OTT、手机电视和新媒体短视频平台，满足新媒体视听节目碎片化要求，是视音频编目行业一个新的尝试和探索。</p>
+<h1 id="5-视频抽帧"><a href="#5-视频抽帧" class="headerlink" title="5.视频抽帧"></a>5.视频抽帧</h1><p>从视频流中截取关键的帧</p>
+<p>简单的说，视频抽帧就是从视频中把要做抽帧的片段在轨道里放到能看见一帧帧画面的模式，用刀片再割断删除你要去除的某帧，比如每隔一帧去除一帧，或者每隔三帧去除二帧~等等等等，然后将剩下的帧移动紧挨对齐，这就是抽帧。</p>
+<h1 id="6-视频帧率"><a href="#6-视频帧率" class="headerlink" title="6. 视频帧率"></a>6. 视频帧率</h1><p>视频帧率（Frame rate）是用于测量显示帧数的量度。所谓的测量单位为每秒显示帧数(Frames per Second，简：FPS）或“赫兹”（Hz）。此词多用于影视制作和电子游戏。</p>
+<h1 id="7-视频分发"><a href="#7-视频分发" class="headerlink" title="7. 视频分发"></a>7. 视频分发</h1><p>一般视频分发基于算法进行</p>
+<p>视频来源多样化，有的基于UCG（用户主动生成），有些基于爬虫，爬取其他平台的内容（一般都有水印）</p>
+<p>视频分发还可以配合精准推荐算法，进行定向广告投放</p>
+<blockquote>
+<p>在爱奇艺头条的商业化上，爱奇艺与百度合作力求让信息流广告更精准：依托从百度搜索引擎的数据，知道每个爱奇艺用户过去三十天在百度上搜索过什么类型关键词，根据他的消费兴趣爱好，可以帮助广告主投放定向广告。无论对于广告主、视频创作者还是爱奇艺，这都是件好事。</p>
+</blockquote>
+<h1 id="8-视频缩略图"><a href="#8-视频缩略图" class="headerlink" title="8. 视频缩略图"></a>8. 视频缩略图</h1><p>一般会抽取视频第一帧作为视频缩略图，或者支持后台上传图片作为视频缩略图</p>
+<h1 id="9-ffmpeg"><a href="#9-ffmpeg" class="headerlink" title="9. ffmpeg"></a>9. ffmpeg</h1><p>FFmpeg是一个开源免费跨平台的视频和音频流方案，属于自由软件，采用LGPL或GPL许可证（依据你选择的组件）。它提供了录制、转换以及流化音视频的完整解决方案。它包含了非常先进的音频/视频编解码库libavcodec，为了保证高可移植性和编解码质量，libavcodec里很多codec都是从头开发的。</p>
+<p>这个项目最早由Fabrice Bellard发起，现在由Michael Niedermayer维护。许多FFmpeg的开发人员都来自MPlayer项目，而且当前FFmpeg也是放在MPlayer项目组的服务器上。项目的名称来自MPEG视频编码标准，前面的”FF”代表”Fast Forward”。</p>
+<p>FFmpeg是一套可以用来记录、转换数字音频、视频，并能将其转化为流的开源计算机程序。它包括了目前领先的音/视频编码库libavcodec。 FFmpeg是在Linux下开发出来的，但它可以在包括Windows在内的大多数操作系统中编译。这个项目是由Fabrice Bellard发起的，现在由Michael Niedermayer主持。可以轻易地实现多种视频格式之间的相互转换，例如可以将摄录下的视频avi等转成现在视频网站所采用的flv格式。</p>
+<h1 id="10-视频加工"><a href="#10-视频加工" class="headerlink" title="10. 视频加工"></a>10. 视频加工</h1><p>通过工具对视频进行基本分析（长宽），格式校验，压缩，编解码，格式转换，缩略图抽取等操作</p>
+<h1 id="11-视频格式"><a href="#11-视频格式" class="headerlink" title="11. 视频格式"></a>11. 视频格式</h1><blockquote>
+<p>问题：本地视频文件常见有MP4、MKV、AVI等，这些都是什么？有什么区别？</p>
+</blockquote>
+<p>首先，MP4、AVI、MKV都是本地视频文件的后缀，在windows系统下，用于提示操作系统应该采用哪个应用程序打开。而在流媒体领域，这些都被称为『视频封装格式』，因为除了音视频流之外，它们还包含了一些辅助信息以及组织视音频的方式。不同格式的视频在不同平台上用户体验不同，很大原因在于对视音频的组织方式带来的差异。笔者以为百度百科上的解释蛮通俗易懂的（维基百科的说法不够直白）：</p>
+<p>视频格式是视频播放软件为了能够播放视频文件而赋予视频文件的一种识别符号。</p>
+<p>简言之，<strong>视频格式规定了和播放器的通信协议。</strong></p>
+<h1 id="12-视频协议"><a href="#12-视频协议" class="headerlink" title="12. 视频协议"></a>12. 视频协议</h1><blockquote>
+<p>问题：在腾讯视频、哔哩哔哩网上看的视频，与本地播放的MP4、MKV、AVI文件，有什么区别？</p>
+</blockquote>
+<p>『视频协议』是针对网络流媒体而言的，也就是只有在有网络时通过浏览器或者移动端APP才能看到的视频，目前常见的协议有RTSP、RTMP、HLS、HTTP等。笔者短暂地接触过GStreamer开发，在连接到RSTP视频时，发现除了视音频流和metadata之外，还携带了播放的信令。</p>
+<p>也有文章会把『视频协议』归入『视频封装格式』。『视频协议』和『视频封装格式』都同时携带了视音频和metadata，以及协议/格式需要的其他信息。以FFMpeg为例，并不区分视频格式和视频协议；但是GStreamer的话，还时需要指定『视频协议』，但是不区分『视频封装格式』。</p>
+<p>剥开『视频封装格式』和『视频协议』的外壳，接下来了解视音频流本身，这才是流媒体领域中真正的主角。</p>
+<h1 id="13-视频流-以及-编解码-视频转码"><a href="#13-视频流-以及-编解码-视频转码" class="headerlink" title="13. 视频流 以及 编解码 / 视频转码"></a>13. 视频流 以及 编解码 / 视频转码</h1><p>就视频流而言，相信大家平时一定经常听到类似“h264码流”、“yuv流”、“编码流”、“解码流”，“原始流”、“裸流”，“压缩后的流”或者“未压缩的流”等等。归纳而言，提到『视频流』的时候，一定只有两种形式：</p>
+<ul>
+<li>经过压缩算法压缩的流数据，称为『编码流』，又因为目前压缩/编码算法以H264为主，因此也常常称为『H264码流』。</li>
+<li>未经压缩的流数据，是解码后的流数据，称为『原始流』，可以想象视频是由一幅一幅在时间上连续的“图像”组成的，而因为视频内部的“图像”是『YUV』（后文将介绍），因此也常常称为『YUV流』。</li>
+</ul>
+<p>总结出现的名称，“h264码流”、“编码流”、“压缩后的流”是压缩/编码后的视频流；而“yuv流”、“解码流”、“未压缩的流”则是未经压缩/编码的视频流。“裸流”是一个具有歧义的词，是上下文内容，既可以是前者，也可以是后者。</p>
+<p>因此，如果以后阅读任何流媒体相关的文章时，看到『视频流』都应该搞清楚，这究竟是编码/压缩的，还是没有。在生活中，接触到的视频文件绝大部分都是编码/压缩后的；在网络传输场景中，绝大部分也是编码/压缩后的。只有在视频播放时，观众观赏到的时一帧帧被『转码』为『RGB』的解码后视频流。</p>
+<p>编码/压缩在流媒体领域是一项非常重要的技术：从『H264码流』到『YUV流』的过程称为解码，反之称为编码</p>
+<h1 id="14-常见的帧名词-重点"><a href="#14-常见的帧名词-重点" class="headerlink" title="14. 常见的帧名词(重点)"></a>14. 常见的帧名词(重点)</h1><h2 id="14-1-帧率（FPS）"><a href="#14-1-帧率（FPS）" class="headerlink" title="14.1 帧率（FPS）"></a>14.1 帧率（FPS）</h2><p>『帧率』，FPS，全称Frames Per Second。指每秒传输的帧数，或者每秒显示的帧数，一般来说，『帧率』影响画面流畅度，且成正比：帧率越大，画面越流畅；帧率越小，画面越有跳动感。一个较权威的说法：<br>当视频帧率不低于24fps时，人眼才会觉得视频时连贯的，称为“视觉暂留”现象。<br>因此，才有说法：尽管『帧率』越高越流畅，但在很多实际应用场景中24fps就可以了。</p>
+<h2 id="14-2-分辨率（Resolution）"><a href="#14-2-分辨率（Resolution）" class="headerlink" title="14.2 分辨率（Resolution）"></a>14.2 分辨率（Resolution）</h2><p>『分辨率』，也常被俗称为『图像的尺寸』或者『图像的大小』。指一帧图像包含的像素的多少，常见有1280x720（720P），1920X1080（1080P）等规格。『分辨率』影响图像大小，且与之成正比：『分辨率』越高，图像越大；反之，图像越小。</p>
+<h2 id="14-3-码率（BPS）"><a href="#14-3-码率（BPS）" class="headerlink" title="14.3 码率（BPS）"></a>14.3 码率（BPS）</h2><p>『码率』，BPS，全称Bits Per Second。指每秒传送的数据位数，常见单位KBPS（千位每秒）和MBPS（兆位每秒）。笔者认为这个概念真正要理解起来还是需要好好说明的，网上一说：“『码率』与体积成正比：码率越大，体积越大；码率越小，体积越小”；另一说：“『码率』越大，说明单位时间内取样率越大，数据流精度就越高，这样表现出来的的效果就是：视频画面更清晰画质更高”；还有说法是：“『码率』就是『失真度』”。</p>
+<h1 id="15-参考链接"><a href="#15-参考链接" class="headerlink" title="15. 参考链接"></a>15. 参考链接</h1><p><a target="_blank" rel="noopener" href="https://www.bgteach.com/article/134">https://www.bgteach.com/article/134</a></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    支持一下呗
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechat1.png" alt="Jinping 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="Jinping 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>有问题随时找我，加我微信~</p>
+
+    <div class="social-list">
+
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/111.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
+
+            <span class="label">WeChat</span>
+          </a>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E9%9F%B3%E8%A7%86%E9%A2%91%E8%A1%8C%E4%B8%9A/" rel="tag"><i class="fa fa-tag"></i> 音视频行业</a>
+              <a href="/tags/%E7%A7%91%E6%99%AE/" rel="tag"><i class="fa fa-tag"></i> 科普</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/01/09/%E5%88%86%E8%80%8C%E6%B2%BB%E4%B9%8B/" rel="prev" title="Fork/Join分而治之">
+      <i class="fa fa-chevron-left"></i> Fork/Join分而治之
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/12/13/%E9%93%BE%E8%A1%A8/" rel="next" title="链表">
+      链表 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="lv-container" data-id="city" data-uid="MTAyMC81MjcwNy8yOTE4NA=="></div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-%E8%A7%86%E9%A2%91%E4%B8%8A%E4%BC%A0"><span class="nav-text">1. 视频上传</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-stream%E8%A7%86%E9%A2%91%E6%B5%81"><span class="nav-text">2. stream视频流</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-%E6%B5%81%E5%AA%92%E4%BD%93%E7%9A%84%E7%BB%84%E6%88%90%E9%83%A8%E5%88%86"><span class="nav-text">2.1 流媒体的组成部分</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-%E7%A7%91%E6%99%AE"><span class="nav-text">2.2 科普</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-%E8%A7%86%E9%A2%91%E6%92%AD%E6%94%BE"><span class="nav-text">2.3 视频播放</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-4-%E6%B5%81%E5%BC%8F%E4%B8%8B%E8%BD%BD%E7%BC%96%E8%BE%91"><span class="nav-text">2.4 流式下载编辑</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-H264-H265"><span class="nav-text">3. H264 H265</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-%E8%A7%86%E9%A2%91%E6%8B%86%E6%9D%A1"><span class="nav-text">4. 视频拆条</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-%E8%A7%86%E9%A2%91%E6%8A%BD%E5%B8%A7"><span class="nav-text">5.视频抽帧</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#6-%E8%A7%86%E9%A2%91%E5%B8%A7%E7%8E%87"><span class="nav-text">6. 视频帧率</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#7-%E8%A7%86%E9%A2%91%E5%88%86%E5%8F%91"><span class="nav-text">7. 视频分发</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#8-%E8%A7%86%E9%A2%91%E7%BC%A9%E7%95%A5%E5%9B%BE"><span class="nav-text">8. 视频缩略图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#9-ffmpeg"><span class="nav-text">9. ffmpeg</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10-%E8%A7%86%E9%A2%91%E5%8A%A0%E5%B7%A5"><span class="nav-text">10. 视频加工</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#11-%E8%A7%86%E9%A2%91%E6%A0%BC%E5%BC%8F"><span class="nav-text">11. 视频格式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#12-%E8%A7%86%E9%A2%91%E5%8D%8F%E8%AE%AE"><span class="nav-text">12. 视频协议</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#13-%E8%A7%86%E9%A2%91%E6%B5%81-%E4%BB%A5%E5%8F%8A-%E7%BC%96%E8%A7%A3%E7%A0%81-%E8%A7%86%E9%A2%91%E8%BD%AC%E7%A0%81"><span class="nav-text">13. 视频流 以及 编解码 &#x2F; 视频转码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14-%E5%B8%B8%E8%A7%81%E7%9A%84%E5%B8%A7%E5%90%8D%E8%AF%8D-%E9%87%8D%E7%82%B9"><span class="nav-text">14. 常见的帧名词(重点)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#14-1-%E5%B8%A7%E7%8E%87%EF%BC%88FPS%EF%BC%89"><span class="nav-text">14.1 帧率（FPS）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14-2-%E5%88%86%E8%BE%A8%E7%8E%87%EF%BC%88Resolution%EF%BC%89"><span class="nav-text">14.2 分辨率（Resolution）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#14-3-%E7%A0%81%E7%8E%87%EF%BC%88BPS%EF%BC%89"><span class="nav-text">14.3 码率（BPS）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#15-%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-text">15. 参考链接</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Jinping"
+      src="/images/image.png">
+  <p class="site-author-name" itemprop="name">Jinping</p>
+  <div class="site-description" itemprop="description">程序员要常思考</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">25</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/jinping-dev" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;jinping-dev" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:jinping0982@163.com" title="E-Mail → mailto:jinping0982@163.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i></a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.jianshu.com/u/9e1f045b3f8d" title="简书 → https:&#x2F;&#x2F;www.jianshu.com&#x2F;u&#x2F;9e1f045b3f8d" rel="noopener" target="_blank"><i class="fa fa-heartbeat fa-fw"></i></a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">©2018 by Jinping</span>
+</div>
+  <div class="powered-by">تطبيق الموقع <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a>
+  </div>
+  <div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_pv"></span>
+</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+NexT.utils.loadComments(document.querySelector('#lv-container'), () => {
+  window.livereOptions = {
+    refer: location.pathname.replace(CONFIG.root, '').replace('index.html', '')
+  };
+  (function(d, s) {
+    var j, e = d.getElementsByTagName(s)[0];
+    if (typeof LivereTower === 'function') { return; }
+    j = d.createElement(s);
+    j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+    j.async = true;
+    e.parentNode.insertBefore(j, e);
+  })(document, 'script');
+});
+</script>
+
+</body>
+</html>
